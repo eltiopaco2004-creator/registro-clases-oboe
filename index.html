@@ -86,14 +86,11 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 <button class="primary" id="save">💾 Guardar clase</button><button class="secondary hidden" id="cancelLessonEdit">Cancelar edición</button></section>
 
 <section class="card"><button class="secondary" id="chooseFolder">📁 Elegir carpeta</button>
-<div class="import-preview">
-  <strong>🔄 Registro transportable</strong><br>
-  Puedes exportar tus alumnos y clases para llevarlos de un dispositivo a otro. 
-  Las grabaciones se mantienen como una función independiente para una fase posterior.
-</div>
 <div id="folderNote" class="muted">Carpeta de grabaciones no seleccionada.</div></section>
 
-<section class="card"><h2>📊 Exportación de datos</h2><p class="muted">Exporta los datos del curso seleccionado para abrirlos en Google Sheets.</p><button type="button" class="secondary" id="csv">📊 Exportar clases para Google Sheets</button><button type="button" class="secondary" id="backup">📦 Exportar registro</button><button type="button" class="secondary" id="importBtn">📥 Importar registro</button><input id="importFile" type="file" accept="application/json,.json" style="display:none"><div id="exportStatus" class="muted" style="margin-top:8px"></div><div class="muted" style="margin-top:8px">La importación añade alumnos y clases que no existan. No borra los datos que ya tienes.</div></section>
+<section class="card"><h2>📁 Carpeta del registro</h2><p class="muted">Aquí se guardarán las copias del registro y las exportaciones CSV. Puedes cambiarla cuando quieras.</p><button type="button" class="secondary" id="chooseDataFolder">📂 Elegir carpeta de datos</button><div id="dataFolderNote" class="muted" style="margin-top:8px">No has elegido una carpeta. Al exportar, el navegador te ofrecerá su ubicación habitual.</div></section>
+
+<section class="card"><h2>📊 Exportación de datos</h2><p class="muted">El registro se puede llevar de un dispositivo a otro mediante un archivo de datos. Las grabaciones no se incluyen en esta copia.</p><button type="button" class="secondary" id="csv">📊 Exportar clases para Google Sheets</button><button type="button" class="secondary" id="backup">📦 Exportar registro completo</button><button type="button" class="secondary" id="importBtn">📥 Importar registro</button><input id="importFile" type="file" accept="application/json,.json" style="display:none"><div id="exportStatus" class="muted" style="margin-top:8px"></div><div class="muted" style="margin-top:8px">La importación añade alumnos y clases que no existan. No borra los datos que ya tienes.</div></section>
 
 <section class="card"><h2>📚 Historial</h2><p class="muted">Pulsa sobre el nombre de un alumno para ver todas sus clases.</p><div id="history"></div></section>
 
@@ -307,10 +304,37 @@ q("csv").onclick=()=>{const y=year(),ls=lessons.filter(x=>(x.schoolYear||y)===y)
  const studentRows=[["ID alumno","Clave unificación","Nombre y apellidos","Curso","Curso escolar","Dispositivo","Nº clases","Nº faltas","Nº asistencias","Media notas","Última clase","Clases con observación","Clases con grabación"],...students.map(s=>{const a=ls.filter(x=>x.studentId===s.id),f=a.filter(x=>x.attendance==="falta").length,n=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade)),obs=a.filter(x=>x.obs).length,aud=a.filter(x=>x.audioData).length;return [s.id,mergeKey(s.name,s.course),s.name,s.course,y,deviceId,a.length,f,a.length-f,n.length?(n.reduce((p,v)=>p+v,0)/n.length).toFixed(2):"",a.length?a.slice().sort((u,v)=>(v.date||"").localeCompare(u.date||""))[0].date:"",obs,aud]})];
  const classRows=[["Alumno","Curso","Curso escolar","Fecha","Estado","Nota","Sonido","Afinación","Técnica","Ritmo","Musicalidad","Estudio","Actitud","Progreso","Valoración general","Comentario automático","Observación","Grabación","Nombre archivo grabación","Dispositivo","Fecha/hora creación","ID clase","ID alumno","Clave alumno"],...ls.map(x=>{const s=students.find(z=>z.id===x.studentId);return [x.student,x.course,x.schoolYear||y,x.date,x.attendance==="falta"?"Falta":"Asiste",x.grade??"",x.ratings?.sonido??"",x.ratings?.afinacion??"",x.ratings?.tecnica??"",x.ratings?.ritmo??"",x.ratings?.musicalidad??"",x.ratings?.estudio??"",x.ratings?.actitud??"",x.ratings?.progreso??"",x.ratings?.general??"",x.autoComment||"",x.obs,x.audioData?"Sí":"No",x.audioData?filename(x.student,x.date):"",deviceId,x.created?new Date(x.created).toISOString():"",x.id,x.studentId,s?mergeKey(s.name,s.course):mergeKey(x.student,x.course)]})];
  const summary=[ ["Alumno","Curso","Curso escolar","Clases","Asistencias","Faltas","Media","Última clase","Observaciones","Grabaciones"], ...students.map(s=>{const a=ls.filter(x=>x.studentId===s.id),f=a.filter(x=>x.attendance==="falta").length,n=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));return [s.name,s.course,y,a.length,a.length-f,f,n.length?(n.reduce((p,v)=>p+v,0)/n.length).toFixed(2):"",a.length?a.slice().sort((u,v)=>(v.date||"").localeCompare(u.date||""))[0].date:"",a.filter(x=>x.obs).length,a.filter(x=>x.audioData).length]}) ];
- downloadFile(new Blob([makeCSV(classRows)],{type:"text/csv;charset=utf-8"}),`Clases_Oboe_${y}.csv`);setTimeout(()=>downloadFile(new Blob([makeCSV(summary)],{type:"text/csv;charset=utf-8"}),`Resumen_Oboe_${y}.csv`),350);};
-q("backup").onclick=()=>{
-  const payload={version:11,app:"Registro de Clases",schoolYear:year(),deviceId,exportedAt:new Date().toISOString(),students,lessons};
-  downloadFile(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),`Registro_Clases_Oboe_${year()}.json`);
+ writeDataFile(new Blob([makeCSV(classRows)],{type:"text/csv;charset=utf-8"}),`Clases_Oboe_${y}.csv`).then(()=>setTimeout(()=>writeDataFile(new Blob([makeCSV(summary)],{type:"text/csv;charset=utf-8"}),`Resumen_Oboe_${y}.csv`),250));};
+// Carpeta independiente para el REGISTRO (las grabaciones usan su propia carpeta).
+const DATA_DB="registroClasesArchivosV1", DATA_STORE="handles";
+let dataDir=null;
+function openDataDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DATA_DB,1);r.onupgradeneeded=()=>r.result.createObjectStore(DATA_STORE);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+async function saveDataDirHandle(h){try{const db=await openDataDB();await new Promise((res,rej)=>{const tx=db.transaction(DATA_STORE,"readwrite");tx.objectStore(DATA_STORE).put(h,"dataDir");tx.oncomplete=res;tx.onerror=()=>rej(tx.error)});db.close();}catch(e){console.warn("No se pudo recordar la carpeta de datos",e)}}
+async function loadDataDirHandle(){try{const db=await openDataDB();const h=await new Promise((res,rej)=>{const tx=db.transaction(DATA_STORE,"readonly");const r=tx.objectStore(DATA_STORE).get("dataDir");r.onsuccess=()=>res(r.result||null);r.onerror=()=>rej(r.error)});db.close();return h}catch(e){return null}}
+async function ensureDataPermission(h){if(!h||!h.queryPermission)return true;let p=await h.queryPermission({mode:"readwrite"});if(p!=="granted")p=await h.requestPermission({mode:"readwrite"});return p==="granted"}
+async function writeDataFile(blob,name){
+  if(dataDir){
+    try{if(await ensureDataPermission(dataDir)){const fh=await dataDir.getFileHandle(name,{create:true});const w=await fh.createWritable();await w.write(blob);await w.close();const st=q("exportStatus");if(st)st.textContent="Guardado en la carpeta de datos: "+name;return true;}}
+    catch(e){console.warn("No se pudo guardar en la carpeta elegida",e)}
+  }
+  downloadFile(blob,name);return false;
+}
+q("chooseDataFolder").onclick=async()=>{
+  if(typeof window.showDirectoryPicker!=="function"){
+    alert("Este navegador no permite elegir una carpeta desde la aplicación. Las exportaciones se guardarán mediante la descarga normal del navegador.");return;
+  }
+  try{
+    const h=await window.showDirectoryPicker({mode:"readwrite"});
+    dataDir=h;await saveDataDirHandle(h);
+    q("dataFolderNote").textContent="Carpeta seleccionada: las copias del registro y los CSV se guardarán aquí. Puedes cambiarla cuando quieras.";
+  }catch(e){if(e&&e.name!=="AbortError")alert("No se ha podido seleccionar la carpeta.")}
+};
+(async()=>{const h=await loadDataDirHandle();if(h){dataDir=h;q("dataFolderNote").textContent="Hay una carpeta de datos seleccionada. Si el navegador pide permiso, podrás volver a autorizarla.";}})();
+
+q("backup").onclick=async()=>{
+  const cleanLessons=lessons.map(x=>{const y={...x};delete y.audioData;return y;});
+  const payload={version:12,app:"Registro de Clases",instrument:"Oboe",exportedAt:new Date().toISOString(),sourceDeviceId:deviceId,students,lessons:cleanLessons};
+  await writeDataFile(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),`Registro_Clases_Oboe_completo.json`);
 };
 q("importBtn").onclick=()=>q("importFile").click();
 q("importFile").onchange=async e=>{
