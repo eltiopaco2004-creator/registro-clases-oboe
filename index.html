@@ -126,6 +126,19 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
     .class-extra-toggle{min-height:42px}
   }
 </style>
+
+<style id="history-collapsed-v5">
+  #historyCard.collapsed #history{display:none!important}
+  #historyCard.collapsed .history-help{display:none}
+  .section-head-compact{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .section-head-compact h2{margin:0}
+</style>
+
+<style id="section-collapse-safety-v5">
+  #studentFormWrap.collapsed{display:none!important}
+  #historyCard.collapsed #history{display:none!important}
+  #configCard.collapsed > :not(.config-head):not(#configSummary){display:none!important}
+</style>
 </head><body><div class="wrap">
 <header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p></header>
 
@@ -190,7 +203,14 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 
 <section class="card"><h2>📊 Exportación de datos</h2><p class="muted">El registro se puede llevar de un dispositivo a otro mediante un archivo de datos. Las grabaciones no se incluyen en esta copia.</p><button type="button" class="secondary" id="csv">📊 Exportar clases para Google Sheets</button><button type="button" class="secondary" id="backup">📦 Exportar registro completo</button><button type="button" class="secondary" id="importBtn">📥 Importar registro</button><input id="importFile" type="file" accept="application/json,.json" style="display:none"><div id="exportStatus" class="muted" style="margin-top:8px"></div><div id="backupStatus" class="muted" style="margin-top:4px"></div><div class="muted" style="margin-top:8px">La importación añade alumnos y clases que no existan. No borra los datos que ya tienes.</div></section>
 
-<section class="card"><h2>📚 Historial</h2><p class="muted">Pulsa sobre el nombre de un alumno para ver todas sus clases.</p><div id="history"></div></section>
+<section class="card collapsed" id="historyCard">
+  <div class="section-head-compact">
+    <h2>📚 Historial</h2>
+    <button type="button" class="secondary" id="toggleHistory">📚 Abrir historial</button>
+  </div>
+  <p class="muted history-help">Pulsa sobre el nombre de un alumno para ver todas sus clases.</p>
+  <div id="history"></div>
+</section>
 
 
 
@@ -417,8 +437,19 @@ function saveS(){
 function updateStudentsPanel(){
   const wrap=q("studentFormWrap"), btn=q("toggleStudents"), sum=q("studentsSummary");
   const has=students.length>0;
-  if(edit){wrap.classList.remove("collapsed");btn.textContent="✏️ Editando alumno";return;}
-  if(!has){wrap.classList.remove("collapsed");btn.textContent="➕ Añadir alumno";return;}
+  if(!wrap||!btn)return;
+  if(edit){
+    wrap.classList.remove("collapsed");
+    btn.textContent="✖️ Cerrar";
+    if(sum)sum.textContent=`${students.length} alumno${students.length===1?"":"s"} registrados`;
+    return;
+  }
+  if(!has){
+    wrap.classList.remove("collapsed");
+    btn.textContent="➕ Añadir alumno";
+    if(sum)sum.textContent="";
+    return;
+  }
   wrap.classList.add("collapsed");
   btn.textContent="➕ Añadir alumno";
   if(sum)sum.textContent=`${students.length} alumno${students.length===1?"":"s"} registrados`;
@@ -440,9 +471,10 @@ function renderSelect(){let old=q("student").value;q("student").innerHTML='<opti
 function resetStudentForm(){q("studentName").value="";q("studentCourse").value="";q("studentDay").value="";q("studentTime").value=""}
 q("toggleStudents").onclick=()=>{
   const wrap=q("studentFormWrap");
-  if(edit){wrap.classList.remove("collapsed");return;}
-  wrap.classList.toggle("collapsed");
-  q("toggleStudents").textContent=wrap.classList.contains("collapsed")?"➕ Añadir alumno":"✖️ Cerrar";
+  if(edit){wrap.classList.remove("collapsed");q("toggleStudents").textContent="✖️ Cerrar";return;}
+  const open=wrap.classList.contains("collapsed");
+  wrap.classList.toggle("collapsed",!open);
+  q("toggleStudents").textContent=open?"✖️ Cerrar":"➕ Añadir alumno";
 };
 q("addStudent").onclick=()=>{let n=q("studentName").value.trim(),c=q("studentCourse").value,d=q("studentDay").value,t=q("studentTime").value;if(!n||!c)return alert("Indica nombre y curso.");if(edit){let s=students.find(x=>x.id===edit);s.name=n;s.course=c;s.scheduleDay=d;s.scheduleTime=t;lessons.forEach(x=>{if(x.studentId===edit){x.student=n;x.course=c}});edit=null;q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden");saveL();saveS()}else{if(students.some(s=>s.name.toLowerCase()===n.toLowerCase()))return alert("Ese alumno ya existe.");students.push({id:crypto.randomUUID(),name:n,course:c,scheduleDay:d,scheduleTime:t});saveS()}resetStudentForm();renderStudents();renderSelect();render()};
 q("cancelEdit").onclick=()=>{edit=null;resetStudentForm();q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden");updateStudentsPanel()};
@@ -460,9 +492,16 @@ q("toggleRecording").onclick=()=>{
   p.classList.toggle("open",open);
   q("toggleRecording").textContent=open?"✖️ Cerrar grabación":"🎙️ Añadir";
 };
+q("toggleHistory").onclick=()=>{
+  const card=q("historyCard");
+  const closed=card.classList.contains("collapsed");
+  card.classList.toggle("collapsed",!closed);
+  q("toggleHistory").textContent=closed?"✖️ Cerrar historial":"📚 Abrir historial";
+  if(closed) renderHistoryStudents();
+};
 let selectedStudentHistory=null;
 function render(){
-  renderHistoryStudents();
+  if(!q("historyCard")?.classList.contains("collapsed")) renderHistoryStudents();
 }
 window.renderHistoryStudents=renderHistoryStudents;
 function renderHistoryStudents(){
@@ -675,7 +714,8 @@ q("importFile").onchange=async e=>{
     }
     saveS();
     saveL();
-    renderStudents();renderSelect();render();
+    updateStudentsPanel();
+renderStudents();renderSelect();render();
     q("exportStatus").textContent=`Importación completada: ${addedStudents} alumnos nuevos y ${addedLessons} clases nuevas. ${skippedLessons} clases ya estaban registradas.`;
     alert(`Importación completada.\n\nAlumnos nuevos: ${addedStudents}\nAlumnos ya existentes: ${mergedStudents}\nClases nuevas: ${addedLessons}\nClases ya existentes: ${skippedLessons}`);
   }catch(err){
