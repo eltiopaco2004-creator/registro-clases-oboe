@@ -26,8 +26,14 @@ function initYears(){let y=parseInt(yr()),s="";for(let i=y-4;i<=y+5;i++)s+=`<opt
 function year(){return q("schoolYear").value}initYears();q("schoolYear").onchange=()=>{localStorage.setItem(YK,year());renderStudents();renderSelect();render()};
 q("date").value=new Date().toISOString().slice(0,10);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const courseOrder=["1.º Elemental","2.º Elemental","3.º Elemental","4.º Elemental","1.º Profesional","2.º Profesional","3.º Profesional","4.º Profesional","5.º Profesional","6.º Profesional"];
+function courseRank(course){const i=courseOrder.indexOf(String(course||""));return i<0?999:i}
+function displayName(name){const p=String(name||"").trim().split(/\s+/);if(p.length<2)return p[0]||"";return `${p.slice(1).join(" ")}, ${p[0]}`}
+function surnameKey(name){const p=String(name||"").trim().split(/\s+/);return p.length>1?p.slice(1).join(" "):p[0]||""}
+function sortStudents(list){return list.slice().sort((a,b)=>courseRank(a.course)-courseRank(b.course)||surnameKey(a.name).localeCompare(surnameKey(b.name),"es",{sensitivity:"base"})||String(a.name).localeCompare(String(b.name),"es",{sensitivity:"base"}))}
+
 function saveL(){localStorage.setItem(LK,JSON.stringify(lessons.map(x=>({...x,audioUrl:undefined}))));}function saveS(){localStorage.setItem(SK,JSON.stringify(students))}
-function renderStudents(){if(!students.length){q("studentsList").innerHTML='<p class="muted">Todavía no hay alumnos creados.</p>';return}q("studentsList").innerHTML=students.slice().sort((a,b)=>a.name.localeCompare(b.name,"es")).map(s=>{let n=lessons.filter(x=>(x.schoolYear||year())===year()&&x.studentId===s.id).length,f=lessons.filter(x=>(x.schoolYear||year())===year()&&x.studentId===s.id&&x.attendance==="falta").length;return `<div class="item"><b>${esc(s.name)}</b><div class="muted">${esc(s.course)} · ${n} clases · ${f} faltas</div><button class="secondary" onclick="editStudent('${s.id}')">✏️ Editar</button><button class="danger" onclick="deleteStudent('${s.id}')">🗑️</button></div>`}).join("")}
+function renderStudents(){if(!students.length){q("studentsList").innerHTML='<p class="muted">Todavía no hay alumnos creados.</p>';return}q("studentsList").innerHTML=sortStudents(students).map(s=>{let n=lessons.filter(x=>(x.schoolYear||year())===year()&&x.studentId===s.id).length,f=lessons.filter(x=>(x.schoolYear||year())===year()&&x.studentId===s.id&&x.attendance==="falta").length;return `<div class="item"><b>${esc(displayName(s.name))}</b><div class="muted">${esc(s.course)} · ${n} clases · ${f} faltas</div><button class="secondary" onclick="editStudent('${s.id}')">✏️ Editar</button><button class="danger" onclick="deleteStudent('${s.id}')">🗑️</button></div>`}).join("")}
 function renderSelect(){let old=q("student").value;q("student").innerHTML='<option value="">Selecciona un alumno…</option>'+students.slice().sort((a,b)=>a.name.localeCompare(b.name,"es")).map(s=>`<option value="${s.id}">${esc(s.name)} — ${esc(s.course)}</option>`).join("");if(students.some(s=>s.id===old))q("student").value=old}
 q("addStudent").onclick=()=>{let n=q("studentName").value.trim(),c=q("studentCourse").value;if(!n||!c)return alert("Indica nombre y curso.");if(edit){let s=students.find(x=>x.id===edit);s.name=n;s.course=c;lessons.forEach(x=>{if(x.studentId===edit){x.student=n;x.course=c}});edit=null;q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden");saveL();saveS()}else{if(students.some(s=>s.name.toLowerCase()===n.toLowerCase()))return alert("Ese alumno ya existe.");students.push({id:crypto.randomUUID(),name:n,course:c});saveS()}q("studentName").value="";q("studentCourse").value="";renderStudents();renderSelect();render()};
 q("cancelEdit").onclick=()=>{edit=null;q("studentName").value="";q("studentCourse").value="";q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden")};
@@ -47,7 +53,7 @@ function renderHistoryStudents(){
     return;
   }
   const a=lessons.filter(x=>(x.schoolYear||y)===y);
-  const list=students.slice().sort((a,b)=>a.name.localeCompare(b.name,"es"))
+  const list=sortStudents(students)
     .filter(s=>!term||s.name.toLowerCase().includes(term));
   q("history").innerHTML=
     `<input id="filter" placeholder="Buscar alumno…" value="${esc(term)}" oninput="renderHistoryStudents()">`+
@@ -57,7 +63,7 @@ function renderHistoryStudents(){
       const notes=ls.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
       const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(2):"—";
       return `<div class="item history-student" data-student-id="${esc(s.id)}" style="cursor:pointer">
-        <b>${esc(s.name)}</b>
+        <b>${esc(displayName(s.name))}</b>
         <div class="muted">${esc(s.course)} · ${ls.length} clases · ${f} faltas · media ${avg}</div>
         <button type="button" class="secondary history-open" data-student-id="${esc(s.id)}">📚 Ver historial</button>
       </div>`;
@@ -83,7 +89,7 @@ function renderStudentHistory(id){
   const notes=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
   const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(2):"—";
   q("history").innerHTML=`<button class="secondary" onclick="selectedStudentHistory=null;renderHistoryStudents()">← Volver a alumnos</button>
-    <h3>${esc(s.name)}</h3>
+    <h3>${esc(displayName(s.name))}</h3>
     <div class="muted">${esc(s.course)} · Curso escolar ${esc(y)}</div>
     <p><b>${a.length}</b> clases · <b>${f}</b> faltas · <b>${avg}</b> media</p>
     <div>${a.length?a.map(x=>`<div class="item">
