@@ -139,6 +139,13 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
   #historyCard.collapsed #history{display:none!important}
   #configCard.collapsed > :not(.config-head):not(#configSummary){display:none!important}
 </style>
+
+<style id="students-card-collapse-v5">
+  #studentsCard.collapsed .students-summary{display:block!important}
+  #studentsCard.collapsed .student-form-wrap,
+  #studentsCard.collapsed #studentsList{display:none!important}
+  #studentsCard.collapsed .students-head{margin-bottom:0}
+</style>
 </head><body><div class="wrap">
 <header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p></header>
 
@@ -434,24 +441,27 @@ function saveS(){
     return false;
   }
 }
-function updateStudentsPanel(){
-  const wrap=q("studentFormWrap"), btn=q("toggleStudents"), sum=q("studentsSummary");
+function updateStudentsPanel(forceOpen){
+  const card=q("studentsCard"), wrap=q("studentFormWrap"), btn=q("toggleStudents"), sum=q("studentsSummary");
+  if(!card||!wrap||!btn)return;
   const has=students.length>0;
-  if(!wrap||!btn)return;
-  if(edit){
+  if(edit || forceOpen===true){
+    card.classList.remove("collapsed");
     wrap.classList.remove("collapsed");
-    btn.textContent="✖️ Cerrar";
-    if(sum)sum.textContent=`${students.length} alumno${students.length===1?"":"s"} registrados`;
+    btn.textContent=edit?"✖️ Cerrar":"✖️ Cerrar";
+    if(sum)sum.textContent=has?`${students.length} alumno${students.length===1?"":"s"} registrados`:"";
     return;
   }
   if(!has){
+    card.classList.remove("collapsed");
     wrap.classList.remove("collapsed");
     btn.textContent="➕ Añadir alumno";
     if(sum)sum.textContent="";
     return;
   }
-  wrap.classList.add("collapsed");
-  btn.textContent="➕ Añadir alumno";
+  card.classList.add("collapsed");
+  wrap.classList.remove("collapsed");
+  btn.textContent="👨‍🎓 Abrir alumnos";
   if(sum)sum.textContent=`${students.length} alumno${students.length===1?"":"s"} registrados`;
 }
 function renderStudents(){
@@ -470,15 +480,20 @@ function renderStudents(){
 function renderSelect(){let old=q("student").value;q("student").innerHTML='<option value="">Selecciona un alumno…</option>'+students.slice().sort((a,b)=>a.name.localeCompare(b.name,"es")).map(s=>`<option value="${s.id}">${esc(s.name)} — ${esc(s.course)}</option>`).join("");if(students.some(s=>s.id===old))q("student").value=old}
 function resetStudentForm(){q("studentName").value="";q("studentCourse").value="";q("studentDay").value="";q("studentTime").value=""}
 q("toggleStudents").onclick=()=>{
-  const wrap=q("studentFormWrap");
-  if(edit){wrap.classList.remove("collapsed");q("toggleStudents").textContent="✖️ Cerrar";return;}
-  const open=wrap.classList.contains("collapsed");
-  wrap.classList.toggle("collapsed",!open);
-  q("toggleStudents").textContent=open?"✖️ Cerrar":"➕ Añadir alumno";
+  const card=q("studentsCard");
+  if(edit){updateStudentsPanel(true);return;}
+  const closed=card.classList.contains("collapsed");
+  if(closed){
+    card.classList.remove("collapsed");
+    q("toggleStudents").textContent="✖️ Cerrar alumnos";
+  }else{
+    card.classList.add("collapsed");
+    q("toggleStudents").textContent="👨‍🎓 Abrir alumnos";
+  }
 };
 q("addStudent").onclick=()=>{let n=q("studentName").value.trim(),c=q("studentCourse").value,d=q("studentDay").value,t=q("studentTime").value;if(!n||!c)return alert("Indica nombre y curso.");if(edit){let s=students.find(x=>x.id===edit);s.name=n;s.course=c;s.scheduleDay=d;s.scheduleTime=t;lessons.forEach(x=>{if(x.studentId===edit){x.student=n;x.course=c}});edit=null;q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden");saveL();saveS()}else{if(students.some(s=>s.name.toLowerCase()===n.toLowerCase()))return alert("Ese alumno ya existe.");students.push({id:crypto.randomUUID(),name:n,course:c,scheduleDay:d,scheduleTime:t});saveS()}resetStudentForm();renderStudents();renderSelect();render()};
 q("cancelEdit").onclick=()=>{edit=null;resetStudentForm();q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden");updateStudentsPanel()};
-window.editStudent=id=>{let s=students.find(x=>x.id===id);edit=id;q("studentName").value=s.name;q("studentCourse").value=s.course;q("studentDay").value=s.scheduleDay||"";q("studentTime").value=s.scheduleTime||"";q("addStudent").textContent="💾 Guardar cambios";q("cancelEdit").classList.remove("hidden");updateStudentsPanel()};
+window.editStudent=id=>{let s=students.find(x=>x.id===id);edit=id;q("studentName").value=s.name;q("studentCourse").value=s.course;q("studentDay").value=s.scheduleDay||"";q("studentTime").value=s.scheduleTime||"";q("addStudent").textContent="💾 Guardar cambios";q("cancelEdit").classList.remove("hidden");updateStudentsPanel(true)};
 window.deleteStudent=id=>{let s=students.find(x=>x.id===id),n=lessons.filter(x=>x.studentId===id).length;if(confirm(`¿Eliminar a ${s.name}?${n?`\nSus ${n} clases NO se borrarán.`:""}`)){students=students.filter(x=>x.id!==id);saveS();renderStudents();renderSelect()}};
 q("attendance").onchange=()=>{let f=q("attendance").value==="falta";q("grade").disabled=f;q("ratingsBox").style.opacity=f?".55":"1";if(f)q("grade").value=""};
 
@@ -714,8 +729,7 @@ q("importFile").onchange=async e=>{
     }
     saveS();
     saveL();
-    updateStudentsPanel();
-renderStudents();renderSelect();render();
+    renderStudents();renderSelect();render();
     q("exportStatus").textContent=`Importación completada: ${addedStudents} alumnos nuevos y ${addedLessons} clases nuevas. ${skippedLessons} clases ya estaban registradas.`;
     alert(`Importación completada.\n\nAlumnos nuevos: ${addedStudents}\nAlumnos ya existentes: ${mergedStudents}\nClases nuevas: ${addedLessons}\nClases ya existentes: ${skippedLessons}`);
   }catch(err){
