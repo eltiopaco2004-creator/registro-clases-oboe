@@ -11,7 +11,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 
 <section class="card"><button class="secondary" id="backup">📦 Copia de seguridad</button><button class="secondary" id="csv">📊 Exportar CSV</button><button class="secondary" id="chooseFolder">📁 Elegir carpeta</button><div id="folderNote" class="muted">Carpeta de grabaciones no seleccionada.</div></section>
 
-<section class="card"><h2>📚 Historial</h2><div id="history"></div></section>
+<section class="card"><h2>📚 Historial</h2><p class="muted">Pulsa sobre el nombre de un alumno para ver todas sus clases.</p><div id="history"></div></section>
 </div><script>
 const LK="oboeLessonsV2",SK="oboeStudentsV1",YK="oboeSchoolYearV1",q=id=>document.getElementById(id);
 let lessons=JSON.parse(localStorage.getItem(LK)||"[]"),students=JSON.parse(localStorage.getItem(SK)||"[]"),media=null,chunks=[],audioData=null,dir=null,edit=null;
@@ -32,6 +32,7 @@ let selectedStudentHistory=null;
 function render(){
   renderHistoryStudents();
 }
+window.renderHistoryStudents=renderHistoryStudents;
 function renderHistoryStudents(){
   const term=(q("filter")?.value||"").toLowerCase();
   const y=year();
@@ -56,6 +57,7 @@ function renderHistoryStudents(){
       </div>`;
     }).join(""):'<p class="muted">No hay alumnos en este curso escolar.</p>');
 }
+window.openStudentHistory=openStudentHistory;
 function openStudentHistory(id){
   selectedStudentHistory=id;
   renderStudentHistory(id);
@@ -82,7 +84,6 @@ function renderStudentHistory(id){
     </div>`).join(""):'<p class="muted">No hay clases registradas de este alumno en este curso escolar.</p>'}</div>`;
 }
 window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){lessons=lessons.filter(x=>x.id!==id);saveL();render();renderStudents()}};
-q("filter").oninput=render;
 q("record").onclick=async()=>{try{let st=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];media=new MediaRecorder(st);media.ondataavailable=e=>e.data.size&&chunks.push(e.data);media.onstop=()=>{let b=new Blob(chunks,{type:media.mimeType||"audio/webm"}),r=new FileReader();r.onload=()=>audioData=r.result;r.readAsDataURL(b);st.getTracks().forEach(t=>t.stop())};media.start();q("record").disabled=true;q("stop").disabled=false;q("recText").textContent="🔴 Grabando…"}catch(e){alert("No se ha podido acceder al micrófono.")}};
 q("stop").onclick=()=>{if(media&&media.state!=="inactive"){media.stop();q("record").disabled=false;q("stop").disabled=true;q("recText").textContent="Grabación preparada"}};
 function filename(name,date){let p=name.trim().split(/\s+/),first=(p[0]||"Grabacion").replace(/[\\/:*?"<>|]/g,"_"),ini=p.slice(1).map(x=>x[0]).join("").toUpperCase(),d=new Date(),t=`${String(d.getHours()).padStart(2,"0")}-${String(d.getMinutes()).padStart(2,"0")}`;return `${first}${ini?"_"+ini:""}_${date}_${t}.webm`}
