@@ -1,7 +1,21 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe</title><style>
-body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-width:720px;margin:auto;padding:16px}.card{background:white;border:1px solid #ddd;border-radius:16px;padding:16px;margin:12px 0}label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:10px;font:inherit}textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{border:0;border-radius:10px;padding:10px 13px;margin:6px 4px 0 0;font-weight:700}.primary{background:#2f5d50;color:#fff}.secondary{background:#dfe9e4;color:#2f5d50}.danger{background:#f3dddd;color:#a44242}.item{border-top:1px solid #ddd;padding:12px 0}.muted{color:#69716d;font-size:12px}.grade{float:right;font-size:20px;font-weight:800;color:#2f5d50}.hidden{display:none}.rec{padding:10px;background:#f7f7f4;border-radius:10px;margin-top:8px}
+body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-width:720px;margin:auto;padding:16px}.card{background:white;border:1px solid #ddd;border-radius:16px;padding:16px;margin:12px 0}label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:10px;font:inherit}textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{border:0;border-radius:10px;padding:10px 13px;margin:6px 4px 0 0;font-weight:700;max-width:100%;white-space:normal}.primary{background:#2f5d50;color:#fff}.secondary{background:#dfe9e4;color:#2f5d50}.danger{background:#f3dddd;color:#a44242}.item{border-top:1px solid #ddd;padding:12px 0}.muted{color:#69716d;font-size:12px}.grade{float:right;font-size:20px;font-weight:800;color:#2f5d50}.hidden{display:none}.rec{padding:10px;background:#f7f7f4;border-radius:10px;margin-top:8px}
 .rating-group{margin:12px 0}.rating-title{font-weight:700;font-size:13px;margin-bottom:6px}
-.rating-buttons{display:flex;gap:6px}.rating-buttons button{flex:1;margin:0;background:#f1f3f1;color:#2f5d50;border:1px solid #ccd5d0}
+.rating-buttons{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;width:100%}
+.rating-buttons button{width:100%;min-width:0;margin:0;padding:9px 2px;background:#f1f3f1;color:#2f5d50;border:1px solid #ccd5d0}
+@media(max-width:600px){
+  .wrap{padding:10px}.card{padding:13px;margin:9px 0}
+  h1{font-size:24px}h2{font-size:19px}h3{font-size:16px}
+  .row{grid-template-columns:1fr}
+  .rating-buttons{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+  .rating-buttons button{padding:10px 2px;font-size:14px}
+  button{padding:10px 11px}
+  .item button{margin-top:7px}
+}
+@media(max-width:360px){
+  .rating-buttons{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+  .rating-buttons button{padding:9px 1px;font-size:13px}
+}
 .rating-buttons button.selected{background:#2f5d50;color:#fff}.rating-help{font-size:11px;color:#69716d;margin-top:4px}
 .auto-comment{background:#f7f7f4;border-radius:10px;padding:10px;margin-top:8px;font-size:13px;line-height:1.4}
 </style></head><body><div class="wrap">
@@ -18,7 +32,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 
 <div id="ratingsBox">
 <h3>📊 Valoración de la clase</h3>
-<p class="rating-help">1 = Necesita mejorar · 5 = Adecuado · 10 = Muy bien</p>
+<p class="rating-help">1 = Necesita mejorar · 2 = En proceso · 3 = Adecuado · 4 = Bien · 5 = Muy bien</p>
 <div id="ratings"></div>
 <div class="rating-group"><div class="rating-title">⭐ Valoración general</div><div class="rating-buttons" data-rating="general"></div></div>
 <div id="autoComment" class="auto-comment">Selecciona las valoraciones para generar un comentario automático.</div>
@@ -49,112 +63,67 @@ const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const courseOrder=["1.º Elemental","2.º Elemental","3.º Elemental","4.º Elemental","1.º Profesional","2.º Profesional","3.º Profesional","4.º Profesional","5.º Profesional","6.º Profesional"];
 const ratingDefinitions={
   sonido:[
-    "Necesita mejorar considerablemente la calidad y estabilidad del sonido y requiere atención constante a la emisión.",
-    "Presenta importantes dificultades en la calidad y estabilidad del sonido.",
-    "Está iniciando la mejora del sonido, aunque todavía presenta bastante inestabilidad en la emisión.",
-    "Está progresando en la calidad del sonido, pero necesita seguir trabajando la emisión y estabilidad.",
-    "Obtiene un sonido básico adecuado para su nivel, aunque debe seguir consolidándolo.",
+    "Necesita mejorar la calidad y estabilidad del sonido, requiriendo atención constante a la emisión.",
+    "Está mejorando la calidad del sonido, aunque todavía presenta cierta inestabilidad en la emisión.",
     "Obtiene un sonido adecuado para su nivel y mantiene una emisión correcta.",
-    "Muestra un buen sonido, con una emisión bastante estable y controlada.",
     "Muestra un sonido cuidado, estable y con buena calidad de emisión.",
-    "Destaca por la calidad, estabilidad y control de su sonido.",
-    "Destaca de manera excepcional por la calidad, estabilidad, control y personalidad de su sonido."
+    "Destaca por la calidad, estabilidad y control de su sonido, mostrando una excelente emisión."
   ],
   afinacion:[
-    "Necesita mejorar considerablemente el control de la afinación y requiere ayuda constante.",
-    "Presenta importantes dificultades para mantener y corregir la afinación.",
-    "Está empezando a desarrollar el control de la afinación, aunque todavía necesita mucha ayuda.",
-    "Progresa en el control de la afinación, pero aún presenta desviaciones frecuentes.",
-    "Mantiene una afinación básica adecuada, aunque necesita seguir consolidándola.",
+    "Necesita mejorar el control de la afinación y requiere ayuda frecuente para corregirla.",
+    "Está desarrollando el control de la afinación, aunque todavía presenta algunas dificultades.",
     "Mantiene una afinación adecuada para su nivel en los ejercicios y obras trabajados.",
-    "Muestra un buen control de la afinación y corrige pequeñas desviaciones.",
     "Mantiene una buena afinación y corrige con facilidad las pequeñas desviaciones.",
-    "Muestra un excelente control de la afinación y una gran capacidad de corrección.",
-    "Presenta un dominio excepcional de la afinación, con gran precisión y autonomía."
+    "Muestra un excelente control de la afinación y una gran capacidad para detectar y corregir desviaciones."
   ],
   tecnica:[
-    "Necesita reforzar considerablemente los aspectos técnicos básicos.",
-    "Presenta importantes dificultades de coordinación y precisión.",
-    "Está adquiriendo las habilidades técnicas básicas, aunque necesita bastante apoyo.",
-    "Progresa técnicamente, pero todavía presenta dificultades de coordinación y precisión.",
-    "Presenta un nivel técnico básico adecuado, aunque debe seguir consolidándolo.",
-    "Presenta un dominio técnico adecuado para su nivel y resuelve correctamente los ejercicios.",
-    "Muestra un buen dominio técnico, con coordinación y precisión.",
-    "Muestra un dominio técnico notable, con buena coordinación, precisión y seguridad.",
-    "Presenta un excelente dominio técnico, con precisión, coordinación y fluidez.",
-    "Destaca por un dominio técnico excepcional, mostrando gran precisión, fluidez y autonomía."
+    "Necesita reforzar los aspectos técnicos básicos y mejorar la coordinación y precisión de los movimientos.",
+    "Está progresando técnicamente, aunque todavía presenta dificultades de coordinación y precisión.",
+    "Presenta un dominio técnico adecuado para su nivel y resuelve correctamente los ejercicios trabajados.",
+    "Muestra un buen dominio técnico, con coordinación, precisión y seguridad.",
+    "Presenta un excelente dominio técnico, con gran precisión, coordinación, fluidez y autonomía."
   ],
   ritmo:[
-    "Necesita mejorar considerablemente el mantenimiento del pulso y la precisión rítmica.",
-    "Presenta importantes dificultades para mantener el pulso y ejecutar correctamente los ritmos.",
-    "Está desarrollando el sentido del pulso, aunque todavía necesita mucha práctica.",
-    "Progresa en la precisión rítmica, pero aún presenta dificultades.",
-    "Mantiene un pulso básico adecuado, aunque necesita seguir consolidándolo.",
+    "Necesita mejorar el mantenimiento del pulso y la precisión rítmica.",
+    "Mantiene el pulso con cierta dificultad y necesita seguir trabajando la precisión rítmica.",
     "Mantiene correctamente el pulso y ejecuta los ritmos trabajados de forma adecuada.",
-    "Muestra buena seguridad y precisión rítmica.",
-    "Muestra una buena estabilidad del pulso y precisión rítmica.",
-    "Muestra un excelente sentido del pulso y gran precisión.",
-    "Destaca por un dominio excepcional del ritmo, el pulso y la precisión."
+    "Muestra buena seguridad y precisión rítmica, manteniendo un pulso estable.",
+    "Muestra un excelente sentido del pulso y una gran precisión y seguridad rítmica."
   ],
   musicalidad:[
-    "Necesita mejorar considerablemente la expresión musical y el uso de dinámicas y matices.",
-    "Presenta importantes dificultades para incorporar intención expresiva a la interpretación.",
-    "Comienza a incorporar elementos expresivos, aunque necesita bastante ayuda.",
-    "Progresa en la expresión musical, pero necesita trabajar la intención y los matices.",
-    "Realiza una interpretación básica adecuada, aunque debe seguir desarrollando la expresividad.",
-    "Realiza una interpretación adecuada e incorpora correctamente los elementos trabajados.",
-    "Muestra una buena capacidad expresiva y utiliza correctamente los recursos musicales.",
-    "Muestra una interpretación cuidada, expresiva y musical.",
-    "Realiza una interpretación excelente, con sensibilidad e intención musical.",
-    "Realiza una interpretación excepcionalmente expresiva, musical y personal."
+    "Necesita mejorar la expresión musical y la utilización de dinámicas y matices.",
+    "Comienza a incorporar elementos expresivos, aunque todavía necesita trabajarlos con mayor intención.",
+    "Realiza una interpretación adecuada, incorporando correctamente las dinámicas y matices trabajados.",
+    "Muestra una buena capacidad expresiva y utiliza adecuadamente los recursos musicales.",
+    "Realiza una interpretación muy expresiva y musical, mostrando sensibilidad, intención y personalidad."
   ],
   estudio:[
-    "Necesita mejorar considerablemente la constancia y organización del estudio.",
-    "Presenta una preparación insuficiente y necesita adquirir hábitos de estudio.",
-    "Está adquiriendo hábitos de estudio, aunque necesita mucha más regularidad.",
-    "Progresa en sus hábitos de estudio, pero necesita mejorar la constancia y organización.",
-    "Mantiene un nivel de estudio básico adecuado, aunque debe seguir consolidándolo.",
+    "Necesita mejorar la constancia y organización del estudio y la preparación del material.",
+    "Está adquiriendo hábitos de estudio, aunque necesita mejorar su regularidad y organización.",
     "Mantiene un ritmo de estudio adecuado y prepara correctamente los contenidos indicados.",
-    "Estudia con regularidad y aprovecha bien el tiempo de trabajo.",
-    "Muestra buena constancia, organización y aprovechamiento del estudio.",
-    "Destaca por su constancia, organización y autonomía en el estudio.",
-    "Destaca excepcionalmente por su constancia, organización, autonomía y aprovechamiento."
+    "Estudia con regularidad, aprovecha bien el tiempo y llega a clase con el trabajo preparado.",
+    "Destaca por su constancia, organización, autonomía y excelente aprovechamiento del estudio."
   ],
   actitud:[
-    "Necesita mejorar considerablemente la atención, participación y actitud durante la clase.",
-    "Presenta dificultades frecuentes de atención, participación o disposición para el trabajo.",
-    "Su actitud es irregular y necesita bastante ayuda para mantener la atención y participación.",
-    "Muestra una actitud generalmente adecuada, aunque debe mejorar algunos aspectos.",
-    "Mantiene una actitud básica adecuada, aunque puede mejorar su atención y participación.",
-    "Mantiene una actitud adecuada y trabaja correctamente durante la clase.",
+    "Necesita mejorar la atención, participación y actitud durante la clase.",
+    "Su actitud es adecuada, aunque necesita mejorar la atención y la participación en algunos momentos.",
+    "Mantiene una actitud adecuada, participando y trabajando correctamente durante la clase.",
     "Muestra buena actitud, atención, interés y disposición para aprender.",
-    "Muestra una actitud muy positiva, participativa y responsable.",
-    "Destaca por su excelente actitud, motivación, atención y participación.",
-    "Destaca excepcionalmente por su motivación, autonomía, responsabilidad y actitud ante el aprendizaje."
+    "Destaca por su excelente actitud, motivación, atención, participación y autonomía durante la clase."
   ],
   progreso:[
-    "El progreso es muy limitado y necesita reforzar de forma importante los contenidos trabajados.",
-    "El progreso es limitado y requiere un seguimiento y refuerzo constantes.",
-    "Se observa cierta evolución, aunque todavía necesita bastante apoyo para consolidar los aprendizajes.",
-    "Progresa de forma gradual, pero necesita mayor continuidad y consolidación.",
-    "Presenta una evolución básica adecuada, aunque debe seguir consolidando los aprendizajes.",
+    "El progreso es limitado y necesita reforzar los contenidos trabajados.",
+    "Se observa cierta evolución, aunque necesita mayor continuidad y consolidación de los aprendizajes.",
     "Presenta una evolución adecuada y va consolidando los contenidos trabajados.",
-    "Muestra un buen progreso y una evolución constante.",
-    "Muestra un progreso notable y consolida con seguridad los contenidos.",
-    "Muestra un progreso excelente y aplica los aprendizajes con mucha autonomía.",
-    "Muestra un progreso excepcional, asimilando rápidamente los contenidos y aplicándolos con gran autonomía."
+    "Muestra un buen progreso y una evolución constante en los diferentes aspectos trabajados.",
+    "Muestra un progreso excelente, asimilando rápidamente los contenidos y aplicándolos con autonomía."
   ],
   general:[
     "Clase con dificultades significativas. Es necesario reforzar los contenidos trabajados y establecer pautas concretas de mejora.",
-    "Clase con dificultades importantes. Necesita un seguimiento cercano y un trabajo específico de los aspectos básicos.",
-    "Clase en proceso de mejora. Se observa evolución, aunque todavía necesita bastante apoyo.",
-    "Clase con progreso gradual. Es necesario continuar trabajando y consolidando algunos aspectos.",
-    "Clase adecuada en los aspectos básicos, aunque conviene seguir consolidando los contenidos.",
+    "Clase de progreso moderado. Se están adquiriendo los contenidos, aunque es necesario continuar trabajando algunos aspectos.",
     "Clase adecuada. Se han trabajado correctamente los contenidos previstos y se observa una evolución satisfactoria.",
-    "Buena clase. El alumno ha trabajado con interés y ha mostrado un buen progreso.",
-    "Muy buena clase. El alumno ha mostrado seguridad, buena actitud y un dominio notable de los contenidos.",
-    "Excelente clase. El alumno ha mostrado gran implicación, dominio y autonomía.",
-    "Clase excepcional. El alumno ha mostrado un dominio sobresaliente, gran autonomía y una excelente actitud y calidad de trabajo."
+    "Buena clase. El alumno ha trabajado con interés y ha mostrado un buen dominio y progreso en los contenidos trabajados.",
+    "Excelente clase. El alumno ha mostrado gran implicación, autonomía y un dominio muy satisfactorio de los contenidos trabajados."
   ]
 };
 const ratingLabels={sonido:"🎵 Sonido",afinacion:"🎯 Afinación",tecnica:"🎼 Técnica",ritmo:"⏱️ Ritmo",musicalidad:"🎶 Musicalidad",estudio:"📚 Estudio",actitud:"👨‍🏫 Actitud",progreso:"📈 Progreso"};
@@ -165,7 +134,7 @@ function initRatings(){
     box.insertAdjacentHTML("beforeend",`<div class="rating-group"><div class="rating-title">${label}</div><div class="rating-buttons" data-rating="${key}"></div></div>`);
   });
   document.querySelectorAll(".rating-buttons").forEach(group=>{
-    for(let i=1;i<=10;i++){
+    for(let i=1;i<=5;i++){
       const b=document.createElement("button"); b.type="button"; b.textContent=i; b.dataset.value=i;
       b.onclick=()=>setRating(group.dataset.rating,i); group.appendChild(b);
     }
@@ -262,7 +231,7 @@ function renderStudentHistory(id){
       <span class="grade">${x.attendance==="falta"?"—":x.grade}</span>
       <b>${new Date(x.date+"T12:00:00").toLocaleDateString("es-ES")}</b>
       <div class="muted">${x.attendance==="falta"?"🔴 Falta":"🟢 Asiste"}</div>
-      ${x.ratings&&Object.keys(x.ratings).length?`<div class="muted"><b>Valoración:</b> ${Object.entries(x.ratings).map(([k,v])=>`${esc(ratingLabels[k]||k)} ${v}/10`).join(" · ")}</div>`:""}
+      ${x.ratings&&Object.keys(x.ratings).length?`<div class="muted"><b>Valoración:</b> ${Object.entries(x.ratings).map(([k,v])=>`${esc(ratingLabels[k]||k)} ${v}/5`).join(" · ")}</div>`:""}
        ${x.autoComment?`<p class="muted"><b>Valoración general:</b> ${esc(x.autoComment)}</p>`:""}
        ${x.obs?`<p>${esc(x.obs)}</p>`:""}
       ${x.audioData?`<audio controls style="width:100%" src="${x.audioData}"></audio>`:""}
@@ -291,7 +260,7 @@ q("csv").onclick=()=>{const y=year(),ls=lessons.filter(x=>(x.schoolYear||y)===y)
  const classRows=[["Alumno","Curso","Curso escolar","Fecha","Estado","Nota","Sonido","Afinación","Técnica","Ritmo","Musicalidad","Estudio","Actitud","Progreso","Valoración general","Comentario automático","Observación","Grabación","Nombre archivo grabación","Dispositivo","Fecha/hora creación","ID clase","ID alumno","Clave alumno"],...ls.map(x=>{const s=students.find(z=>z.id===x.studentId);return [x.student,x.course,x.schoolYear||y,x.date,x.attendance==="falta"?"Falta":"Asiste",x.grade??"",x.ratings?.sonido??"",x.ratings?.afinacion??"",x.ratings?.tecnica??"",x.ratings?.ritmo??"",x.ratings?.musicalidad??"",x.ratings?.estudio??"",x.ratings?.actitud??"",x.ratings?.progreso??"",x.ratings?.general??"",x.autoComment||"",x.obs,x.audioData?"Sí":"No",x.audioData?filename(x.student,x.date):"",deviceId,x.created?new Date(x.created).toISOString():"",x.id,x.studentId,s?mergeKey(s.name,s.course):mergeKey(x.student,x.course)]})];
  const summary=[ ["Alumno","Curso","Curso escolar","Clases","Asistencias","Faltas","Media","Última clase","Observaciones","Grabaciones"], ...students.map(s=>{const a=ls.filter(x=>x.studentId===s.id),f=a.filter(x=>x.attendance==="falta").length,n=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));return [s.name,s.course,y,a.length,a.length-f,f,n.length?(n.reduce((p,v)=>p+v,0)/n.length).toFixed(2):"",a.length?a.slice().sort((u,v)=>(v.date||"").localeCompare(u.date||""))[0].date:"",a.filter(x=>x.obs).length,a.filter(x=>x.audioData).length]}) ];
  downloadFile(new Blob([makeCSV(classRows)],{type:"text/csv;charset=utf-8"}),`Clases_Oboe_${y}.csv`);setTimeout(()=>downloadFile(new Blob([makeCSV(summary)],{type:"text/csv;charset=utf-8"}),`Resumen_Oboe_${y}.csv`),350);};
-q("backup").onclick=()=>downloadFile(new Blob([JSON.stringify({version:8,schoolYear:year(),deviceId,students,lessons},null,2)],{type:"application/json"}),`Copia_Registro_Clases_Oboe_${year()}.json`);
+q("backup").onclick=()=>downloadFile(new Blob([JSON.stringify({version:10,schoolYear:year(),deviceId,students,lessons},null,2)],{type:"application/json"}),`Copia_Registro_Clases_Oboe_${year()}.json`);
 
 renderStudents();renderSelect();render();
 </script></body></html>
