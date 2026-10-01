@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe - v12</title><style>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe</title><style>
 body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-width:720px;margin:auto;padding:16px}.card{background:white;border:1px solid #ddd;border-radius:16px;padding:16px;margin:12px 0}label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:10px;font:inherit}textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{border:0;border-radius:10px;padding:10px 13px;margin:6px 4px 0 0;font-weight:700}.primary{background:#2f5d50;color:#fff}.secondary{background:#dfe9e4;color:#2f5d50}.danger{background:#f3dddd;color:#a44242}.item{border-top:1px solid #ddd;padding:12px 0}.muted{color:#69716d;font-size:12px}.grade{float:right;font-size:20px;font-weight:800;color:#2f5d50}.hidden{display:none}.rec{padding:10px;background:#f7f7f4;border-radius:10px;margin-top:8px}
 </style></head><body><div class="wrap">
 <header><h1>🎵 Registro de Clases de Oboe</h1><p class="muted">Cuaderno digital de clases individuales</p></header>
@@ -7,43 +7,29 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 
 
 
-<section class="card"><h2>📝 Nueva clase</h2><label>Alumno</label><select id="student"><option value="">Selecciona un alumno…</option></select><div class="row"><div><label>Fecha</label><input id="date" type="date"></div><div><label>Estado</label><select id="attendance"><option value="asiste">🟢 Asiste</option><option value="falta">🔴 Falta</option></select></div></div><div id="gradeBox"><label>Nota</label><input id="grade" type="number" min="0" max="10" step=".1"></div><label>Observación</label><textarea id="obs"></textarea><div class="rec"><span id="recText">Sin grabación</span> <span id="recTime"></span></div><button type="button" class="secondary" id="record">🎙️ Grabar</button><button type="button" class="secondary" id="stop" disabled>⏹ Parar</button><button type="button" class="primary" id="save">💾 Guardar clase</button></section>
+<section class="card"><h2>📝 Nueva clase</h2><label>Alumno</label><select id="student"><option value="">Selecciona un alumno…</option></select><div class="row"><div><label>Fecha</label><input id="date" type="date"></div><div><label>Estado</label><select id="attendance"><option value="asiste">🟢 Asiste</option><option value="falta">🔴 Falta</option></select></div></div><div id="gradeBox"><label>Nota</label><input id="grade" type="number" min="0" max="10" step=".1"></div><label>Observación</label><textarea id="obs"></textarea><div class="rec"><span id="recText">Sin grabación</span> <span id="recTime"></span></div><button class="secondary" id="record">🎙️ Grabar</button><button class="secondary" id="stop" disabled>⏹ Parar</button><button class="primary" id="save">💾 Guardar clase</button></section>
 
-<section class="card">
-<h2>📊 Exportación de datos</h2>
-<p class="muted">Guarda una copia de tus datos o llévalos a Google Sheets.</p>
-<div style="display:flex;gap:8px;flex-wrap:wrap">
-<button type="button" class="secondary" id="csv">📊 Exportar para Google Sheets</button>
-<div id="csvOptions" style="width:100%"></div>
+<section class="card"><button class="secondary" id="chooseFolder">📁 Elegir carpeta</button><div id="folderNote" class="muted">Carpeta de grabaciones no seleccionada.</div></section>
 
-<button type="button" class="secondary" id="backup">📦 Copia de seguridad</button>
-</div>
-</section>
-<section class="card">
-<button type="button" class="secondary" id="chooseFolder">📁 Elegir carpeta de grabaciones</button>
-<div id="folderNote" class="muted">Carpeta de grabaciones no seleccionada.</div>
-<div id="appStatus" class="muted" style="margin-top:8px"></div>
-</section>
+<section class="card"><h2>📊 Exportación de datos</h2><p class="muted">Exporta los datos del curso seleccionado para abrirlos en Google Sheets.</p><button type="button" class="secondary" id="csv">📊 Exportar para Google Sheets</button><button type="button" class="secondary" id="backup">📦 Copia de seguridad</button><div id="exportStatus" class="muted" style="margin-top:8px"></div></section>
 
 <section class="card"><h2>📚 Historial</h2><p class="muted">Pulsa sobre el nombre de un alumno para ver todas sus clases.</p><div id="history"></div></section>
 
 
 
-<section class="card"><h2>👨‍🎓 Alumnos</h2><p class="muted">Gestión de alumnos del curso. Este apartado se utiliza principalmente al inicio del curso.</p><label>Nombre y apellidos</label><input id="studentName" placeholder="Ej.: María García López"><label>Curso</label><select id="studentCourse"><option value="">Selecciona el curso…</option><optgroup label="Enseñanzas Elementales"><option>1.º Elemental</option><option>2.º Elemental</option><option>3.º Elemental</option><option>4.º Elemental</option></optgroup><optgroup label="Enseñanzas Profesionales"><option>1.º Profesional</option><option>2.º Profesional</option><option>3.º Profesional</option><option>4.º Profesional</option><option>5.º Profesional</option><option>6.º Profesional</option></optgroup></select><button type="button" class="primary" id="addStudent">➕ Añadir alumno</button><button type="button" class="secondary hidden" id="cancelEdit">Cancelar</button><div id="studentsList"></div></section>
+<section class="card"><h2>👨‍🎓 Alumnos</h2><p class="muted">Gestión de alumnos del curso. Este apartado se utiliza principalmente al inicio del curso.</p><label>Nombre y apellidos</label><input id="studentName" placeholder="Ej.: María García López"><label>Curso</label><select id="studentCourse"><option value="">Selecciona el curso…</option><optgroup label="Enseñanzas Elementales"><option>1.º Elemental</option><option>2.º Elemental</option><option>3.º Elemental</option><option>4.º Elemental</option></optgroup><optgroup label="Enseñanzas Profesionales"><option>1.º Profesional</option><option>2.º Profesional</option><option>3.º Profesional</option><option>4.º Profesional</option><option>5.º Profesional</option><option>6.º Profesional</option></optgroup></select><button class="primary" id="addStudent">➕ Añadir alumno</button><button class="secondary hidden" id="cancelEdit">Cancelar</button><div id="studentsList"></div></section>
 </div><script>
 const LK="oboeLessonsV2",SK="oboeStudentsV1",YK="oboeSchoolYearV1",q=id=>document.getElementById(id);
 let lessons=JSON.parse(localStorage.getItem(LK)||"[]"),students=JSON.parse(localStorage.getItem(SK)||"[]"),media=null,chunks=[],audioData=null,dir=null,edit=null;
-function uid(){try{if(globalThis.crypto&&typeof crypto.randomUUID==="function")return crypto.randomUUID()}catch(e){}return "id-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,10)+"-"+Math.random().toString(36).slice(2,10)}
-function setStatus(msg){const el=q("appStatus");if(el)el.textContent=msg||""}
 function yr(){let d=new Date(),y=d.getFullYear();return d.getMonth()+1>=9?`${y}-${String(y+1).slice(-2)}`:`${y-1}-${String(y).slice(-2)}`}
 function initYears(){let y=parseInt(yr()),s="";for(let i=y-4;i<=y+5;i++)s+=`<option>${i}-${String(i+1).slice(-2)}</option>`;q("schoolYear").innerHTML=s;q("schoolYear").value=localStorage.getItem(YK)||yr()}
 function year(){return q("schoolYear").value}initYears();q("schoolYear").onchange=()=>{localStorage.setItem(YK,year());renderStudents();renderSelect();render()};
 q("date").value=new Date().toISOString().slice(0,10);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function saveL(){localStorage.setItem(LK,JSON.stringify(lessons.map(x=>({...x,audioUrl:undefined}))));}function saveS(){localStorage.setItem(SK,JSON.stringify(students))}
-function renderStudents(){if(!students.length){q("studentsList").innerHTML='<p class="muted">Todavía no hay alumnos creados.</p>';return}q("studentsList").innerHTML=students.slice().sort((a,b)=>a.name.localeCompare(b.name,"es")).map(s=>{let n=lessons.filter(x=>(x.schoolYear||year())===year()&&x.studentId===s.id).length,f=lessons.filter(x=>(x.schoolYear||year())===year()&&x.studentId===s.id&&x.attendance==="falta").length;return `<div class="item"><b>${esc(s.name)}</b><div class="muted">${esc(s.course)} · ${n} clases · ${f} faltas</div><button type="button" class="secondary" onclick="editStudent('${s.id}')">✏️ Editar</button><button type="button" class="danger" onclick="deleteStudent('${s.id}')">🗑️</button></div>`}).join("")}
+function renderStudents(){if(!students.length){q("studentsList").innerHTML='<p class="muted">Todavía no hay alumnos creados.</p>';return}q("studentsList").innerHTML=students.slice().sort((a,b)=>a.name.localeCompare(b.name,"es")).map(s=>{let n=lessons.filter(x=>(x.schoolYear||year())===year()&&x.studentId===s.id).length,f=lessons.filter(x=>(x.schoolYear||year())===year()&&x.studentId===s.id&&x.attendance==="falta").length;return `<div class="item"><b>${esc(s.name)}</b><div class="muted">${esc(s.course)} · ${n} clases · ${f} faltas</div><button class="secondary" onclick="editStudent('${s.id}')">✏️ Editar</button><button class="danger" onclick="deleteStudent('${s.id}')">🗑️</button></div>`}).join("")}
 function renderSelect(){let old=q("student").value;q("student").innerHTML='<option value="">Selecciona un alumno…</option>'+students.slice().sort((a,b)=>a.name.localeCompare(b.name,"es")).map(s=>`<option value="${s.id}">${esc(s.name)} — ${esc(s.course)}</option>`).join("");if(students.some(s=>s.id===old))q("student").value=old}
-q("addStudent").onclick=()=>{let n=q("studentName").value.trim(),c=q("studentCourse").value;if(!n||!c)return alert("Indica nombre y curso.");if(edit){let s=students.find(x=>x.id===edit);s.name=n;s.course=c;lessons.forEach(x=>{if(x.studentId===edit){x.student=n;x.course=c}});edit=null;q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden");saveL();saveS()}else{if(students.some(s=>s.name.toLowerCase()===n.toLowerCase()))return alert("Ese alumno ya existe.");students.push({id:uid(),name:n,course:c});saveS()}q("studentName").value="";q("studentCourse").value="";renderStudents();renderSelect();render()};
+q("addStudent").onclick=()=>{let n=q("studentName").value.trim(),c=q("studentCourse").value;if(!n||!c)return alert("Indica nombre y curso.");if(edit){let s=students.find(x=>x.id===edit);s.name=n;s.course=c;lessons.forEach(x=>{if(x.studentId===edit){x.student=n;x.course=c}});edit=null;q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden");saveL();saveS()}else{if(students.some(s=>s.name.toLowerCase()===n.toLowerCase()))return alert("Ese alumno ya existe.");students.push({id:crypto.randomUUID(),name:n,course:c});saveS()}q("studentName").value="";q("studentCourse").value="";renderStudents();renderSelect();render()};
 q("cancelEdit").onclick=()=>{edit=null;q("studentName").value="";q("studentCourse").value="";q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden")};
 window.editStudent=id=>{let s=students.find(x=>x.id===id);edit=id;q("studentName").value=s.name;q("studentCourse").value=s.course;q("addStudent").textContent="💾 Guardar cambios";q("cancelEdit").classList.remove("hidden")};
 window.deleteStudent=id=>{let s=students.find(x=>x.id===id),n=lessons.filter(x=>x.studentId===id).length;if(confirm(`¿Eliminar a ${s.name}?${n?`\nSus ${n} clases NO se borrarán.`:""}`)){students=students.filter(x=>x.id!==id);saveS();renderStudents();renderSelect()}};
@@ -70,10 +56,10 @@ function renderHistoryStudents(){
       const f=ls.filter(x=>x.attendance==="falta").length;
       const notes=ls.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
       const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(2):"—";
-      return `<div class="item" style="cursor:pointer" onclick="openStudentHistory('${s.id}')">
+      return `<div class="item history-student" data-student-id="${esc(s.id)}" style="cursor:pointer">
         <b>${esc(s.name)}</b>
         <div class="muted">${esc(s.course)} · ${ls.length} clases · ${f} faltas · media ${avg}</div>
-        <button type="button" class="secondary" onclick="event.stopPropagation();openStudentHistory('${s.id}')">📚 Ver historial</button>
+        <button type="button" class="secondary history-open" data-student-id="${esc(s.id)}">📚 Ver historial</button>
       </div>`;
     }).join(""):'<p class="muted">No hay alumnos en este curso escolar.</p>');
 }
@@ -82,6 +68,12 @@ function openStudentHistory(id){
   selectedStudentHistory=id;
   renderStudentHistory(id);
 }
+document.addEventListener("click",e=>{
+  const b=e.target.closest(".history-open");
+  if(b){e.stopPropagation();openStudentHistory(b.dataset.studentId);return;}
+  const card=e.target.closest(".history-student");
+  if(card) openStudentHistory(card.dataset.studentId);
+});
 function renderStudentHistory(id){
   const s=students.find(x=>x.id===id);
   if(!s){selectedStudentHistory=null;return renderHistoryStudents();}
@@ -90,7 +82,7 @@ function renderStudentHistory(id){
   const f=a.filter(x=>x.attendance==="falta").length;
   const notes=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
   const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(2):"—";
-  q("history").innerHTML=`<button type="button" class="secondary" onclick="selectedStudentHistory=null;renderHistoryStudents()">← Volver a alumnos</button>
+  q("history").innerHTML=`<button class="secondary" onclick="selectedStudentHistory=null;renderHistoryStudents()">← Volver a alumnos</button>
     <h3>${esc(s.name)}</h3>
     <div class="muted">${esc(s.course)} · Curso escolar ${esc(y)}</div>
     <p><b>${a.length}</b> clases · <b>${f}</b> faltas · <b>${avg}</b> media</p>
@@ -100,30 +92,30 @@ function renderStudentHistory(id){
       <div class="muted">${x.attendance==="falta"?"🔴 Falta":"🟢 Asiste"}</div>
       ${x.obs?`<p>${esc(x.obs)}</p>`:""}
       ${x.audioData?`<audio controls style="width:100%" src="${x.audioData}"></audio>`:""}
-      <button type="button" class="danger" onclick="removeLesson('${x.id}')">Eliminar</button>
+      <button class="danger" onclick="removeLesson('${x.id}')">Eliminar</button>
     </div>`).join(""):'<p class="muted">No hay clases registradas de este alumno en este curso escolar.</p>'}</div>`;
 }
 window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){lessons=lessons.filter(x=>x.id!==id);saveL();render();renderStudents()}};
-q("record").onclick=async()=>{try{if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||typeof MediaRecorder==="undefined")return alert("Este navegador no permite grabar audio. Usa Chrome actualizado.");let st=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];media=new MediaRecorder(st);media.ondataavailable=e=>e.data.size&&chunks.push(e.data);media.onstop=()=>{let b=new Blob(chunks,{type:media.mimeType||"audio/webm"}),r=new FileReader();r.onload=()=>audioData=r.result;r.readAsDataURL(b);st.getTracks().forEach(t=>t.stop())};media.start();q("record").disabled=true;q("stop").disabled=false;q("recText").textContent="🔴 Grabando…"}catch(e){alert("No se ha podido acceder al micrófono.")}};
+q("record").onclick=async()=>{try{let st=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];media=new MediaRecorder(st);media.ondataavailable=e=>e.data.size&&chunks.push(e.data);media.onstop=()=>{let b=new Blob(chunks,{type:media.mimeType||"audio/webm"}),r=new FileReader();r.onload=()=>audioData=r.result;r.readAsDataURL(b);st.getTracks().forEach(t=>t.stop())};media.start();q("record").disabled=true;q("stop").disabled=false;q("recText").textContent="🔴 Grabando…"}catch(e){alert("No se ha podido acceder al micrófono.")}};
 q("stop").onclick=()=>{if(media&&media.state!=="inactive"){media.stop();q("record").disabled=false;q("stop").disabled=true;q("recText").textContent="Grabación preparada"}};
 function filename(name,date){let p=name.trim().split(/\s+/),first=(p[0]||"Grabacion").replace(/[\\/:*?"<>|]/g,"_"),ini=p.slice(1).map(x=>x[0]).join("").toUpperCase(),d=new Date(),t=`${String(d.getHours()).padStart(2,"0")}-${String(d.getMinutes()).padStart(2,"0")}`;return `${first}${ini?"_"+ini:""}_${date}_${t}.webm`}
-q("save").onclick=async()=>{let sid=q("student").value,att=q("attendance").value,g=q("grade").value;if(!sid)return alert("Selecciona un alumno.");if(att==="asiste"&&g==="")return alert("Indica la nota o marca falta.");let s=students.find(x=>x.id===sid),item={id:uid(),studentId:sid,student:s.name,course:s.course,date:q("date").value,attendance:att,grade:att==="falta"?null:Number(g),obs:q("obs").value.trim(),schoolYear:year(),audioData:audioData||null,created:Date.now()};lessons.push(item);saveL();if(dir&&audioData)await saveFile(item);q("student").value="";q("grade").value="";q("obs").value="";q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";render();renderStudents();alert("Clase guardada.")};
+q("save").onclick=async()=>{let sid=q("student").value,att=q("attendance").value,g=q("grade").value;if(!sid)return alert("Selecciona un alumno.");if(att==="asiste"&&g==="")return alert("Indica la nota o marca falta.");let s=students.find(x=>x.id===sid),item={id:crypto.randomUUID(),studentId:sid,student:s.name,course:s.course,date:q("date").value,attendance:att,grade:att==="falta"?null:Number(g),obs:q("obs").value.trim(),schoolYear:year(),audioData:audioData||null,created:Date.now()};lessons.push(item);saveL();if(dir&&audioData)await saveFile(item);q("student").value="";q("grade").value="";q("obs").value="";q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";render();renderStudents();alert("Clase guardada.")};
 async function saveFile(x){try{let f=await dir.getDirectoryHandle("Grabaciones",{create:true}),s=await f.getDirectoryHandle(x.student.replace(/[\\/:*?"<>|]/g,"_"),{create:true}),bin=atob(x.audioData.split(",")[1]),a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);let h=await s.getFileHandle(filename(x.student,x.date),{create:true}),w=await h.createWritable();await w.write(a);await w.close()}catch(e){console.warn(e)}}
-q("chooseFolder").onclick=async()=>{if(!showDirectoryPicker)return alert("Este navegador no permite seleccionar carpetas.");try{dir=await showDirectoryPicker({mode:"readwrite"});q("folderNote").textContent="Carpeta seleccionada: las grabaciones nuevas se copiarán en Grabaciones/Alumno/."}catch(e){}};
-function download(b,n){try{const url=URL.createObjectURL(b),a=document.createElement("a");a.href=url;a.download=n;a.rel="noopener";a.style.display="none";document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(url)},1500);setStatus("Archivo preparado: "+n)}catch(e){setStatus("No se pudo descargar el archivo. Prueba desde Chrome.");alert("No se ha podido descargar el archivo en este dispositivo.")}}
-function mergeKey(name,course){return `${String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}__${String(course||"").toLowerCase().replace(/[^a-z0-9]+/g,"-")}`}
+q("chooseFolder").onclick=async()=>{if(typeof window.showDirectoryPicker!=="function"){q("folderNote").textContent="Este navegador no permite seleccionar carpetas. Las grabaciones seguirán guardándose en la aplicación.";alert("Este navegador no permite seleccionar una carpeta. Puedes seguir grabando y guardando las clases normalmente.");return;}try{dir=await window.showDirectoryPicker({mode:"readwrite"});q("folderNote").textContent="Carpeta seleccionada: las grabaciones nuevas se copiarán en Grabaciones/Alumno/."}catch(e){if(e&&e.name!=="AbortError")alert("No se ha podido seleccionar la carpeta.");}};
+function download(b,n){let a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 const DEVICE_KEY="oboeDeviceIdV1";
-let deviceId=localStorage.getItem(DEVICE_KEY)||uid();localStorage.setItem(DEVICE_KEY,deviceId);
-function csvText(rows){return "\ufeff"+rows.map(z=>z.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(";")).join("\n")}
-q("csv").onclick=()=>{
-  const y=year(),a=lessons.filter(x=>(x.schoolYear||y)===y);
-  const studentRows=[["student_id","student_key","nombre","curso","curso_escolar","device_id"],...students.map(s=>[s.id,mergeKey(s.name,s.course),s.name,s.course,y,deviceId])];
-  const classRows=[["lesson_id","student_id","student_key","fecha","alumno","curso","curso_escolar","estado","nota","observacion","grabacion","device_id","creado"],...a.map(x=>{const s=students.find(z=>z.id===x.studentId);return [x.id,x.studentId,s?mergeKey(s.name,s.course):mergeKey(x.student,x.course),x.date,x.student,x.course,x.schoolYear||y,x.attendance==="falta"?"Falta":"Asiste",x.grade??"",x.obs,x.audioData?"Sí":"No",deviceId,x.created||""]})];
-  const panel=q("csvOptions");
-  panel.innerHTML=`<div class="item"><b>Elige qué CSV quieres guardar:</b><br><button type="button" type="button" class="secondary" id="csvStudents">👨‍🎓 Alumnos ${y}</button><button type="button" type="button" class="secondary" id="csvClasses">📝 Clases ${y}</button></div>`;
-  q("csvStudents").onclick=()=>download(new Blob([csvText(studentRows)],{type:"text/csv;charset=utf-8"}),`Alumnos_Oboe_${y}.csv`);
-  q("csvClasses").onclick=()=>download(new Blob([csvText(classRows)],{type:"text/csv;charset=utf-8"}),`Clases_Oboe_${y}.csv`);
-};
-q("backup").onclick=()=>download(new Blob([JSON.stringify({version:4,schoolYear:year(),students,lessons})],{type:"application/json"}),`Copia_Registro_Clases_Oboe_${year()}.json`);
+let deviceId=localStorage.getItem(DEVICE_KEY);
+if(!deviceId){deviceId=(globalThis.crypto&&typeof crypto.randomUUID==="function"?crypto.randomUUID():"dev-"+Date.now().toString(36)+Math.random().toString(36).slice(2,8));localStorage.setItem(DEVICE_KEY,deviceId)}
+function mergeKey(name,course){return String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+"__"+String(course||"").toLowerCase().replace(/[^a-z0-9]+/g,"-")}
+function downloadFile(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=name;a.style.display="none";document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(url)},1000);const st=q("exportStatus");if(st)st.textContent="Archivo preparado: "+name}
+function csvEscape(v){return `"${String(v??"").replace(/"/g,'""')}"`}
+function makeCSV(rows){return "\ufeff"+rows.map(r=>r.map(csvEscape).join(";")).join("\n")}
+q("csv").onclick=()=>{const y=year(),ls=lessons.filter(x=>(x.schoolYear||y)===y);
+ const studentRows=[["ID alumno","Clave unificación","Nombre y apellidos","Curso","Curso escolar","Dispositivo","Nº clases","Nº faltas","Nº asistencias","Media notas","Última clase","Clases con observación","Clases con grabación"],...students.map(s=>{const a=ls.filter(x=>x.studentId===s.id),f=a.filter(x=>x.attendance==="falta").length,n=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade)),obs=a.filter(x=>x.obs).length,aud=a.filter(x=>x.audioData).length;return [s.id,mergeKey(s.name,s.course),s.name,s.course,y,deviceId,a.length,f,a.length-f,n.length?(n.reduce((p,v)=>p+v,0)/n.length).toFixed(2):"",a.length?a.slice().sort((u,v)=>(v.date||"").localeCompare(u.date||""))[0].date:"",obs,aud]})];
+ const classRows=[["ID clase","ID alumno","Clave alumno","Alumno","Curso","Curso escolar","Fecha","Estado","Nota","Observación","Grabación","Nombre archivo grabación","Dispositivo","Fecha/hora creación"],...ls.map(x=>{const s=students.find(z=>z.id===x.studentId);return [x.id,x.studentId,s?mergeKey(s.name,s.course):mergeKey(x.student,x.course),x.student,x.course,x.schoolYear||y,x.date,x.attendance==="falta"?"Falta":"Asiste",x.grade??"",x.obs,x.audioData?"Sí":"No",x.audioData?filename(x.student,x.date):"",deviceId,x.created?new Date(x.created).toISOString():""]})];
+ const summary=[ ["Alumno","Curso","Curso escolar","Clases","Asistencias","Faltas","Media","Última clase","Observaciones","Grabaciones"], ...students.map(s=>{const a=ls.filter(x=>x.studentId===s.id),f=a.filter(x=>x.attendance==="falta").length,n=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));return [s.name,s.course,y,a.length,a.length-f,f,n.length?(n.reduce((p,v)=>p+v,0)/n.length).toFixed(2):"",a.length?a.slice().sort((u,v)=>(v.date||"").localeCompare(u.date||""))[0].date:"",a.filter(x=>x.obs).length,a.filter(x=>x.audioData).length]}) ];
+ downloadFile(new Blob([makeCSV(studentRows)],{type:"text/csv;charset=utf-8"}),`Alumnos_Oboe_${y}.csv`);setTimeout(()=>downloadFile(new Blob([makeCSV(classRows)],{type:"text/csv;charset=utf-8"}),`Clases_Oboe_${y}.csv`),350);setTimeout(()=>downloadFile(new Blob([makeCSV(summary)],{type:"text/csv;charset=utf-8"}),`Resumen_Oboe_${y}.csv`),700);};
+q("backup").onclick=()=>downloadFile(new Blob([JSON.stringify({version:5,schoolYear:year(),deviceId,students,lessons},null,2)],{type:"application/json"}),`Copia_Registro_Clases_Oboe_${year()}.json`);
+
 renderStudents();renderSelect();render();
 </script></body></html>
