@@ -99,6 +99,33 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
     #quickWork button{font-size:12px;padding:7px 5px;}
   }
 </style>
+
+<style id="config-collapsed-v5-fix">
+  #configCard.collapsed > :not(.config-head):not(#configSummary){display:none!important}
+  #configCard.collapsed #configSummary{display:block!important}
+  #configCard.collapsed .config-head{margin-bottom:0}
+  #configCard.collapsed .config-head h2{display:none}
+</style>
+
+<style id="modo-clase-v5">
+  .class-extra-toggle{
+    width:100%;text-align:left;margin-top:8px;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .class-extra-panel{margin-top:8px}
+  .class-extra-panel.collapsed{display:none}
+  .recording-compact{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:8px 0;margin-top:6px;
+  }
+  .recording-controls{display:none;margin-top:6px}
+  .recording-controls.open{display:block}
+  .recording-summary{font-size:12px;color:#69716d}
+  .class-main-action{margin-top:10px}
+  @media(max-width:600px){
+    .class-extra-toggle{min-height:42px}
+  }
+</style>
 </head><body><div class="wrap">
 <header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p></header>
 
@@ -136,14 +163,25 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
   </div>
   <div class="quick-summary" id="quickWorkSummary"></div>
 </div>
-<div class="next-class">
-  <label for="nextClass"><strong>➡️ Para la próxima clase</strong> <span style="font-weight:normal;color:#777">(opcional)</span></label>
-  <input id="nextClass" type="text" placeholder="Ej.: repasar escala de Sol y estudiar el nº 14">
+<button type="button" class="secondary class-extra-toggle" id="toggleClassExtras">
+  <span>➕ Más opciones de la clase</span><span id="classExtrasArrow">▾</span>
+</button>
+<div id="classExtras" class="class-extra-panel collapsed">
+  <div class="next-class">
+    <label for="nextClass"><strong>➡️ Para la próxima clase</strong> <span style="font-weight:normal;color:#777">(opcional)</span></label>
+    <input id="nextClass" type="text" placeholder="Ej.: repasar escala de Sol y estudiar el nº 14">
+  </div>
+  <div class="recording-compact">
+    <div><b>🎙️ Grabación</b><div id="recordingSummary" class="recording-summary">Sin grabación</div></div>
+    <button type="button" class="secondary" id="toggleRecording">🎙️ Añadir</button>
+  </div>
+  <div id="recordingControls" class="recording-controls">
+    <div class="rec"><span id="recText">Sin grabación</span> <span id="recTime"></span></div>
+    <button class="secondary" id="record">🎙️ Grabar</button><button class="secondary" id="stop" disabled>⏹ Parar</button>
+  </div>
 </div>
-
-<div class="rec"><span id="recText">Sin grabación</span> <span id="recTime"></span></div>
-<button class="secondary" id="record">🎙️ Grabar</button><button class="secondary" id="stop" disabled>⏹ Parar</button>
-<button class="primary" id="save">💾 Guardar clase</button><button class="secondary hidden" id="cancelLessonEdit">Cancelar edición</button></section>
+<button class="primary class-main-action" id="save">💾 Guardar clase</button>
+<button class="secondary hidden" id="cancelLessonEdit">Cancelar edición</button></section>
 
 <section class="card"><button class="secondary" id="chooseFolder">📁 Elegir carpeta</button>
 <div id="folderNote" class="muted">Carpeta de grabaciones no seleccionada.</div></section>
@@ -214,8 +252,8 @@ function currentInstrument(){return (appSettings.instrument==="Otro"?appSettings
 function safeFilePart(x){return String(x||"").trim().replace(/[\\/:*?"<>|]+/g,"_").replace(/\s+/g,"_")||"Registro"}
 function hasSettings(){return !!(appSettings.teacher||appSettings.school||appSettings.instrument||appSettings.otherInstrument)}
 function updateConfigView(forceOpen){
-  const card=q("configCard"), form=q("configForm");
-  const configured=hasSettings();
+  const card=q("configCard");
+  const configured=!!(appSettings.teacher||appSettings.school||appSettings.instrument||appSettings.otherInstrument);
   if(forceOpen===true){card.classList.remove("collapsed");return}
   if(forceOpen===false){card.classList.add("collapsed");return}
   card.classList.toggle("collapsed",configured);
@@ -411,6 +449,17 @@ q("cancelEdit").onclick=()=>{edit=null;resetStudentForm();q("addStudent").textCo
 window.editStudent=id=>{let s=students.find(x=>x.id===id);edit=id;q("studentName").value=s.name;q("studentCourse").value=s.course;q("studentDay").value=s.scheduleDay||"";q("studentTime").value=s.scheduleTime||"";q("addStudent").textContent="💾 Guardar cambios";q("cancelEdit").classList.remove("hidden");updateStudentsPanel()};
 window.deleteStudent=id=>{let s=students.find(x=>x.id===id),n=lessons.filter(x=>x.studentId===id).length;if(confirm(`¿Eliminar a ${s.name}?${n?`\nSus ${n} clases NO se borrarán.`:""}`)){students=students.filter(x=>x.id!==id);saveS();renderStudents();renderSelect()}};
 q("attendance").onchange=()=>{let f=q("attendance").value==="falta";q("grade").disabled=f;q("ratingsBox").style.opacity=f?".55":"1";if(f)q("grade").value=""};
+
+q("toggleClassExtras").onclick=()=>{
+  const p=q("classExtras"), open=!p.classList.contains("collapsed");
+  p.classList.toggle("collapsed",open);
+  q("toggleClassExtras").innerHTML=`<span>${open?"➕ Más opciones de la clase":"➖ Ocultar opciones"}</span><span id="classExtrasArrow">${open?"▾":"▴"}</span>`;
+};
+q("toggleRecording").onclick=()=>{
+  const p=q("recordingControls"), open=!p.classList.contains("open");
+  p.classList.toggle("open",open);
+  q("toggleRecording").textContent=open?"✖️ Cerrar grabación":"🎙️ Añadir";
+};
 let selectedStudentHistory=null;
 function render(){
   renderHistoryStudents();
