@@ -11,7 +11,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 
 <section class="card"><button class="secondary" id="backup">📦 Copia de seguridad</button><button class="secondary" id="csv">📊 Exportar CSV</button><button class="secondary" id="chooseFolder">📁 Elegir carpeta</button><div id="folderNote" class="muted">Carpeta de grabaciones no seleccionada.</div></section>
 
-<section class="card"><h2>📚 Historial</h2><input id="filter" placeholder="Buscar alumno…"><div id="history"></div></section>
+<section class="card"><h2>📚 Historial</h2><div id="history"></div></section>
 </div><script>
 const LK="oboeLessonsV2",SK="oboeStudentsV1",YK="oboeSchoolYearV1",q=id=>document.getElementById(id);
 let lessons=JSON.parse(localStorage.getItem(LK)||"[]"),students=JSON.parse(localStorage.getItem(SK)||"[]"),media=null,chunks=[],audioData=null,dir=null,edit=null;
@@ -28,7 +28,59 @@ q("cancelEdit").onclick=()=>{edit=null;q("studentName").value="";q("studentCours
 window.editStudent=id=>{let s=students.find(x=>x.id===id);edit=id;q("studentName").value=s.name;q("studentCourse").value=s.course;q("addStudent").textContent="💾 Guardar cambios";q("cancelEdit").classList.remove("hidden")};
 window.deleteStudent=id=>{let s=students.find(x=>x.id===id),n=lessons.filter(x=>x.studentId===id).length;if(confirm(`¿Eliminar a ${s.name}?${n?`\nSus ${n} clases NO se borrarán.`:""}`)){students=students.filter(x=>x.id!==id);saveS();renderStudents();renderSelect()}};
 q("attendance").onchange=()=>{let f=q("attendance").value==="falta";q("grade").disabled=f;if(f)q("grade").value=""};
-function render(){let term=q("filter").value.toLowerCase(),a=lessons.filter(x=>(x.schoolYear||year())===year()&&(!term||x.student.toLowerCase().includes(term))).sort((a,b)=>b.created-a.created);q("history").innerHTML=a.length?a.map(x=>`<div class="item"><span class="grade">${x.attendance==="falta"?"—":x.grade}</span><b>${esc(x.student)}</b><div class="muted">${new Date(x.date+"T12:00:00").toLocaleDateString("es-ES")} · ${esc(x.course)} · ${x.attendance==="falta"?"🔴 Falta":"🟢 Asiste"}</div>${x.obs?`<p>${esc(x.obs)}</p>`:""}${x.audioData?`<audio controls style="width:100%" src="${x.audioData}"></audio>`:""}<button class="danger" onclick="removeLesson('${x.id}')">Eliminar</button></div>`).join(""):'<p class="muted">No hay clases en este curso escolar.</p>'}
+let selectedStudentHistory=null;
+function render(){
+  renderHistoryStudents();
+}
+function renderHistoryStudents(){
+  const term=(q("filter")?.value||"").toLowerCase();
+  const y=year();
+  if(selectedStudentHistory){
+    renderStudentHistory(selectedStudentHistory);
+    return;
+  }
+  const a=lessons.filter(x=>(x.schoolYear||y)===y);
+  const list=students.slice().sort((a,b)=>a.name.localeCompare(b.name,"es"))
+    .filter(s=>!term||s.name.toLowerCase().includes(term));
+  q("history").innerHTML=
+    `<input id="filter" placeholder="Buscar alumno…" value="${esc(term)}" oninput="renderHistoryStudents()">`+
+    (list.length?list.map(s=>{
+      const ls=a.filter(x=>x.studentId===s.id);
+      const f=ls.filter(x=>x.attendance==="falta").length;
+      const notes=ls.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
+      const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(2):"—";
+      return `<div class="item" style="cursor:pointer" onclick="openStudentHistory('${s.id}')">
+        <b>${esc(s.name)}</b>
+        <div class="muted">${esc(s.course)} · ${ls.length} clases · ${f} faltas · media ${avg}</div>
+        <button class="secondary" onclick="event.stopPropagation();openStudentHistory('${s.id}')">📚 Ver historial</button>
+      </div>`;
+    }).join(""):'<p class="muted">No hay alumnos en este curso escolar.</p>');
+}
+function openStudentHistory(id){
+  selectedStudentHistory=id;
+  renderStudentHistory(id);
+}
+function renderStudentHistory(id){
+  const s=students.find(x=>x.id===id);
+  if(!s){selectedStudentHistory=null;return renderHistoryStudents();}
+  const y=year();
+  const a=lessons.filter(x=>(x.schoolYear||y)===y&&x.studentId===id).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.created-a.created);
+  const f=a.filter(x=>x.attendance==="falta").length;
+  const notes=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
+  const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(2):"—";
+  q("history").innerHTML=`<button class="secondary" onclick="selectedStudentHistory=null;renderHistoryStudents()">← Volver a alumnos</button>
+    <h3>${esc(s.name)}</h3>
+    <div class="muted">${esc(s.course)} · Curso escolar ${esc(y)}</div>
+    <p><b>${a.length}</b> clases · <b>${f}</b> faltas · <b>${avg}</b> media</p>
+    <div>${a.length?a.map(x=>`<div class="item">
+      <span class="grade">${x.attendance==="falta"?"—":x.grade}</span>
+      <b>${new Date(x.date+"T12:00:00").toLocaleDateString("es-ES")}</b>
+      <div class="muted">${x.attendance==="falta"?"🔴 Falta":"🟢 Asiste"}</div>
+      ${x.obs?`<p>${esc(x.obs)}</p>`:""}
+      ${x.audioData?`<audio controls style="width:100%" src="${x.audioData}"></audio>`:""}
+      <button class="danger" onclick="removeLesson('${x.id}')">Eliminar</button>
+    </div>`).join(""):'<p class="muted">No hay clases registradas de este alumno en este curso escolar.</p>'}</div>`;
+}
 window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){lessons=lessons.filter(x=>x.id!==id);saveL();render();renderStudents()}};
 q("filter").oninput=render;
 q("record").onclick=async()=>{try{let st=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];media=new MediaRecorder(st);media.ondataavailable=e=>e.data.size&&chunks.push(e.data);media.onstop=()=>{let b=new Blob(chunks,{type:media.mimeType||"audio/webm"}),r=new FileReader();r.onload=()=>audioData=r.result;r.readAsDataURL(b);st.getTracks().forEach(t=>t.stop())};media.start();q("record").disabled=true;q("stop").disabled=false;q("recText").textContent="🔴 Grabando…"}catch(e){alert("No se ha podido acceder al micrófono.")}};
