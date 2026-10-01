@@ -18,7 +18,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 }
 .rating-buttons button.selected{background:#2f5d50;color:#fff}.rating-help{font-size:11px;color:#69716d;margin-top:4px}
 .auto-comment{background:#f7f7f4;border-radius:10px;padding:10px;margin-top:8px;font-size:13px;line-height:1.4}
-.config-card{border-color:#d7ded9}.config-card h2{margin-top:0}.config-card .primary{margin-top:10px}.config-card input,.config-card select{margin-bottom:2px}
+.config-card{border-color:#d7ded9}.config-card h2{margin-top:0}.config-card .primary{margin-top:10px}.config-card input,.config-card select{margin-bottom:2px}.config-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.config-head h2{margin:0}.config-card.collapsed{padding:12px 16px}.config-card.collapsed>p:not(#configHelp),.config-card.collapsed>.row,.config-card.collapsed>#otherInstrumentBox,.config-card.collapsed>#schoolName,.config-card.collapsed>label,.config-card.collapsed>#saveSettings,.config-card.collapsed>#settingsStatus{display:none}.config-card.collapsed #configHelp{display:block;margin:6px 0 0}.config-summary{font-size:.95rem}.config-summary{margin:0}.config-summary strong{font-weight:700}
 </style>
 <style id="mejoras-v2">
   .quick-work{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
@@ -40,9 +40,9 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 
 </head><body><div class="wrap">
 <header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p></header>
-<section class="card config-card">
-  <h2>⚙️ Configuración</h2>
-  <p class="muted">Estos datos se guardan en este dispositivo y puedes cambiarlos cuando quieras.</p>
+<section class="card config-card" id="configCard">
+  <div class="config-head"><h2>⚙️ Configuración</h2><button type="button" class="secondary" id="toggleSettings">⚙️ Configuración</button></div>
+  <p class="muted" id="configHelp">Estos datos se guardan en este dispositivo y puedes cambiarlos cuando quieras.</p><p class="config-summary" id="configSummary"></p>
   <div class="row">
     <div><label for="teacherName">Profesor/a</label><input id="teacherName" placeholder="Ej.: María López"></div>
     <div><label for="instrument">Instrumento</label>
@@ -72,7 +72,6 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 <h3>📊 Valoración de la clase</h3>
 <p class="rating-help">1 = Necesita mejorar · 2 = En proceso · 3 = Adecuado · 4 = Bien · 5 = Muy bien</p>
 <div id="ratings"></div>
-<div class="rating-group"><div class="rating-title">⭐ Valoración general</div><div class="rating-buttons" data-rating="general"></div></div>
 <div id="autoComment" class="auto-comment">Selecciona las valoraciones para generar un comentario automático.</div>
 </div>
 
@@ -121,11 +120,20 @@ const defaultSettings={teacher:"",instrument:"Oboe",otherInstrument:"",school:""
 let appSettings=(()=>{try{return {...defaultSettings,...(JSON.parse(localStorage.getItem(SETK)||"{}")||{})}}catch(e){return {...defaultSettings}}})();
 function currentInstrument(){return (appSettings.instrument==="Otro"?appSettings.otherInstrument:appSettings.instrument)||"Oboe"}
 function safeFilePart(x){return String(x||"").trim().replace(/[\\/:*?"<>|]+/g,"_").replace(/\s+/g,"_")||"Registro"}
+function hasSettings(){return !!(appSettings.teacher||appSettings.school||appSettings.instrument||appSettings.otherInstrument)}
+function updateConfigView(forceOpen){
+  const card=q("configCard"), form=q("configForm");
+  const configured=hasSettings();
+  if(forceOpen===true){card.classList.remove("collapsed");return}
+  if(forceOpen===false){card.classList.add("collapsed");return}
+  card.classList.toggle("collapsed",configured);
+}
 function saveSettings(){
   appSettings={teacher:q("teacherName").value.trim(),instrument:q("instrument").value,otherInstrument:q("otherInstrument").value.trim(),school:q("schoolName").value.trim()};
   localStorage.setItem(SETK,JSON.stringify(appSettings));
   applySettings();
   q("settingsStatus").textContent="Configuración guardada.";
+  updateConfigView(false);
 }
 function applySettings(){
   const inst=currentInstrument();
@@ -137,10 +145,14 @@ function applySettings(){
   q("otherInstrument").value=appSettings.otherInstrument||"";
   q("otherInstrumentBox").classList.toggle("hidden",q("instrument").value!=="Otro");
   q("schoolName").value=appSettings.school||"";
+  const summary=q("configSummary");
+  if(summary) summary.innerHTML=[currentInstrument(),appSettings.teacher,appSettings.school].filter(Boolean).join(" · ");
 }
 q("saveSettings").onclick=saveSettings;
+q("toggleSettings").onclick=()=>{const card=q("configCard");card.classList.toggle("collapsed");};
 q("instrument").onchange=()=>q("otherInstrumentBox").classList.toggle("hidden",q("instrument").value!=="Otro");
 applySettings();
+updateConfigView();
 function yr(){let d=new Date(),y=d.getFullYear();return d.getMonth()+1>=9?`${y}-${String(y+1).slice(-2)}`:`${y-1}-${String(y).slice(-2)}`}
 function initYears(){let y=parseInt(yr()),s="";for(let i=y-4;i<=y+5;i++)s+=`<option>${i}-${String(i+1).slice(-2)}</option>`;q("schoolYear").innerHTML=s;q("schoolYear").value=localStorage.getItem(YK)||yr()}
 function year(){return q("schoolYear").value}initYears();q("schoolYear").onchange=()=>{localStorage.setItem(YK,year());renderStudents();renderSelect();render()};
@@ -212,7 +224,7 @@ const ratingDefinitions={
     "Excelente clase. El alumno ha mostrado gran implicación, autonomía y un dominio muy satisfactorio de los contenidos trabajados."
   ]
 };
-const ratingLabels={sonido:"🎵 Sonido",afinacion:"🎯 Afinación",tecnica:"🎼 Técnica",ritmo:"⏱️ Ritmo",musicalidad:"🎶 Musicalidad",estudio:"📚 Estudio",actitud:"👨‍🏫 Actitud",progreso:"📈 Progreso"};
+const ratingLabels={sonido:"🎵 Sonido",afinacion:"🎯 Afinación",tecnica:"🎼 Técnica",ritmo:"⏱️ Ritmo",musicalidad:"🎶 Musicalidad",estudio:"📚 Estudio",actitud:"👨‍🏫 Actitud",progreso:"📈 Progreso",general:"⭐ Valoración general"};
 let ratings={};
 function initRatings(){
   const box=q("ratings"); box.innerHTML="";
@@ -339,17 +351,26 @@ function renderStudentHistory(id){
       ${x.ratings&&Object.keys(x.ratings).length?`<div class="muted"><b>Valoración:</b> ${Object.entries(x.ratings).map(([k,v])=>`${esc(ratingLabels[k]||k)} ${v}/5`).join(" · ")}</div>`:""}
        ${x.autoComment?`<p class="muted"><b>Valoración general:</b> ${esc(x.autoComment)}</p>`:""}
        ${x.obs?`<p>${esc(x.obs)}</p>`:""}
+      ${x.quickWork&&x.quickWork.length?`<p class="muted"><b>Trabajo:</b> ${esc(x.quickWork.join(" · "))}</p>`:""}
+      ${x.nextClass?`<p class="muted"><b>Próxima clase:</b> ${esc(x.nextClass)}</p>`:""}
       ${x.audioData?`<audio controls style="width:100%" src="${x.audioData}"></audio>`:""}
       <button class="secondary" onclick="editLesson('${x.id}')">✏️ Editar</button><button class="danger" onclick="removeLesson('${x.id}')">Eliminar</button>
     </div>`).join(""):'<p class="muted">No hay clases registradas de este alumno en este curso escolar.</p>'}</div>`;
 }
-window.editLesson=id=>{const x=lessons.find(v=>v.id===id);if(!x)return;editingLessonId=id;q("student").value=x.studentId;q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=x.obs||"";audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";loadRatings(x.ratings||{});window.scrollTo({top:0,behavior:"smooth"});};
-q("cancelLessonEdit").onclick=()=>{editingLessonId=null;q("student").value="";q("grade").value="";q("obs").value="";q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");q("ratingsBox").style.opacity="1";resetRatings();};
+window.editLesson=id=>{const x=lessons.find(v=>v.id===id);if(!x)return;editingLessonId=id;q("student").value=x.studentId;q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=x.obs||"";q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";loadRatings(x.ratings||{});window.scrollTo({top:0,behavior:"smooth"});};
+q("cancelLessonEdit").onclick=()=>{editingLessonId=null;q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");q("ratingsBox").style.opacity="1";resetRatings();};
 window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){lessons=lessons.filter(x=>x.id!==id);saveL();render();renderStudents()}};
 q("record").onclick=async()=>{try{let st=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];media=new MediaRecorder(st);media.ondataavailable=e=>e.data.size&&chunks.push(e.data);media.onstop=()=>{let b=new Blob(chunks,{type:media.mimeType||"audio/webm"}),r=new FileReader();r.onload=()=>audioData=r.result;r.readAsDataURL(b);st.getTracks().forEach(t=>t.stop())};media.start();q("record").disabled=true;q("stop").disabled=false;q("recText").textContent="🔴 Grabando…"}catch(e){alert("No se ha podido acceder al micrófono.")}};
 q("stop").onclick=()=>{if(media&&media.state!=="inactive"){media.stop();q("record").disabled=false;q("stop").disabled=true;q("recText").textContent="Grabación preparada"}};
 function filename(name,date){let p=name.trim().split(/\s+/),first=(p[0]||"Grabacion").replace(/[\\/:*?"<>|]/g,"_"),ini=p.slice(1).map(x=>x[0]).join("").toUpperCase(),d=new Date(),t=`${String(d.getHours()).padStart(2,"0")}-${String(d.getMinutes()).padStart(2,"0")}`;return `${first}${ini?"_"+ini:""}_${date}_${t}.webm`}
-q("save").onclick=async()=>{let sid=q("student").value,att=q("attendance").value,g=q("grade").value;if(!sid)return alert("Selecciona un alumno.");if(att==="asiste"&&g==="")return alert("Indica la nota o marca falta.");let s=students.find(x=>x.id===sid);if(editingLessonId){let item=lessons.find(x=>x.id===editingLessonId);if(!item)return alert("No se ha encontrado la clase.");item.studentId=sid;item.student=s.name;item.course=s.course;item.date=q("date").value;item.attendance=att;item.grade=att==="falta"?null:Number(g);item.obs=q("obs").value.trim();item.ratings=att==="falta"?{}:{...ratings};item.autoComment=att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:"");item.schoolYear=year();if(audioData){item.audioData=audioData;if(dir)await saveFile(item)}editingLessonId=null;q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");alert("Cambios guardados.")}else{let item={id:crypto.randomUUID(),studentId:sid,student:s.name,course:s.course,date:q("date").value,attendance:att,grade:att==="falta"?null:Number(g),obs:q("obs").value.trim(),ratings:att==="falta"?{}:{...ratings},autoComment:att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:""),schoolYear:year(),audioData:audioData||null,created:Date.now()};lessons.push(item);if(dir&&audioData)await saveFile(item);alert("Clase guardada.")}saveL();q("student").value="";q("grade").value="";q("obs").value="";q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";resetRatings();render();renderStudents()};
+function clearLessonExtras(){
+  q("nextClass").value="";
+  if(window.__setQuickWork) window.__setQuickWork([]);
+}
+function getLessonExtras(){
+  return {quickWork:window.__getQuickWork?window.__getQuickWork():[],nextClass:q("nextClass").value.trim()};
+}
+q("save").onclick=async()=>{let sid=q("student").value,att=q("attendance").value,g=q("grade").value;if(!sid)return alert("Selecciona un alumno.");if(att==="asiste"&&g==="")return alert("Indica la nota o marca falta.");let s=students.find(x=>x.id===sid);if(editingLessonId){let item=lessons.find(x=>x.id===editingLessonId);if(!item)return alert("No se ha encontrado la clase.");item.studentId=sid;item.student=s.name;item.course=s.course;item.date=q("date").value;item.attendance=att;item.grade=att==="falta"?null:Number(g);item.obs=q("obs").value.trim();const extras=getLessonExtras();item.quickWork=extras.quickWork;item.nextClass=extras.nextClass;item.ratings=att==="falta"?{}:{...ratings};item.autoComment=att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:"");item.schoolYear=year();if(audioData){item.audioData=audioData;if(dir)await saveFile(item)}editingLessonId=null;q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");alert("Cambios guardados.")}else{let item={id:crypto.randomUUID(),studentId:sid,student:s.name,course:s.course,date:q("date").value,attendance:att,grade:att==="falta"?null:Number(g),obs:q("obs").value.trim(),quickWork:getLessonExtras().quickWork,nextClass:getLessonExtras().nextClass,ratings:att==="falta"?{}:{...ratings},autoComment:att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:""),schoolYear:year(),audioData:audioData||null,created:Date.now()};lessons.push(item);if(dir&&audioData)await saveFile(item);alert("Clase guardada.")}saveL();q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";resetRatings();render();renderStudents()};
 async function saveFile(x){try{let f=await dir.getDirectoryHandle("Grabaciones",{create:true}),s=await f.getDirectoryHandle(x.student.replace(/[\\/:*?"<>|]/g,"_"),{create:true}),bin=atob(x.audioData.split(",")[1]),a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);let h=await s.getFileHandle(filename(x.student,x.date),{create:true}),w=await h.createWritable();await w.write(a);await w.close()}catch(e){console.warn(e)}}
 q("chooseFolder").onclick=async()=>{if(typeof window.showDirectoryPicker!=="function"){q("folderNote").textContent="Este navegador no permite seleccionar carpetas. Las grabaciones seguirán guardándose en la aplicación.";alert("Este navegador no permite seleccionar una carpeta. Puedes seguir grabando y guardando las clases normalmente.");return;}try{dir=await window.showDirectoryPicker({mode:"readwrite"});q("folderNote").textContent="Carpeta seleccionada: las grabaciones nuevas se copiarán en Grabaciones/Alumno/."}catch(e){if(e&&e.name!=="AbortError")alert("No se ha podido seleccionar la carpeta.");}};
 function download(b,n){let a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
@@ -362,7 +383,7 @@ function csvEscape(v){return `"${String(v??"").replace(/"/g,'""')}"`}
 function makeCSV(rows){return "\ufeff"+rows.map(r=>r.map(csvEscape).join(";")).join("\n")}
 q("csv").onclick=()=>{const y=year(),ls=lessons.filter(x=>(x.schoolYear||y)===y);
  const studentRows=[["ID alumno","Clave unificación","Nombre y apellidos","Curso","Curso escolar","Dispositivo","Nº clases","Nº faltas","Nº asistencias","Media notas","Última clase","Clases con observación","Clases con grabación"],...students.map(s=>{const a=ls.filter(x=>x.studentId===s.id),f=a.filter(x=>x.attendance==="falta").length,n=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade)),obs=a.filter(x=>x.obs).length,aud=a.filter(x=>x.audioData).length;return [s.id,mergeKey(s.name,s.course),s.name,s.course,y,deviceId,a.length,f,a.length-f,n.length?(n.reduce((p,v)=>p+v,0)/n.length).toFixed(2):"",a.length?a.slice().sort((u,v)=>(v.date||"").localeCompare(u.date||""))[0].date:"",obs,aud]})];
- const classRows=[["Alumno","Curso","Curso escolar","Fecha","Estado","Nota","Sonido","Afinación","Técnica","Ritmo","Musicalidad","Estudio","Actitud","Progreso","Valoración general","Comentario automático","Observación","Grabación","Nombre archivo grabación","Dispositivo","Fecha/hora creación","ID clase","ID alumno","Clave alumno"],...ls.map(x=>{const s=students.find(z=>z.id===x.studentId);return [x.student,x.course,x.schoolYear||y,x.date,x.attendance==="falta"?"Falta":"Asiste",x.grade??"",x.ratings?.sonido??"",x.ratings?.afinacion??"",x.ratings?.tecnica??"",x.ratings?.ritmo??"",x.ratings?.musicalidad??"",x.ratings?.estudio??"",x.ratings?.actitud??"",x.ratings?.progreso??"",x.ratings?.general??"",x.autoComment||"",x.obs,x.audioData?"Sí":"No",x.audioData?filename(x.student,x.date):"",deviceId,x.created?new Date(x.created).toISOString():"",x.id,x.studentId,s?mergeKey(s.name,s.course):mergeKey(x.student,x.course)]})];
+ const classRows=[["Alumno","Curso","Curso escolar","Fecha","Estado","Nota","Sonido","Afinación","Técnica","Ritmo","Musicalidad","Estudio","Actitud","Progreso","Valoración general","Comentario automático","Observación","Trabajo rápido","Para la próxima clase","Grabación","Nombre archivo grabación","Dispositivo","Fecha/hora creación","ID clase","ID alumno","Clave alumno"],...ls.map(x=>{const s=students.find(z=>z.id===x.studentId);return [x.student,x.course,x.schoolYear||y,x.date,x.attendance==="falta"?"Falta":"Asiste",x.grade??"",x.ratings?.sonido??"",x.ratings?.afinacion??"",x.ratings?.tecnica??"",x.ratings?.ritmo??"",x.ratings?.musicalidad??"",x.ratings?.estudio??"",x.ratings?.actitud??"",x.ratings?.progreso??"",x.ratings?.general??"",x.autoComment||"",x.obs,(x.quickWork||[]).join(" · "),x.nextClass||"",x.audioData?"Sí":"No",x.audioData?filename(x.student,x.date):"",deviceId,x.created?new Date(x.created).toISOString():"",x.id,x.studentId,s?mergeKey(s.name,s.course):mergeKey(x.student,x.course)]})];
  const summary=[ ["Alumno","Curso","Curso escolar","Clases","Asistencias","Faltas","Media","Última clase","Observaciones","Grabaciones"], ...students.map(s=>{const a=ls.filter(x=>x.studentId===s.id),f=a.filter(x=>x.attendance==="falta").length,n=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));return [s.name,s.course,y,a.length,a.length-f,f,n.length?(n.reduce((p,v)=>p+v,0)/n.length).toFixed(2):"",a.length?a.slice().sort((u,v)=>(v.date||"").localeCompare(u.date||""))[0].date:"",a.filter(x=>x.obs).length,a.filter(x=>x.audioData).length]}) ];
  writeDataFile(new Blob([makeCSV(classRows)],{type:"text/csv;charset=utf-8"}),`Clases_${safeFilePart(currentInstrument())}_${y}.csv`).then(()=>setTimeout(()=>writeDataFile(new Blob([makeCSV(summary)],{type:"text/csv;charset=utf-8"}),`Resumen_${safeFilePart(currentInstrument())}_${y}.csv`),250));};
 // Carpeta independiente para el REGISTRO (las grabaciones usan su propia carpeta).
