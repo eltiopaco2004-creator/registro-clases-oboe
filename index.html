@@ -38,26 +38,70 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
   }
 </style>
 
+
+<style id="mejoras-v5-practicas">
+  .course-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+  .summary-stat{background:#f7f8f6;border:1px solid #e2e6e3;border-radius:12px;padding:10px;text-align:center}
+  .summary-stat b{display:block;font-size:1.18rem;color:#2f5d50}
+  .summary-stat span{display:block;font-size:11px;color:#69716d;margin-top:2px}
+  .history-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .history-toolbar input{flex:1;min-width:180px}
+  .student-card{border:1px solid #e0e4e1!important;border-radius:13px;margin:8px 0;padding:13px!important;background:#fff}
+  .student-card:hover{border-color:#b9c9c1!important}
+  .student-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .student-last{font-size:12px;color:#69716d;margin-top:3px}
+  .profile-header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+  .profile-name{font-size:20px;font-weight:800;margin:4px 0}
+  .profile-course{font-size:12px;color:#69716d}
+  .profile-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+  .profile-stat{background:#f7f8f6;border:1px solid #e2e6e3;border-radius:11px;padding:10px;text-align:center}
+  .profile-stat b{display:block;font-size:1.2rem;color:#2f5d50}
+  .profile-stat span{font-size:11px;color:#69716d}
+  .evolution{margin-top:14px}
+  .evolution-row{display:grid;grid-template-columns:82px 1fr 34px;gap:8px;align-items:center;margin:7px 0;font-size:12px}
+  .evolution-bar{height:10px;background:#edf0ee;border-radius:999px;overflow:hidden}
+  .evolution-fill{height:100%;background:#2f5d50;border-radius:999px}
+  .profile-note{background:#fafbf9;border-left:3px solid #cbd8d1;padding:9px 11px;border-radius:8px;margin:7px 0;font-size:13px}
+  .profile-section-title{font-size:14px;font-weight:800;margin:16px 0 7px}
+  @media(max-width:600px){
+    .course-summary{grid-template-columns:repeat(2,1fr)}
+    .profile-stats{grid-template-columns:repeat(2,1fr)}
+    .evolution-row{grid-template-columns:74px 1fr 30px}
+  }
+</style>
+
+
+<style id="alumnos-compacto-v5">
+  .students-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
+  .students-head h2{margin:0}
+  .students-summary{font-size:12px;color:#69716d;margin-top:4px}
+  .student-form-wrap{margin-top:12px}
+  .student-form-wrap.collapsed{display:none}
+</style>
+
+<style id="quick-work-compact-v5">
+  #quickWork{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+    margin-top:7px;
+  }
+  #quickWork button{
+    min-height:38px;
+    padding:7px 8px;
+    font-size:13px;
+    line-height:1.1;
+    margin:0;
+    white-space:nowrap;
+  }
+  @media(min-width:700px){
+    #quickWork{grid-template-columns:repeat(5,minmax(0,1fr));}
+    #quickWork button{font-size:12px;padding:7px 5px;}
+  }
+</style>
 </head><body><div class="wrap">
 <header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p></header>
-<section class="card config-card" id="configCard">
-  <div class="config-head"><h2>⚙️ Configuración</h2><button type="button" class="secondary" id="toggleSettings">⚙️ Configuración</button></div>
-  <p class="muted" id="configHelp">Estos datos se guardan en este dispositivo y puedes cambiarlos cuando quieras.</p><p class="config-summary" id="configSummary"></p>
-  <div class="row">
-    <div><label for="teacherName">Profesor/a</label><input id="teacherName" placeholder="Ej.: María López"></div>
-    <div><label for="instrument">Instrumento</label>
-      <select id="instrument">
-        <option>Oboe</option><option>Flauta</option><option>Clarinete</option><option>Fagot</option><option>Saxofón</option>
-        <option>Trompeta</option><option>Trompa</option><option>Trombón</option><option>Violín</option><option>Viola</option>
-        <option>Violonchelo</option><option>Contrabajo</option><option>Piano</option><option>Percusión</option><option>Otro</option>
-      </select>
-    </div>
-  </div>
-  <div id="otherInstrumentBox" class="hidden"><label for="otherInstrument">Especifica el instrumento</label><input id="otherInstrument" placeholder="Ej.: Guitarra"></div>
-  <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
-  <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
-  <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-</section>
+
 
 <section class="card"><label>📚 Curso escolar</label><select id="schoolYear"></select><p class="muted">Las clases e historial corresponden al curso seleccionado.</p></section>
 
@@ -106,13 +150,61 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 
 <section class="card"><h2>📁 Carpeta del registro</h2><p class="muted">Aquí se guardarán las copias del registro y las exportaciones CSV. Puedes cambiarla cuando quieras.</p><button type="button" class="secondary" id="chooseDataFolder">📂 Elegir carpeta de datos</button><div id="dataFolderNote" class="muted" style="margin-top:8px">No has elegido una carpeta. Al exportar, el navegador te ofrecerá su ubicación habitual.</div></section>
 
-<section class="card"><h2>📊 Exportación de datos</h2><p class="muted">El registro se puede llevar de un dispositivo a otro mediante un archivo de datos. Las grabaciones no se incluyen en esta copia.</p><button type="button" class="secondary" id="csv">📊 Exportar clases para Google Sheets</button><button type="button" class="secondary" id="backup">📦 Exportar registro completo</button><button type="button" class="secondary" id="importBtn">📥 Importar registro</button><input id="importFile" type="file" accept="application/json,.json" style="display:none"><div id="exportStatus" class="muted" style="margin-top:8px"></div><div class="muted" style="margin-top:8px">La importación añade alumnos y clases que no existan. No borra los datos que ya tienes.</div></section>
+<section class="card"><h2>📊 Exportación de datos</h2><p class="muted">El registro se puede llevar de un dispositivo a otro mediante un archivo de datos. Las grabaciones no se incluyen en esta copia.</p><button type="button" class="secondary" id="csv">📊 Exportar clases para Google Sheets</button><button type="button" class="secondary" id="backup">📦 Exportar registro completo</button><button type="button" class="secondary" id="importBtn">📥 Importar registro</button><input id="importFile" type="file" accept="application/json,.json" style="display:none"><div id="exportStatus" class="muted" style="margin-top:8px"></div><div id="backupStatus" class="muted" style="margin-top:4px"></div><div class="muted" style="margin-top:8px">La importación añade alumnos y clases que no existan. No borra los datos que ya tienes.</div></section>
 
 <section class="card"><h2>📚 Historial</h2><p class="muted">Pulsa sobre el nombre de un alumno para ver todas sus clases.</p><div id="history"></div></section>
 
 
 
-<section class="card"><h2>👨‍🎓 Alumnos</h2><p class="muted">Gestión de alumnos del curso. Este apartado se utiliza principalmente al inicio del curso.</p><label>Nombre y apellidos</label><input id="studentName" placeholder="Ej.: María García López"><label>Curso</label><select id="studentCourse"><option value="">Selecciona el curso…</option><optgroup label="Enseñanzas Elementales"><option>1.º Elemental</option><option>2.º Elemental</option><option>3.º Elemental</option><option>4.º Elemental</option></optgroup><optgroup label="Enseñanzas Profesionales"><option>1.º Profesional</option><option>2.º Profesional</option><option>3.º Profesional</option><option>4.º Profesional</option><option>5.º Profesional</option><option>6.º Profesional</option></optgroup></select><div class="row"><div><label>Día de clase</label><select id="studentDay"><option value="">Selecciona el día…</option><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option></select></div><div><label>Hora de clase</label><select id="studentTime"><option value="">Selecciona la hora…</option></select></div></div><button class="primary" id="addStudent">➕ Añadir alumno</button><button class="secondary hidden" id="cancelEdit">Cancelar</button><div id="studentsList"></div></section>
+<section class="card" id="studentsCard">
+  <div class="students-head">
+    <div>
+      <h2>👨‍🎓 Alumnos</h2>
+      <p class="muted">Gestión de alumnos del curso. Se utiliza principalmente al inicio del curso.</p>
+      <div id="studentsSummary" class="students-summary"></div>
+    </div>
+    <button type="button" class="secondary" id="toggleStudents">➕ Añadir alumno</button>
+  </div>
+  <div id="studentFormWrap" class="student-form-wrap">
+    <label>Nombre y apellidos</label>
+    <input id="studentName" placeholder="Ej.: María García López">
+    <label>Curso</label>
+    <select id="studentCourse">
+      <option value="">Selecciona el curso…</option>
+      <optgroup label="Enseñanzas Elementales">
+        <option>1.º Elemental</option><option>2.º Elemental</option><option>3.º Elemental</option><option>4.º Elemental</option>
+      </optgroup>
+      <optgroup label="Enseñanzas Profesionales">
+        <option>1.º Profesional</option><option>2.º Profesional</option><option>3.º Profesional</option><option>4.º Profesional</option><option>5.º Profesional</option><option>6.º Profesional</option>
+      </optgroup>
+    </select>
+    <div class="row">
+      <div><label>Día de clase</label><select id="studentDay"><option value="">Selecciona el día…</option><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option></select></div>
+      <div><label>Hora de clase</label><select id="studentTime"><option value="">Selecciona la hora…</option></select></div>
+    </div>
+    <button class="primary" id="addStudent">➕ Añadir alumno</button>
+    <button class="secondary hidden" id="cancelEdit">Cancelar</button>
+  </div>
+  <div id="studentsList"></div>
+</section>
+<section class="card config-cardsection class="card config-card" id="configCard">
+  <div class="config-head"><h2>⚙️ Configuración</h2><button type="button" class="secondary" id="toggleSettings">⚙️ Configuración</button></div>
+  <p class="muted" id="configHelp">Estos datos se guardan en este dispositivo y puedes cambiarlos cuando quieras.</p><p class="config-summary" id="configSummary"></p>
+  <div class="row">
+    <div><label for="teacherName">Profesor/a</label><input id="teacherName" placeholder="Ej.: María López"></div>
+    <div><label for="instrument">Instrumento</label>
+      <select id="instrument">
+        <option>Oboe</option><option>Flauta</option><option>Clarinete</option><option>Fagot</option><option>Saxofón</option>
+        <option>Trompeta</option><option>Trompa</option><option>Trombón</option><option>Violín</option><option>Viola</option>
+        <option>Violonchelo</option><option>Contrabajo</option><option>Piano</option><option>Percusión</option><option>Otro</option>
+      </select>
+    </div>
+  </div>
+  <div id="otherInstrumentBox" class="hidden"><label for="otherInstrument">Especifica el instrumento</label><input id="otherInstrument" placeholder="Ej.: Guitarra"></div>
+  <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
+  <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
+  <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
+</section>
 </div><script>
 const LK="oboeLessonsV2",SK="oboeStudentsV1",YK="oboeSchoolYearV1",SETK="registroClasesSettingsV1",q=id=>document.getElementById(id);
 let lessons=JSON.parse(localStorage.getItem(LK)||"[]"),students=JSON.parse(localStorage.getItem(SK)||"[]"),media=null,chunks=[],audioData=null,dir=null,edit=null,editingLessonId=null;
@@ -284,12 +376,39 @@ function saveS(){
     return false;
   }
 }
-function renderStudents(){if(!students.length){q("studentsList").innerHTML='<p class="muted">Todavía no hay alumnos creados.</p>';return}q("studentsList").innerHTML=sortStudents(students).map(s=>{let n=lessons.filter(x=>(x.schoolYear||year())===year()&&x.studentId===s.id).length,f=lessons.filter(x=>(x.schoolYear||year())===year()&&x.studentId===s.id&&x.attendance==="falta").length,hor=s.scheduleDay&&s.scheduleTime?` · ${esc(s.scheduleDay)} ${esc(s.scheduleTime)}`:"";return `<div class="item"><b>${esc(displayName(s.name))}</b><div class="muted">${esc(s.course)}${hor} · ${n} clases · ${f} faltas</div><button class="secondary" onclick="editStudent('${s.id}')">✏️ Editar</button><button class="danger" onclick="deleteStudent('${s.id}')">🗑️</button></div>`}).join("")}
+function updateStudentsPanel(){
+  const wrap=q("studentFormWrap"), btn=q("toggleStudents"), sum=q("studentsSummary");
+  const has=students.length>0;
+  if(edit){wrap.classList.remove("collapsed");btn.textContent="✏️ Editando alumno";return;}
+  if(!has){wrap.classList.remove("collapsed");btn.textContent="➕ Añadir alumno";return;}
+  wrap.classList.add("collapsed");
+  btn.textContent="➕ Añadir alumno";
+  if(sum)sum.textContent=`${students.length} alumno${students.length===1?"":"s"} registrados`;
+}
+function renderStudents(){
+  if(!students.length){
+    q("studentsList").innerHTML='<p class="muted">Todavía no hay alumnos creados. Añádelos aquí al comenzar el curso.</p>';
+    updateStudentsPanel(); return;
+  }
+  q("studentsList").innerHTML=sortStudents(students).map(s=>{
+    let n=lessons.filter(x=>(x.schoolYear||year())===year()&&x.studentId===s.id).length,
+        f=lessons.filter(x=>(x.schoolYear||year())===year()&&x.studentId===s.id&&x.attendance==="falta").length,
+        hor=s.scheduleDay&&s.scheduleTime?` · ${esc(s.scheduleDay)} ${esc(s.scheduleTime)}`:"";
+    return `<div class="item"><b>${esc(displayName(s.name))}</b><div class="muted">${esc(s.course)}${hor} · ${n} clases · ${f} faltas</div><button class="secondary" onclick="editStudent('${s.id}')">✏️ Editar</button><button class="danger" onclick="deleteStudent('${s.id}')">🗑️</button></div>`
+  }).join("");
+  updateStudentsPanel();
+}
 function renderSelect(){let old=q("student").value;q("student").innerHTML='<option value="">Selecciona un alumno…</option>'+students.slice().sort((a,b)=>a.name.localeCompare(b.name,"es")).map(s=>`<option value="${s.id}">${esc(s.name)} — ${esc(s.course)}</option>`).join("");if(students.some(s=>s.id===old))q("student").value=old}
 function resetStudentForm(){q("studentName").value="";q("studentCourse").value="";q("studentDay").value="";q("studentTime").value=""}
+q("toggleStudents").onclick=()=>{
+  const wrap=q("studentFormWrap");
+  if(edit){wrap.classList.remove("collapsed");return;}
+  wrap.classList.toggle("collapsed");
+  q("toggleStudents").textContent=wrap.classList.contains("collapsed")?"➕ Añadir alumno":"✖️ Cerrar";
+};
 q("addStudent").onclick=()=>{let n=q("studentName").value.trim(),c=q("studentCourse").value,d=q("studentDay").value,t=q("studentTime").value;if(!n||!c)return alert("Indica nombre y curso.");if(edit){let s=students.find(x=>x.id===edit);s.name=n;s.course=c;s.scheduleDay=d;s.scheduleTime=t;lessons.forEach(x=>{if(x.studentId===edit){x.student=n;x.course=c}});edit=null;q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden");saveL();saveS()}else{if(students.some(s=>s.name.toLowerCase()===n.toLowerCase()))return alert("Ese alumno ya existe.");students.push({id:crypto.randomUUID(),name:n,course:c,scheduleDay:d,scheduleTime:t});saveS()}resetStudentForm();renderStudents();renderSelect();render()};
-q("cancelEdit").onclick=()=>{edit=null;resetStudentForm();q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden")};
-window.editStudent=id=>{let s=students.find(x=>x.id===id);edit=id;q("studentName").value=s.name;q("studentCourse").value=s.course;q("studentDay").value=s.scheduleDay||"";q("studentTime").value=s.scheduleTime||"";q("addStudent").textContent="💾 Guardar cambios";q("cancelEdit").classList.remove("hidden")};
+q("cancelEdit").onclick=()=>{edit=null;resetStudentForm();q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden");updateStudentsPanel()};
+window.editStudent=id=>{let s=students.find(x=>x.id===id);edit=id;q("studentName").value=s.name;q("studentCourse").value=s.course;q("studentDay").value=s.scheduleDay||"";q("studentTime").value=s.scheduleTime||"";q("addStudent").textContent="💾 Guardar cambios";q("cancelEdit").classList.remove("hidden");updateStudentsPanel()};
 window.deleteStudent=id=>{let s=students.find(x=>x.id===id),n=lessons.filter(x=>x.studentId===id).length;if(confirm(`¿Eliminar a ${s.name}?${n?`\nSus ${n} clases NO se borrarán.`:""}`)){students=students.filter(x=>x.id!==id);saveS();renderStudents();renderSelect()}};
 q("attendance").onchange=()=>{let f=q("attendance").value==="falta";q("grade").disabled=f;q("ratingsBox").style.opacity=f?".55":"1";if(f)q("grade").value=""};
 let selectedStudentHistory=null;
@@ -300,26 +419,40 @@ window.renderHistoryStudents=renderHistoryStudents;
 function renderHistoryStudents(){
   const term=(q("filter")?.value||"").toLowerCase();
   const y=year();
-  if(selectedStudentHistory){
-    renderStudentHistory(selectedStudentHistory);
-    return;
-  }
+  if(selectedStudentHistory){ renderStudentHistory(selectedStudentHistory); return; }
+
   const a=lessons.filter(x=>(x.schoolYear||y)===y);
-  const list=sortStudents(students)
-    .filter(s=>!term||s.name.toLowerCase().includes(term));
-  q("history").innerHTML=
-    `<input id="filter" placeholder="Buscar alumno…" value="${esc(term)}" oninput="renderHistoryStudents()">`+
-    (list.length?list.map(s=>{
-      const ls=a.filter(x=>x.studentId===s.id);
-      const f=ls.filter(x=>x.attendance==="falta").length;
-      const notes=ls.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
-      const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(2):"—";
-      return `<div class="item history-student" data-student-id="${esc(s.id)}" style="cursor:pointer">
-        <b>${esc(displayName(s.name))}</b>
-        <div class="muted">${esc(s.course)} · ${ls.length} clases · ${f} faltas · media ${avg}</div>
-        <button type="button" class="secondary history-open" data-student-id="${esc(s.id)}">📚 Ver historial</button>
-      </div>`;
-    }).join(""):'<p class="muted">No hay alumnos en este curso escolar.</p>');
+  const notes=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
+  const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(1):"—";
+  const abs=a.filter(x=>x.attendance==="falta").length;
+
+  const list=sortStudents(students).filter(s=>!term||s.name.toLowerCase().includes(term));
+  const summary=`<div class="course-summary">
+    <div class="summary-stat"><b>${students.length}</b><span>Alumnos</span></div>
+    <div class="summary-stat"><b>${a.length}</b><span>Clases</span></div>
+    <div class="summary-stat"><b>${abs}</b><span>Faltas</span></div>
+    <div class="summary-stat"><b>${avg}</b><span>Media</span></div>
+  </div>`;
+
+  const cards=list.length?list.map(s=>{
+    const ls=a.filter(x=>x.studentId===s.id).sort((u,v)=>(v.date||"").localeCompare(u.date||"")||((v.created||0)-(u.created||0)));
+    const f=ls.filter(x=>x.attendance==="falta").length;
+    const notes=ls.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
+    const av=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(1):"—";
+    const last=ls[0];
+    const lastText=last?`Última: ${new Date(last.date+"T12:00:00").toLocaleDateString("es-ES")} · ${last.attendance==="falta"?"Falta":"Nota "+last.grade}`:"Sin clases registradas";
+    const next=ls.find(x=>x.nextClass);
+    return `<div class="item student-card history-student" data-student-id="${esc(s.id)}" style="cursor:pointer">
+      <div class="student-top">
+        <div><b>${esc(displayName(s.name))}</b><div class="student-last">${esc(s.course)} · ${ls.length} clases · ${f} faltas · media ${av}</div><div class="student-last">${esc(lastText)}</div>${next?`<div class="student-last">➡️ ${esc(next.nextClass)}</div>`:""}</div>
+        <button type="button" class="secondary history-open" data-student-id="${esc(s.id)}">📚 Ver ficha</button>
+      </div>
+    </div>`;
+  }).join(""):'<p class="muted">No hay alumnos que coincidan con la búsqueda.</p>';
+
+  q("history").innerHTML=summary+
+    `<div class="history-toolbar"><input id="filter" placeholder="Buscar alumno…" value="${esc(term)}" oninput="renderHistoryStudents()"></div>`+
+    cards;
 }
 window.openStudentHistory=openStudentHistory;
 function openStudentHistory(id){
@@ -336,27 +469,49 @@ function renderStudentHistory(id){
   const s=students.find(x=>x.id===id);
   if(!s){selectedStudentHistory=null;return renderHistoryStudents();}
   const y=year();
-  const a=lessons.filter(x=>(x.schoolYear||y)===y&&x.studentId===id).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.created-a.created);
+  const a=lessons.filter(x=>(x.schoolYear||y)===y&&x.studentId===id).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||((b.created||0)-(a.created||0)));
   const f=a.filter(x=>x.attendance==="falta").length;
   const notes=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
-  const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(2):"—";
-  q("history").innerHTML=`<button class="secondary" onclick="selectedStudentHistory=null;renderHistoryStudents()">← Volver a alumnos</button>
-    <h3>${esc(displayName(s.name))}</h3>
-    <div class="muted">${esc(s.course)} · Curso escolar ${esc(y)}</div>
-    <p><b>${a.length}</b> clases · <b>${f}</b> faltas · <b>${avg}</b> media</p>
+  const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(1):"—";
+  const last=a[0];
+  const next=a.find(x=>x.nextClass);
+  const evolution=a.filter(x=>x.attendance!=="falta"&&x.ratings?.general).slice().reverse().slice(-10);
+
+  const bars=evolution.length?evolution.map(x=>{
+    const v=Number(x.ratings.general)||0;
+    const d=new Date(x.date+"T12:00:00").toLocaleDateString("es-ES",{day:"2-digit",month:"2-digit"});
+    return `<div class="evolution-row"><span>${d}</span><div class="evolution-bar"><div class="evolution-fill" style="width:${v*20}%"></div></div><b>${v}/5</b></div>`;
+  }).join(""):'<p class="muted">Todavía no hay valoraciones generales suficientes para mostrar evolución.</p>';
+
+  const recentNotes=a.filter(x=>x.obs||x.nextClass).slice(0,4);
+  q("history").innerHTML=`<button class="secondary" onclick="selectedStudentHistory=null;renderHistoryStudents()">← Volver</button>
+    <div class="profile-header"><div><div class="profile-name">${esc(displayName(s.name))}</div><div class="profile-course">${esc(s.course)} · Curso ${esc(y)}</div></div>
+      <button class="secondary" onclick="editStudent('${esc(s.id)}')">✏️ Editar alumno</button></div>
+    <div class="profile-stats">
+      <div class="profile-stat"><b>${a.length}</b><span>Clases</span></div>
+      <div class="profile-stat"><b>${f}</b><span>Faltas</span></div>
+      <div class="profile-stat"><b>${avg}</b><span>Media</span></div>
+      <div class="profile-stat"><b>${last?new Date(last.date+"T12:00:00").toLocaleDateString("es-ES",{day:"2-digit",month:"2-digit"}):"—"}</b><span>Última clase</span></div>
+    </div>
+    ${next?`<div class="profile-note"><b>➡️ Para la próxima clase</b><br>${esc(next.nextClass)}</div>`:""}
+    <div class="profile-section-title">📈 Evolución de la valoración general</div>
+    <div class="evolution">${bars}</div>
+    ${recentNotes.length?`<div class="profile-section-title">📝 Últimas observaciones y tareas</div>${recentNotes.map(x=>`<div class="profile-note"><b>${new Date(x.date+"T12:00:00").toLocaleDateString("es-ES")}</b>${x.obs?`<br>${esc(x.obs)}`:""}${x.nextClass?`<br><span class="muted">➡️ ${esc(x.nextClass)}</span>`:""}</div>`).join("")}`:""}
+    <div class="profile-section-title">📚 Historial de clases</div>
     <div>${a.length?a.map(x=>`<div class="item">
       <span class="grade">${x.attendance==="falta"?"—":x.grade}</span>
       <b>${new Date(x.date+"T12:00:00").toLocaleDateString("es-ES")}</b>
       <div class="muted">${x.attendance==="falta"?"🔴 Falta":"🟢 Asiste"}</div>
       ${x.ratings&&Object.keys(x.ratings).length?`<div class="muted"><b>Valoración:</b> ${Object.entries(x.ratings).map(([k,v])=>`${esc(ratingLabels[k]||k)} ${v}/5`).join(" · ")}</div>`:""}
-       ${x.autoComment?`<p class="muted"><b>Valoración general:</b> ${esc(x.autoComment)}</p>`:""}
-       ${x.obs?`<p>${esc(x.obs)}</p>`:""}
+      ${x.autoComment?`<p class="muted"><b>Valoración general:</b> ${esc(x.autoComment)}</p>`:""}
+      ${x.obs?`<p>${esc(x.obs)}</p>`:""}
       ${x.quickWork&&x.quickWork.length?`<p class="muted"><b>Trabajo:</b> ${esc(x.quickWork.join(" · "))}</p>`:""}
       ${x.nextClass?`<p class="muted"><b>Próxima clase:</b> ${esc(x.nextClass)}</p>`:""}
       ${x.audioData?`<audio controls style="width:100%" src="${x.audioData}"></audio>`:""}
-      <button class="secondary" onclick="editLesson('${x.id}')">✏️ Editar</button><button class="danger" onclick="removeLesson('${x.id}')">Eliminar</button>
+      <button class="secondary" onclick="editLesson('${esc(x.id)}')">✏️ Editar</button><button class="danger" onclick="removeLesson('${esc(x.id)}')">Eliminar</button>
     </div>`).join(""):'<p class="muted">No hay clases registradas de este alumno en este curso escolar.</p>'}</div>`;
 }
+
 window.editLesson=id=>{const x=lessons.find(v=>v.id===id);if(!x)return;editingLessonId=id;q("student").value=x.studentId;q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=x.obs||"";q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";loadRatings(x.ratings||{});window.scrollTo({top:0,behavior:"smooth"});};
 q("cancelLessonEdit").onclick=()=>{editingLessonId=null;q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");q("ratingsBox").style.opacity="1";resetRatings();};
 window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){lessons=lessons.filter(x=>x.id!==id);saveL();render();renderStudents()}};
@@ -378,7 +533,7 @@ const DEVICE_KEY="oboeDeviceIdV1";
 let deviceId=localStorage.getItem(DEVICE_KEY);
 if(!deviceId){deviceId=(globalThis.crypto&&typeof crypto.randomUUID==="function"?crypto.randomUUID():"dev-"+Date.now().toString(36)+Math.random().toString(36).slice(2,8));localStorage.setItem(DEVICE_KEY,deviceId)}
 function mergeKey(name,course){return String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+"__"+String(course||"").toLowerCase().replace(/[^a-z0-9]+/g,"-")}
-function downloadFile(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=name;a.style.display="none";document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(url)},1000);const st=q("exportStatus");if(st)st.textContent="Archivo preparado: "+name}
+function downloadFile(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=name;a.style.display="none";document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(url)},1000);const st=q("exportStatus");if(st){st.textContent="Archivo preparado: "+name; if(q("backupStatus")) q("backupStatus").textContent="Última exportación: "+new Date().toLocaleString("es-ES")}}
 function csvEscape(v){return `"${String(v??"").replace(/"/g,'""')}"`}
 function makeCSV(rows){return "\ufeff"+rows.map(r=>r.map(csvEscape).join(";")).join("\n")}
 q("csv").onclick=()=>{const y=year(),ls=lessons.filter(x=>(x.schoolYear||y)===y);
@@ -395,7 +550,7 @@ async function loadDataDirHandle(){try{const db=await openDataDB();const h=await
 async function ensureDataPermission(h){if(!h||!h.queryPermission)return true;let p=await h.queryPermission({mode:"readwrite"});if(p!=="granted")p=await h.requestPermission({mode:"readwrite"});return p==="granted"}
 async function writeDataFile(blob,name){
   if(dataDir){
-    try{if(await ensureDataPermission(dataDir)){const fh=await dataDir.getFileHandle(name,{create:true});const w=await fh.createWritable();await w.write(blob);await w.close();const st=q("exportStatus");if(st)st.textContent="Guardado en la carpeta de datos: "+name;return true;}}
+    try{if(await ensureDataPermission(dataDir)){const fh=await dataDir.getFileHandle(name,{create:true});const w=await fh.createWritable();await w.write(blob);await w.close();const st=q("exportStatus");if(st){st.textContent="Guardado en la carpeta de datos: "+name; if(q("backupStatus")) q("backupStatus").textContent="Última exportación: "+new Date().toLocaleString("es-ES")};return true;}}
     catch(e){console.warn("No se pudo guardar en la carpeta elegida",e)}
   }
   downloadFile(blob,name);return false;
@@ -532,5 +687,6 @@ renderStudents();renderSelect();render();
   });
 })();
 </script>
+
 
 </body></html>
