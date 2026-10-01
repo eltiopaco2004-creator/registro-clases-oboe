@@ -9,7 +9,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 
 <section class="card"><h2>📝 Nueva clase</h2><label>Alumno</label><select id="student"><option value="">Selecciona un alumno…</option></select><div class="row"><div><label>Fecha</label><input id="date" type="date"></div><div><label>Estado</label><select id="attendance"><option value="asiste">🟢 Asiste</option><option value="falta">🔴 Falta</option></select></div></div><div id="gradeBox"><label>Nota</label><input id="grade" type="number" min="0" max="10" step=".1"></div><label>Observación</label><textarea id="obs"></textarea><div class="rec"><span id="recText">Sin grabación</span> <span id="recTime"></span></div><button class="secondary" id="record">🎙️ Grabar</button><button class="secondary" id="stop" disabled>⏹ Parar</button><button class="primary" id="save">💾 Guardar clase</button></section>
 
-<section class="card"><button class="secondary" id="backup">📦 Copia de seguridad</button><button class="secondary" id="csv">📊 Exportar CSV</button><button class="secondary" id="chooseFolder">📁 Elegir carpeta</button><div id="folderNote" class="muted">Carpeta de grabaciones no seleccionada.</div></section>
+<section class="card"><button class="secondary" id="backup">📦 Copia de seguridad</button><button class="secondary" id="csv">📊 Exportar para Google Sheets</button><button class="secondary" id="xlsx">📗 Exportar Excel</button><button class="secondary" id="chooseFolder">📁 Elegir carpeta</button><div id="folderNote" class="muted">Carpeta de grabaciones no seleccionada.</div></section>
 
 <section class="card"><h2>📚 Historial</h2><p class="muted">Pulsa sobre el nombre de un alumno para ver todas sus clases.</p><div id="history"></div></section>
 
@@ -95,7 +95,29 @@ q("save").onclick=async()=>{let sid=q("student").value,att=q("attendance").value
 async function saveFile(x){try{let f=await dir.getDirectoryHandle("Grabaciones",{create:true}),s=await f.getDirectoryHandle(x.student.replace(/[\\/:*?"<>|]/g,"_"),{create:true}),bin=atob(x.audioData.split(",")[1]),a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);let h=await s.getFileHandle(filename(x.student,x.date),{create:true}),w=await h.createWritable();await w.write(a);await w.close()}catch(e){console.warn(e)}}
 q("chooseFolder").onclick=async()=>{if(!showDirectoryPicker)return alert("Este navegador no permite seleccionar carpetas.");try{dir=await showDirectoryPicker({mode:"readwrite"});q("folderNote").textContent="Carpeta seleccionada: las grabaciones nuevas se copiarán en Grabaciones/Alumno/."}catch(e){}};
 function download(b,n){let a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-q("csv").onclick=()=>{let a=lessons.filter(x=>(x.schoolYear||year())===year()),r=[["Fecha","Alumno","Curso","Estado","Nota","Observación","Grabación"],...a.map(x=>[x.date,x.student,x.course,x.attendance==="falta"?"Falta":"Asiste",x.grade??"",x.obs,x.audioData?"Sí":"No"])],c=r.map(z=>z.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(";")).join("\n");download(new Blob(["\ufeff"+c],{type:"text/csv;charset=utf-8"}),`Registro_Clases_Oboe_${year()}.csv`)};
+function mergeKey(name,course){return `${String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}__${String(course||"").toLowerCase().replace(/[^a-z0-9]+/g,"-")}`}
+const DEVICE_KEY="oboeDeviceIdV1";
+let deviceId=localStorage.getItem(DEVICE_KEY)||crypto.randomUUID();localStorage.setItem(DEVICE_KEY,deviceId);
+function csvText(rows){return "\ufeff"+rows.map(z=>z.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(";")).join("\n")}
+q("csv").onclick=()=>{
+  const y=year(), a=lessons.filter(x=>(x.schoolYear||y)===y);
+  const studentRows=[["student_id","student_key","nombre","curso","curso_escolar","device_id"],...students.map(s=>[s.id,mergeKey(s.name,s.course),s.name,s.course,y,deviceId])];
+  const classRows=[["lesson_id","student_id","student_key","fecha","alumno","curso","curso_escolar","estado","nota","observacion","grabacion","device_id","creado"],...a.map(x=>{const s=students.find(z=>z.id===x.studentId);return [x.id,x.studentId,s?mergeKey(s.name,s.course):mergeKey(x.student,x.course),x.date,x.student,x.course,x.schoolYear||y,x.attendance==="falta"?"Falta":"Asiste",x.grade??"",x.obs,x.audioData?"Sí":"No",deviceId,x.created||""]})];
+  download(new Blob([csvText(studentRows)],{type:"text/csv;charset=utf-8"}),`Alumnos_Oboe_${y}.csv`);
+  setTimeout(()=>download(new Blob([csvText(classRows)],{type:"text/csv;charset=utf-8"}),`Clases_Oboe_${y}.csv`),300);
+};
+q("xlsx").onclick=()=>{
+  const y=year(), a=lessons.filter(x=>(x.schoolYear||y)===y);
+  const studentRows=[['ID alumno','Clave unificación','Nombre','Curso','Curso escolar','Dispositivo'],...students.map(s=>[s.id,mergeKey(s.name,s.course),s.name,s.course,y,deviceId])];
+  const classRows=[['ID clase','ID alumno','Clave alumno','Fecha','Alumno','Curso','Curso escolar','Estado','Nota','Observación','Grabación','Dispositivo','Creado'],...a.map(x=>{const s=students.find(z=>z.id===x.studentId);return [x.id,x.studentId,s?mergeKey(s.name,s.course):mergeKey(x.student,x.course),x.date,x.student,x.course,x.schoolYear||y,x.attendance==='falta'?'Falta':'Asiste',x.grade??'',x.obs,x.audioData?'Sí':'No',deviceId,x.created||'']})];
+  const by={}; students.forEach(s=>{const ls=a.filter(x=>x.studentId===s.id),f=ls.filter(x=>x.attendance==='falta').length,ns=ls.filter(x=>x.attendance!=='falta'&&x.grade!==null&&x.grade!=='').map(x=>Number(x.grade));by[s.id]=[s.name,s.course,y,ls.length,f,ns.length?(ns.reduce((p,n)=>p+n,0)/ns.length).toFixed(2):'']});
+  const summary=[['Alumno','Curso','Curso escolar','Clases','Faltas','Media'],...Object.values(by)];
+  const escxml=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+  const sheet=(name,rows)=>`<Worksheet ss:Name="${escxml(name)}"><Table>`+rows.map(r=>'<Row>'+r.map(v=>`<Cell><Data ss:Type="${typeof v==='number'?'Number':'String'}">${escxml(v)}</Data></Cell>`).join('')+'</Row>').join('')+'</Table></Worksheet>`;
+  const xml=`<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">${sheet('Alumnos',studentRows)}${sheet('Clases',classRows)}${sheet('Resumen',summary)}</Workbook>`;
+  download(new Blob([xml],{type:'application/vnd.ms-excel'}),`Registro_Clases_Oboe_${y}.xls`);
+};
+
 q("backup").onclick=()=>download(new Blob([JSON.stringify({version:4,schoolYear:year(),students,lessons})],{type:"application/json"}),`Copia_Registro_Clases_Oboe_${year()}.json`);
 renderStudents();renderSelect();render();
 </script></body></html>
