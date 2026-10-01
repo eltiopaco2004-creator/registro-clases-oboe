@@ -9,7 +9,19 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 
 <section class="card"><h2>📝 Nueva clase</h2><label>Alumno</label><select id="student"><option value="">Selecciona un alumno…</option></select><div class="row"><div><label>Fecha</label><input id="date" type="date"></div><div><label>Estado</label><select id="attendance"><option value="asiste">🟢 Asiste</option><option value="falta">🔴 Falta</option></select></div></div><div id="gradeBox"><label>Nota</label><input id="grade" type="number" min="0" max="10" step=".1"></div><label>Observación</label><textarea id="obs"></textarea><div class="rec"><span id="recText">Sin grabación</span> <span id="recTime"></span></div><button class="secondary" id="record">🎙️ Grabar</button><button class="secondary" id="stop" disabled>⏹ Parar</button><button class="primary" id="save">💾 Guardar clase</button></section>
 
-<section class="card"><button class="secondary" id="backup">📦 Copia de seguridad</button><button class="secondary" id="csv">📊 Exportar para Google Sheets</button><button class="secondary" id="xlsx">📗 Exportar Excel</button><button class="secondary" id="chooseFolder">📁 Elegir carpeta</button><div id="folderNote" class="muted">Carpeta de grabaciones no seleccionada.</div></section>
+<section class="card">
+<h2>📊 Exportación de datos</h2>
+<p class="muted">Guarda una copia de tus datos o llévalos a Google Sheets.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="secondary" id="csv">📊 Exportar para Google Sheets</button>
+<button class="secondary" id="xlsx">📗 Exportar Excel</button>
+<button class="secondary" id="backup">📦 Copia de seguridad</button>
+</div>
+</section>
+<section class="card">
+<button class="secondary" id="chooseFolder">📁 Elegir carpeta de grabaciones</button>
+<div id="folderNote" class="muted">Carpeta de grabaciones no seleccionada.</div>
+</section>
 
 <section class="card"><h2>📚 Historial</h2><p class="muted">Pulsa sobre el nombre de un alumno para ver todas sus clases.</p><div id="history"></div></section>
 
