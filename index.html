@@ -18,7 +18,28 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 }
 .rating-buttons button.selected{background:#2f5d50;color:#fff}.rating-help{font-size:11px;color:#69716d;margin-top:4px}
 .auto-comment{background:#f7f7f4;border-radius:10px;padding:10px;margin-top:8px;font-size:13px;line-height:1.4}
-</style></head><body><div class="wrap">
+</style>
+<style id="mejoras-v2">
+  .quick-work{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+  .quick-work button{border:1px solid #cfd6df;background:#f7f8fa;border-radius:999px;padding:8px 11px;cursor:pointer;font-size:.92rem}
+  .quick-work button.selected{background:#e8f0fe;border-color:#4f7cff}
+  .quick-summary{font-size:.9rem;color:#555;margin-top:7px;min-height:20px}
+  .next-class{margin-top:10px}
+  .student-panel{margin-top:18px;border:1px solid #ddd;border-radius:12px;padding:14px;background:#fafafa}
+  .student-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+  .student-stat{background:white;border:1px solid #e5e5e5;border-radius:10px;padding:10px;text-align:center}
+  .student-stat b{display:block;font-size:1.15rem}
+  .history-actions{display:flex;flex-wrap:wrap;gap:6px}
+  .search-box{margin:10px 0}
+  .search-box input{width:100%;box-sizing:border-box}
+  .import-preview{margin-top:10px;padding:10px;border-radius:10px;background:#f4f7fb;border:1px solid #dbe3ef}
+  @media(max-width:600px){
+    .student-stats{grid-template-columns:repeat(2,1fr)}
+    .quick-work button{flex:1 1 calc(50% - 7px)}
+  }
+</style>
+
+</head><body><div class="wrap">
 <header><h1>🎵 Registro de Clases de Oboe</h1><p class="muted">Cuaderno digital de clases individuales</p></header>
 
 <section class="card"><label>📚 Curso escolar</label><select id="schoolYear"></select><p class="muted">Las clases e historial corresponden al curso seleccionado.</p></section>
@@ -39,13 +60,40 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 </div>
 
 <label>Observación</label><textarea id="obs" placeholder="Puedes añadir cualquier comentario personal..."></textarea>
+<div class="next-class">
+  <label><strong>📚 Trabajo rápido</strong> <span style="font-weight:normal;color:#777">(opcional)</span></label>
+  <div class="quick-work" id="quickWork">
+    <button type="button" data-work="Escalas">🎵 Escalas</button>
+    <button type="button" data-work="Estudios">📖 Estudios</button>
+    <button type="button" data-work="Obra">🎶 Obra</button>
+    <button type="button" data-work="Técnica">🔧 Técnica</button>
+    <button type="button" data-work="Afinación">🎯 Afinación</button>
+    <button type="button" data-work="Articulación">🗣️ Articulación</button>
+    <button type="button" data-work="Sonido">🎧 Sonido</button>
+    <button type="button" data-work="Memorización">🧠 Memorización</button>
+    <button type="button" data-work="Lectura">👀 Lectura</button>
+    <button type="button" data-work="Orquesta">🎼 Orquesta</button>
+  </div>
+  <div class="quick-summary" id="quickWorkSummary"></div>
+</div>
+<div class="next-class">
+  <label for="nextClass"><strong>➡️ Para la próxima clase</strong> <span style="font-weight:normal;color:#777">(opcional)</span></label>
+  <input id="nextClass" type="text" placeholder="Ej.: repasar escala de Sol y estudiar el nº 14">
+</div>
+
 <div class="rec"><span id="recText">Sin grabación</span> <span id="recTime"></span></div>
 <button class="secondary" id="record">🎙️ Grabar</button><button class="secondary" id="stop" disabled>⏹ Parar</button>
 <button class="primary" id="save">💾 Guardar clase</button><button class="secondary hidden" id="cancelLessonEdit">Cancelar edición</button></section>
 
-<section class="card"><button class="secondary" id="chooseFolder">📁 Elegir carpeta</button><div id="folderNote" class="muted">Carpeta de grabaciones no seleccionada.</div></section>
+<section class="card"><button class="secondary" id="chooseFolder">📁 Elegir carpeta</button>
+<div class="import-preview">
+  <strong>🔄 Registro transportable</strong><br>
+  Puedes exportar tus alumnos y clases para llevarlos de un dispositivo a otro. 
+  Las grabaciones se mantienen como una función independiente para una fase posterior.
+</div>
+<div id="folderNote" class="muted">Carpeta de grabaciones no seleccionada.</div></section>
 
-<section class="card"><h2>📊 Exportación de datos</h2><p class="muted">Exporta los datos del curso seleccionado para abrirlos en Google Sheets.</p><button type="button" class="secondary" id="csv">📊 Exportar clases para Google Sheets</button><button type="button" class="secondary" id="backup">📦 Copia de seguridad</button><div id="exportStatus" class="muted" style="margin-top:8px"></div></section>
+<section class="card"><h2>📊 Exportación de datos</h2><p class="muted">Exporta los datos del curso seleccionado para abrirlos en Google Sheets.</p><button type="button" class="secondary" id="csv">📊 Exportar clases para Google Sheets</button><button type="button" class="secondary" id="backup">📦 Exportar registro</button><button type="button" class="secondary" id="importBtn">📥 Importar registro</button><input id="importFile" type="file" accept="application/json,.json" style="display:none"><div id="exportStatus" class="muted" style="margin-top:8px"></div><div class="muted" style="margin-top:8px">La importación añade alumnos y clases que no existan. No borra los datos que ya tienes.</div></section>
 
 <section class="card"><h2>📚 Historial</h2><p class="muted">Pulsa sobre el nombre de un alumno para ver todas sus clases.</p><div id="history"></div></section>
 
@@ -260,7 +308,111 @@ q("csv").onclick=()=>{const y=year(),ls=lessons.filter(x=>(x.schoolYear||y)===y)
  const classRows=[["Alumno","Curso","Curso escolar","Fecha","Estado","Nota","Sonido","Afinación","Técnica","Ritmo","Musicalidad","Estudio","Actitud","Progreso","Valoración general","Comentario automático","Observación","Grabación","Nombre archivo grabación","Dispositivo","Fecha/hora creación","ID clase","ID alumno","Clave alumno"],...ls.map(x=>{const s=students.find(z=>z.id===x.studentId);return [x.student,x.course,x.schoolYear||y,x.date,x.attendance==="falta"?"Falta":"Asiste",x.grade??"",x.ratings?.sonido??"",x.ratings?.afinacion??"",x.ratings?.tecnica??"",x.ratings?.ritmo??"",x.ratings?.musicalidad??"",x.ratings?.estudio??"",x.ratings?.actitud??"",x.ratings?.progreso??"",x.ratings?.general??"",x.autoComment||"",x.obs,x.audioData?"Sí":"No",x.audioData?filename(x.student,x.date):"",deviceId,x.created?new Date(x.created).toISOString():"",x.id,x.studentId,s?mergeKey(s.name,s.course):mergeKey(x.student,x.course)]})];
  const summary=[ ["Alumno","Curso","Curso escolar","Clases","Asistencias","Faltas","Media","Última clase","Observaciones","Grabaciones"], ...students.map(s=>{const a=ls.filter(x=>x.studentId===s.id),f=a.filter(x=>x.attendance==="falta").length,n=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));return [s.name,s.course,y,a.length,a.length-f,f,n.length?(n.reduce((p,v)=>p+v,0)/n.length).toFixed(2):"",a.length?a.slice().sort((u,v)=>(v.date||"").localeCompare(u.date||""))[0].date:"",a.filter(x=>x.obs).length,a.filter(x=>x.audioData).length]}) ];
  downloadFile(new Blob([makeCSV(classRows)],{type:"text/csv;charset=utf-8"}),`Clases_Oboe_${y}.csv`);setTimeout(()=>downloadFile(new Blob([makeCSV(summary)],{type:"text/csv;charset=utf-8"}),`Resumen_Oboe_${y}.csv`),350);};
-q("backup").onclick=()=>downloadFile(new Blob([JSON.stringify({version:10,schoolYear:year(),deviceId,students,lessons},null,2)],{type:"application/json"}),`Copia_Registro_Clases_Oboe_${year()}.json`);
+q("backup").onclick=()=>{
+  const payload={version:11,app:"Registro de Clases",schoolYear:year(),deviceId,exportedAt:new Date().toISOString(),students,lessons};
+  downloadFile(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),`Registro_Clases_Oboe_${year()}.json`);
+};
+q("importBtn").onclick=()=>q("importFile").click();
+q("importFile").onchange=async e=>{
+  const file=e.target.files&&e.target.files[0];
+  if(!file)return;
+  try{
+    const text=await file.text();
+    const data=JSON.parse(text);
+    if(!data||!Array.isArray(data.students)||!Array.isArray(data.lessons))throw new Error("Formato no reconocido");
+    if(!confirm(`Se van a importar ${data.students.length} alumnos y ${data.lessons.length} clases. Los datos actuales no se borrarán. ¿Continuar?`)){e.target.value="";return;}
+    const studentMap=new Map();
+    let addedStudents=0, mergedStudents=0, addedLessons=0, skippedLessons=0;
+    const localByKey=new Map(students.map(st=>[mergeKey(st.name,st.course),st]));
+    for(const incoming of data.students){
+      if(!incoming||!incoming.name)continue;
+      const key=mergeKey(incoming.name,incoming.course);
+      let local=localByKey.get(key);
+      if(local){
+        studentMap.set(incoming.id,local.id);
+        mergedStudents++;
+        if((!local.scheduleDay&&incoming.scheduleDay)||( !local.scheduleTime&&incoming.scheduleTime)){
+          if(!local.scheduleDay&&incoming.scheduleDay)local.scheduleDay=incoming.scheduleDay;
+          if(!local.scheduleTime&&incoming.scheduleTime)local.scheduleTime=incoming.scheduleTime;
+        }
+      }else{
+        local={...incoming,id:crypto.randomUUID()};
+        students.push(local);
+        localByKey.set(key,local);
+        studentMap.set(incoming.id,local.id);
+        addedStudents++;
+      }
+    }
+    const existingLessonIds=new Set(lessons.map(x=>x.id));
+    const existingLessonKeys=new Set(lessons.map(x=>`${x.studentId}__${x.date||""}__${x.created||""}`));
+    for(const incoming of data.lessons){
+      if(!incoming)continue;
+      const mappedStudentId=studentMap.get(incoming.studentId)||incoming.studentId;
+      const lessonId=String(incoming.id||"");
+      const key=`${mappedStudentId}__${incoming.date||""}__${incoming.created||""}`;
+      if((lessonId&&existingLessonIds.has(lessonId))||existingLessonKeys.has(key)){skippedLessons++;continue;}
+      const localLesson={...incoming,id:lessonId&&!existingLessonIds.has(lessonId)?lessonId:crypto.randomUUID(),studentId:mappedStudentId};
+      const st=students.find(x=>x.id===mappedStudentId);
+      if(st){localLesson.student=st.name;localLesson.course=st.course;}
+      lessons.push(localLesson);
+      existingLessonIds.add(localLesson.id);
+      existingLessonKeys.add(key);
+      addedLessons++;
+    }
+    saveL();
+    renderStudents();renderSelect();render();
+    q("exportStatus").textContent=`Importación completada: ${addedStudents} alumnos nuevos y ${addedLessons} clases nuevas. ${skippedLessons} clases ya estaban registradas.`;
+    alert(`Importación completada.\n\nAlumnos nuevos: ${addedStudents}\nAlumnos ya existentes: ${mergedStudents}\nClases nuevas: ${addedLessons}\nClases ya existentes: ${skippedLessons}`);
+  }catch(err){
+    console.error(err);
+    alert("No se ha podido importar el archivo. Asegúrate de que es una copia de Registro de Clases válida.");
+  }finally{e.target.value="";}
+};
 
 renderStudents();renderSelect();render();
-</script></body></html>
+</script>
+<script id="mejoras-v2-js">
+(function(){
+  const quick = document.getElementById('quickWork');
+  const summary = document.getElementById('quickWorkSummary');
+  if(!quick) return;
+
+  function selectedWorks(){
+    return [...quick.querySelectorAll('button.selected')].map(b=>b.dataset.work);
+  }
+  function renderWorks(){
+    const vals = selectedWorks();
+    summary.textContent = vals.length ? 'Seleccionado: ' + vals.join(' · ') : '';
+  }
+  quick.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      btn.classList.toggle('selected');
+      renderWorks();
+    });
+  });
+
+  window.__getQuickWork = selectedWorks;
+  window.__setQuickWork = function(vals){
+    quick.querySelectorAll('button').forEach(b=>b.classList.toggle('selected', vals.includes(b.dataset.work)));
+    renderWorks();
+  };
+
+  // Add a lightweight student search/filter if a history/student container can be found.
+  const searchTarget = document.querySelector('#history, .history, [id*="history"]');
+  if(searchTarget && !document.getElementById('studentSearchV2')){
+    const wrap=document.createElement('div');
+    wrap.className='search-box';
+    wrap.innerHTML='<input id="studentSearchV2" type="search" placeholder="🔎 Buscar alumno o texto del historial...">';
+    searchTarget.parentNode.insertBefore(wrap, searchTarget);
+    document.getElementById('studentSearchV2').addEventListener('input', function(){
+      const q=this.value.toLowerCase().trim();
+      searchTarget.querySelectorAll('div, tr, li').forEach(el=>{
+        if(!q){el.style.display=''; return;}
+        el.style.display=el.textContent.toLowerCase().includes(q)?'':'none';
+      });
+    });
+  }
+})();
+</script>
+
+</body></html>
