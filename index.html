@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe</title><style>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases</title><style>
 body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-width:720px;margin:auto;padding:16px}.card{background:white;border:1px solid #ddd;border-radius:16px;padding:16px;margin:12px 0}label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:10px;font:inherit}textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{border:0;border-radius:10px;padding:10px 13px;margin:6px 4px 0 0;font-weight:700;max-width:100%;white-space:normal}.primary{background:#2f5d50;color:#fff}.secondary{background:#dfe9e4;color:#2f5d50}.danger{background:#f3dddd;color:#a44242}.item{border-top:1px solid #ddd;padding:12px 0}.muted{color:#69716d;font-size:12px}.grade{float:right;font-size:20px;font-weight:800;color:#2f5d50}.hidden{display:none}.rec{padding:10px;background:#f7f7f4;border-radius:10px;margin-top:8px}
 .rating-group{margin:12px 0}.rating-title{font-weight:700;font-size:13px;margin-bottom:6px}
 .rating-buttons{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;width:100%}
@@ -18,6 +18,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 }
 .rating-buttons button.selected{background:#2f5d50;color:#fff}.rating-help{font-size:11px;color:#69716d;margin-top:4px}
 .auto-comment{background:#f7f7f4;border-radius:10px;padding:10px;margin-top:8px;font-size:13px;line-height:1.4}
+.config-card{border-color:#d7ded9}.config-card h2{margin-top:0}.config-card .primary{margin-top:10px}.config-card input,.config-card select{margin-bottom:2px}
 </style>
 <style id="mejoras-v2">
   .quick-work{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
@@ -30,8 +31,6 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
   .student-stat{background:white;border:1px solid #e5e5e5;border-radius:10px;padding:10px;text-align:center}
   .student-stat b{display:block;font-size:1.15rem}
   .history-actions{display:flex;flex-wrap:wrap;gap:6px}
-  .search-box{margin:10px 0}
-  .search-box input{width:100%;box-sizing:border-box}
   .import-preview{margin-top:10px;padding:10px;border-radius:10px;background:#f4f7fb;border:1px solid #dbe3ef}
   @media(max-width:600px){
     .student-stats{grid-template-columns:repeat(2,1fr)}
@@ -40,7 +39,25 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 </style>
 
 </head><body><div class="wrap">
-<header><h1>🎵 Registro de Clases de Oboe</h1><p class="muted">Cuaderno digital de clases individuales</p></header>
+<header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p></header>
+<section class="card config-card">
+  <h2>⚙️ Configuración</h2>
+  <p class="muted">Estos datos se guardan en este dispositivo y puedes cambiarlos cuando quieras.</p>
+  <div class="row">
+    <div><label for="teacherName">Profesor/a</label><input id="teacherName" placeholder="Ej.: María López"></div>
+    <div><label for="instrument">Instrumento</label>
+      <select id="instrument">
+        <option>Oboe</option><option>Flauta</option><option>Clarinete</option><option>Fagot</option><option>Saxofón</option>
+        <option>Trompeta</option><option>Trompa</option><option>Trombón</option><option>Violín</option><option>Viola</option>
+        <option>Violonchelo</option><option>Contrabajo</option><option>Piano</option><option>Percusión</option><option>Otro</option>
+      </select>
+    </div>
+  </div>
+  <div id="otherInstrumentBox" class="hidden"><label for="otherInstrument">Especifica el instrumento</label><input id="otherInstrument" placeholder="Ej.: Guitarra"></div>
+  <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
+  <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
+  <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
+</section>
 
 <section class="card"><label>📚 Curso escolar</label><select id="schoolYear"></select><p class="muted">Las clases e historial corresponden al curso seleccionado.</p></section>
 
@@ -98,8 +115,32 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 
 <section class="card"><h2>👨‍🎓 Alumnos</h2><p class="muted">Gestión de alumnos del curso. Este apartado se utiliza principalmente al inicio del curso.</p><label>Nombre y apellidos</label><input id="studentName" placeholder="Ej.: María García López"><label>Curso</label><select id="studentCourse"><option value="">Selecciona el curso…</option><optgroup label="Enseñanzas Elementales"><option>1.º Elemental</option><option>2.º Elemental</option><option>3.º Elemental</option><option>4.º Elemental</option></optgroup><optgroup label="Enseñanzas Profesionales"><option>1.º Profesional</option><option>2.º Profesional</option><option>3.º Profesional</option><option>4.º Profesional</option><option>5.º Profesional</option><option>6.º Profesional</option></optgroup></select><div class="row"><div><label>Día de clase</label><select id="studentDay"><option value="">Selecciona el día…</option><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option></select></div><div><label>Hora de clase</label><select id="studentTime"><option value="">Selecciona la hora…</option></select></div></div><button class="primary" id="addStudent">➕ Añadir alumno</button><button class="secondary hidden" id="cancelEdit">Cancelar</button><div id="studentsList"></div></section>
 </div><script>
-const LK="oboeLessonsV2",SK="oboeStudentsV1",YK="oboeSchoolYearV1",q=id=>document.getElementById(id);
+const LK="oboeLessonsV2",SK="oboeStudentsV1",YK="oboeSchoolYearV1",SETK="registroClasesSettingsV1",q=id=>document.getElementById(id);
 let lessons=JSON.parse(localStorage.getItem(LK)||"[]"),students=JSON.parse(localStorage.getItem(SK)||"[]"),media=null,chunks=[],audioData=null,dir=null,edit=null,editingLessonId=null;
+const defaultSettings={teacher:"",instrument:"Oboe",otherInstrument:"",school:""};
+let appSettings=(()=>{try{return {...defaultSettings,...(JSON.parse(localStorage.getItem(SETK)||"{}")||{})}}catch(e){return {...defaultSettings}}})();
+function currentInstrument(){return (appSettings.instrument==="Otro"?appSettings.otherInstrument:appSettings.instrument)||"Oboe"}
+function safeFilePart(x){return String(x||"").trim().replace(/[\\/:*?"<>|]+/g,"_").replace(/\s+/g,"_")||"Registro"}
+function saveSettings(){
+  appSettings={teacher:q("teacherName").value.trim(),instrument:q("instrument").value,otherInstrument:q("otherInstrument").value.trim(),school:q("schoolName").value.trim()};
+  localStorage.setItem(SETK,JSON.stringify(appSettings));
+  applySettings();
+  q("settingsStatus").textContent="Configuración guardada.";
+}
+function applySettings(){
+  const inst=currentInstrument();
+  document.title="Registro de Clases"+(inst?" · "+inst:"");
+  q("appTitle").textContent="🎵 Registro de Clases";
+  q("appSubtitle").textContent=[inst,appSettings.teacher,appSettings.school].filter(Boolean).join(" · ")||"Cuaderno digital de clases individuales";
+  q("teacherName").value=appSettings.teacher||"";
+  q("instrument").value=appSettings.instrument||"Oboe";
+  q("otherInstrument").value=appSettings.otherInstrument||"";
+  q("otherInstrumentBox").classList.toggle("hidden",q("instrument").value!=="Otro");
+  q("schoolName").value=appSettings.school||"";
+}
+q("saveSettings").onclick=saveSettings;
+q("instrument").onchange=()=>q("otherInstrumentBox").classList.toggle("hidden",q("instrument").value!=="Otro");
+applySettings();
 function yr(){let d=new Date(),y=d.getFullYear();return d.getMonth()+1>=9?`${y}-${String(y+1).slice(-2)}`:`${y-1}-${String(y).slice(-2)}`}
 function initYears(){let y=parseInt(yr()),s="";for(let i=y-4;i<=y+5;i++)s+=`<option>${i}-${String(i+1).slice(-2)}</option>`;q("schoolYear").innerHTML=s;q("schoolYear").value=localStorage.getItem(YK)||yr()}
 function year(){return q("schoolYear").value}initYears();q("schoolYear").onchange=()=>{localStorage.setItem(YK,year());renderStudents();renderSelect();render()};
@@ -323,7 +364,7 @@ q("csv").onclick=()=>{const y=year(),ls=lessons.filter(x=>(x.schoolYear||y)===y)
  const studentRows=[["ID alumno","Clave unificación","Nombre y apellidos","Curso","Curso escolar","Dispositivo","Nº clases","Nº faltas","Nº asistencias","Media notas","Última clase","Clases con observación","Clases con grabación"],...students.map(s=>{const a=ls.filter(x=>x.studentId===s.id),f=a.filter(x=>x.attendance==="falta").length,n=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade)),obs=a.filter(x=>x.obs).length,aud=a.filter(x=>x.audioData).length;return [s.id,mergeKey(s.name,s.course),s.name,s.course,y,deviceId,a.length,f,a.length-f,n.length?(n.reduce((p,v)=>p+v,0)/n.length).toFixed(2):"",a.length?a.slice().sort((u,v)=>(v.date||"").localeCompare(u.date||""))[0].date:"",obs,aud]})];
  const classRows=[["Alumno","Curso","Curso escolar","Fecha","Estado","Nota","Sonido","Afinación","Técnica","Ritmo","Musicalidad","Estudio","Actitud","Progreso","Valoración general","Comentario automático","Observación","Grabación","Nombre archivo grabación","Dispositivo","Fecha/hora creación","ID clase","ID alumno","Clave alumno"],...ls.map(x=>{const s=students.find(z=>z.id===x.studentId);return [x.student,x.course,x.schoolYear||y,x.date,x.attendance==="falta"?"Falta":"Asiste",x.grade??"",x.ratings?.sonido??"",x.ratings?.afinacion??"",x.ratings?.tecnica??"",x.ratings?.ritmo??"",x.ratings?.musicalidad??"",x.ratings?.estudio??"",x.ratings?.actitud??"",x.ratings?.progreso??"",x.ratings?.general??"",x.autoComment||"",x.obs,x.audioData?"Sí":"No",x.audioData?filename(x.student,x.date):"",deviceId,x.created?new Date(x.created).toISOString():"",x.id,x.studentId,s?mergeKey(s.name,s.course):mergeKey(x.student,x.course)]})];
  const summary=[ ["Alumno","Curso","Curso escolar","Clases","Asistencias","Faltas","Media","Última clase","Observaciones","Grabaciones"], ...students.map(s=>{const a=ls.filter(x=>x.studentId===s.id),f=a.filter(x=>x.attendance==="falta").length,n=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));return [s.name,s.course,y,a.length,a.length-f,f,n.length?(n.reduce((p,v)=>p+v,0)/n.length).toFixed(2):"",a.length?a.slice().sort((u,v)=>(v.date||"").localeCompare(u.date||""))[0].date:"",a.filter(x=>x.obs).length,a.filter(x=>x.audioData).length]}) ];
- writeDataFile(new Blob([makeCSV(classRows)],{type:"text/csv;charset=utf-8"}),`Clases_Oboe_${y}.csv`).then(()=>setTimeout(()=>writeDataFile(new Blob([makeCSV(summary)],{type:"text/csv;charset=utf-8"}),`Resumen_Oboe_${y}.csv`),250));};
+ writeDataFile(new Blob([makeCSV(classRows)],{type:"text/csv;charset=utf-8"}),`Clases_${safeFilePart(currentInstrument())}_${y}.csv`).then(()=>setTimeout(()=>writeDataFile(new Blob([makeCSV(summary)],{type:"text/csv;charset=utf-8"}),`Resumen_${safeFilePart(currentInstrument())}_${y}.csv`),250));};
 // Carpeta independiente para el REGISTRO (las grabaciones usan su propia carpeta).
 const DATA_DB="registroClasesArchivosV1", DATA_STORE="handles";
 let dataDir=null;
@@ -352,8 +393,8 @@ q("chooseDataFolder").onclick=async()=>{
 
 q("backup").onclick=async()=>{
   const cleanLessons=lessons.map(x=>{const y={...x};delete y.audioData;return y;});
-  const payload={version:13,app:"Registro de Clases",instrument:"Oboe",exportedAt:new Date().toISOString(),sourceDeviceId:deviceId,students,lessons:cleanLessons};
-  await writeDataFile(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),`Registro_Clases_Oboe_completo.json`);
+  const payload={version:14,app:"Registro de Clases",instrument:currentInstrument(),settings:appSettings,exportedAt:new Date().toISOString(),sourceDeviceId:deviceId,students,lessons:cleanLessons};
+  await writeDataFile(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),`Registro_Clases_${safeFilePart(currentInstrument())}_completo.json`);
 };
 q("importBtn").onclick=()=>q("importFile").click();
 q("importFile").onchange=async e=>{
@@ -363,6 +404,11 @@ q("importFile").onchange=async e=>{
     const text=await file.text();
     const data=JSON.parse(text);
     if(!data||!Array.isArray(data.students)||!Array.isArray(data.lessons))throw new Error("Formato no reconocido");
+     if(data.settings && typeof data.settings==="object"){
+       appSettings={...defaultSettings,...data.settings};
+       localStorage.setItem(SETK,JSON.stringify(appSettings));
+       applySettings();
+     }
     if(!confirm(`Se van a importar ${data.students.length} alumnos y ${data.lessons.length} clases. Los datos actuales no se borrarán. ¿Continuar?`)){e.target.value="";return;}
     const studentMap=new Map();
     let addedStudents=0, mergedStudents=0, addedLessons=0, skippedLessons=0;
@@ -441,21 +487,6 @@ renderStudents();renderSelect();render();
     renderWorks();
   };
 
-  // Add a lightweight student search/filter if a history/student container can be found.
-  const searchTarget = document.querySelector('#history, .history, [id*="history"]');
-  if(searchTarget && !document.getElementById('studentSearchV2')){
-    const wrap=document.createElement('div');
-    wrap.className='search-box';
-    wrap.innerHTML='<input id="studentSearchV2" type="search" placeholder="🔎 Buscar alumno o texto del historial...">';
-    searchTarget.parentNode.insertBefore(wrap, searchTarget);
-    document.getElementById('studentSearchV2').addEventListener('input', function(){
-      const q=this.value.toLowerCase().trim();
-      searchTarget.querySelectorAll('div, tr, li').forEach(el=>{
-        if(!q){el.style.display=''; return;}
-        el.style.display=el.textContent.toLowerCase().includes(q)?'':'none';
-      });
-    });
-  }
 })();
 </script>
 
