@@ -893,7 +893,7 @@ async function syncRequest(method,path,body){
 q("syncBtn").onclick=async()=>{
   const userId=currentUserId();
   if(!accessToken||!userId){syncMsg("🔴 No hay sesión iniciada.");updateAuthUI(null);return;}
-  const btn=q("syncNow");btn.disabled=true;syncMsg("🔄 Comprobando conexión…");
+  const btn=q("syncBtn");btn.disabled=true;syncMsg("🔄 Comprobando conexión…");
   try{
     const r=await syncRequest("GET",`/rest/v1/${SYNC_TABLE}?select=data,updated_at&user_id=eq.${encodeURIComponent(userId)}&limit=1`);
     if(!r.ok){const d=await r.text();throw new Error(d||("HTTP "+r.status));}
