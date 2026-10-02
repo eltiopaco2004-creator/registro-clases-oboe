@@ -107,6 +107,11 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
   #configCard.collapsed .config-head h2{display:none}
 </style>
 
+<style id="config-sections-v6">
+  .config-section-block{border-top:1px solid #e5e8e6;padding-top:12px;margin-top:14px}
+  .config-section-block h3{margin:0 0 8px;font-size:16px}
+</style>
+
 <style id="modo-clase-v5">
   .class-extra-toggle{
     width:100%;text-align:left;margin-top:8px;
@@ -149,22 +154,6 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 </head><body><div class="wrap">
 <header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p></header>
 
-
-<section class="card"><label>📚 Curso escolar</label><select id="schoolYear"></select><p class="muted">Las clases e historial corresponden al curso seleccionado.</p></section>
-
-
-
-<section class="card" id="syncCard">
-<h2>☁️ Sincronización</h2>
-<div id="authStatus" class="muted">Comprobando sesión…</div>
-<div id="authBox">
-<label>Correo electrónico</label><input id="authEmail" type="email" autocomplete="off" inputmode="email" placeholder="correo@ejemplo.com">
-<label>Contraseña</label><input id="authPassword" type="password" autocomplete="new-password" placeholder="Contraseña">
-<label style="font-weight:400"><input id="rememberAccess" type="checkbox" style="width:auto;margin-right:6px" checked> Recordar datos de acceso en este dispositivo</label>
-<div><button class="primary" id="loginBtn" type="button">🔐 Iniciar sesión</button><button class="secondary" id="logoutBtn" type="button">Cerrar sesión</button></div>
-</div>
-<div id="syncActions" style="display:none;margin-top:8px"><button class="primary" id="syncBtn" type="button">☁️ Sincronizar ahora</button><div id="syncMsg" class="muted" style="margin-top:8px"></div></div>
-</section>
 
 <section class="card"><h2>📝 Nueva clase</h2>
 <label>Alumno</label><select id="student"><option value="">Selecciona un alumno…</option></select>
@@ -215,12 +204,73 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 <button class="primary class-main-action" id="save">💾 Guardar clase</button>
 <button class="secondary hidden" id="cancelLessonEdit">Cancelar edición</button></section>
 
-<section class="card"><button class="secondary" id="chooseFolder">📁 Elegir carpeta</button>
-<div id="folderNote" class="muted">Carpeta de grabaciones no seleccionada.</div></section>
+<section class="card" id="configCard">
+  <div class="config-head"><h2>⚙️ Configuración</h2><button type="button" class="secondary" id="toggleSettings">⚙️ Abrir configuración</button></div>
+  <p class="muted" id="configHelp">Opciones de configuración y mantenimiento. Normalmente no necesitas abrir este apartado durante las clases.</p>
+  <p class="config-summary" id="configSummary"></p>
 
-<section class="card"><h2>📁 Carpeta del registro</h2><p class="muted">Aquí se guardarán las copias del registro y las exportaciones CSV. Puedes cambiarla cuando quieras.</p><button type="button" class="secondary" id="chooseDataFolder">📂 Elegir carpeta de datos</button><div id="dataFolderNote" class="muted" style="margin-top:8px">No has elegido una carpeta. Al exportar, el navegador te ofrecerá su ubicación habitual.</div></section>
+  <div class="config-section-block">
+    <h3>📅 Curso académico</h3>
+    <label>Curso escolar</label>
+    <select id="schoolYear"></select>
+    <p class="muted">Las clases e historial corresponden al curso seleccionado.</p>
+  </div>
 
-<section class="card"><h2>📊 Exportación de datos</h2><p class="muted">El registro se puede llevar de un dispositivo a otro mediante un archivo de datos. Las grabaciones no se incluyen en esta copia.</p><button type="button" class="secondary" id="csv">📊 Exportar clases para Google Sheets</button><button type="button" class="secondary" id="backup">📦 Exportar registro completo</button><button type="button" class="secondary" id="importBtn">📥 Importar registro</button><input id="importFile" type="file" accept="application/json,.json" style="display:none"><div id="exportStatus" class="muted" style="margin-top:8px"></div><div id="backupStatus" class="muted" style="margin-top:4px"></div><div class="muted" style="margin-top:8px">La importación añade alumnos y clases que no existan. No borra los datos que ya tienes.</div></section>
+  <div class="config-section-block">
+    <h3>👨‍🏫 Datos del profesor y centro</h3>
+    <div class="row">
+      <div><label for="teacherName">Profesor/a</label><input id="teacherName" placeholder="Ej.: María López"></div>
+      <div><label for="instrument">Instrumento</label>
+        <select id="instrument">
+          <option>Oboe</option><option>Flauta</option><option>Clarinete</option><option>Fagot</option><option>Saxofón</option>
+          <option>Trompeta</option><option>Trompa</option><option>Trombón</option><option>Violín</option><option>Viola</option>
+          <option>Violonchelo</option><option>Contrabajo</option><option>Piano</option><option>Percusión</option><option>Otro</option>
+        </select>
+      </div>
+    </div>
+    <div id="otherInstrumentBox" class="hidden"><label for="otherInstrument">Especifica el instrumento</label><input id="otherInstrument" placeholder="Ej.: Guitarra"></div>
+    <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
+    <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
+    <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
+  </div>
+
+  <div class="config-section-block" id="syncBlock">
+    <h3>☁️ Sincronización</h3>
+    <div id="authStatus" class="muted">Comprobando sesión…</div>
+    <div id="authBox">
+      <label>Correo electrónico</label><input id="authEmail" type="email" autocomplete="off" inputmode="email" placeholder="correo@ejemplo.com">
+      <label>Contraseña</label><input id="authPassword" type="password" autocomplete="new-password" placeholder="Contraseña">
+      <label style="font-weight:400"><input id="rememberAccess" type="checkbox" style="width:auto;margin-right:6px" checked> Recordar datos de acceso en este dispositivo</label>
+      <div><button class="primary" id="loginBtn" type="button">🔐 Iniciar sesión</button><button class="secondary" id="logoutBtn" type="button">Cerrar sesión</button></div>
+    </div>
+    <div id="syncActions" style="display:none;margin-top:8px"><button class="primary" id="syncBtn" type="button">☁️ Sincronizar ahora</button><div id="syncMsg" class="muted" style="margin-top:8px"></div></div>
+  </div>
+
+  <div class="config-section-block">
+    <h3>🎙️ Grabaciones</h3>
+    <p class="muted">Elige dónde guardar las grabaciones de las clases.</p>
+    <button type="button" class="secondary" id="chooseFolder">📁 Elegir carpeta</button>
+    <div id="folderNote" class="muted">Carpeta de grabaciones no seleccionada.</div>
+  </div>
+
+  <div class="config-section-block">
+    <h3>📁 Carpeta del registro</h3>
+    <p class="muted">Aquí se guardarán las copias del registro y las exportaciones CSV. Puedes cambiarla cuando quieras.</p>
+    <button type="button" class="secondary" id="chooseDataFolder">📂 Elegir carpeta de datos</button>
+    <div id="dataFolderNote" class="muted" style="margin-top:8px">No has elegido una carpeta. Al exportar, el navegador te ofrecerá su ubicación habitual.</div>
+  </div>
+
+  <div class="config-section-block">
+    <h3>📊 Exportación y copias</h3>
+    <p class="muted">El registro se puede llevar de un dispositivo a otro mediante un archivo de datos. Las grabaciones no se incluyen en esta copia.</p>
+    <button type="button" class="secondary" id="csv">📊 Exportar clases para Google Sheets</button>
+    <button type="button" class="secondary" id="backup">📦 Exportar registro completo</button>
+    <button type="button" class="secondary" id="importBtn">📥 Importar registro</button>
+    <input id="importFile" type="file" accept="application/json,.json" style="display:none">
+    <div id="exportStatus" class="muted" style="margin-top:8px"></div><div id="backupStatus" class="muted" style="margin-top:4px"></div>
+    <div class="muted" style="margin-top:8px">La importación añade alumnos y clases que no existan. No borra los datos que ya tienes.</div>
+  </div>
+</section>
 
 <section class="card collapsed" id="historyCard">
   <div class="section-head-compact">
@@ -264,25 +314,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
   </div>
   <div id="studentsList"></div>
 </section>
-<section class="card config-cardsection class="card config-card" id="configCard">
-  <div class="config-head"><h2>⚙️ Configuración</h2><button type="button" class="secondary" id="toggleSettings">⚙️ Configuración</button></div>
-  <p class="muted" id="configHelp">Estos datos se guardan en este dispositivo y puedes cambiarlos cuando quieras.</p><p class="config-summary" id="configSummary"></p>
-  <div class="row">
-    <div><label for="teacherName">Profesor/a</label><input id="teacherName" placeholder="Ej.: María López"></div>
-    <div><label for="instrument">Instrumento</label>
-      <select id="instrument">
-        <option>Oboe</option><option>Flauta</option><option>Clarinete</option><option>Fagot</option><option>Saxofón</option>
-        <option>Trompeta</option><option>Trompa</option><option>Trombón</option><option>Violín</option><option>Viola</option>
-        <option>Violonchelo</option><option>Contrabajo</option><option>Piano</option><option>Percusión</option><option>Otro</option>
-      </select>
-    </div>
-  </div>
-  <div id="otherInstrumentBox" class="hidden"><label for="otherInstrument">Especifica el instrumento</label><input id="otherInstrument" placeholder="Ej.: Guitarra"></div>
-  <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
-  <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
-  <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-</section>
-</div><script>
+<script>
 const LK="oboeLessonsV2",SK="oboeStudentsV1",YK="oboeSchoolYearV1",SETK="registroClasesSettingsV1",q=id=>document.getElementById(id);
 let lessons=JSON.parse(localStorage.getItem(LK)||"[]"),students=JSON.parse(localStorage.getItem(SK)||"[]"),media=null,chunks=[],audioData=null,dir=null,edit=null,editingLessonId=null;
 const defaultSettings={teacher:"",instrument:"Oboe",otherInstrument:"",school:""};
@@ -302,7 +334,7 @@ function saveSettings(){
   localStorage.setItem(SETK,JSON.stringify(appSettings));
   applySettings();
   q("settingsStatus").textContent="Configuración guardada.";
-  updateConfigView(false);
+  updateConfigView(false);q("toggleSettings").textContent="⚙️ Abrir configuración";
 }
 function applySettings(){
   const inst=currentInstrument();
@@ -318,10 +350,11 @@ function applySettings(){
   if(summary) summary.innerHTML=[currentInstrument(),appSettings.teacher,appSettings.school].filter(Boolean).join(" · ");
 }
 q("saveSettings").onclick=saveSettings;
-q("toggleSettings").onclick=()=>{const card=q("configCard");card.classList.toggle("collapsed");};
+q("toggleSettings").onclick=()=>{const card=q("configCard");card.classList.toggle("collapsed");q("toggleSettings").textContent=card.classList.contains("collapsed")?"⚙️ Abrir configuración":"⚙️ Cerrar configuración";};
 q("instrument").onchange=()=>q("otherInstrumentBox").classList.toggle("hidden",q("instrument").value!=="Otro");
 applySettings();
 updateConfigView();
+q("toggleSettings").textContent=q("configCard").classList.contains("collapsed")?"⚙️ Abrir configuración":"⚙️ Cerrar configuración";
 function yr(){let d=new Date(),y=d.getFullYear();return d.getMonth()+1>=9?`${y}-${String(y+1).slice(-2)}`:`${y-1}-${String(y).slice(-2)}`}
 function initYears(){let y=parseInt(yr()),s="";for(let i=y-4;i<=y+5;i++)s+=`<option>${i}-${String(i+1).slice(-2)}</option>`;q("schoolYear").innerHTML=s;q("schoolYear").value=localStorage.getItem(YK)||yr()}
 function year(){return q("schoolYear").value}initYears();q("schoolYear").onchange=()=>{localStorage.setItem(YK,year());renderStudents();renderSelect();render()};
