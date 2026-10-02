@@ -154,6 +154,18 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 
 
 
+<section class="card" id="syncCard">
+<h2>☁️ Sincronización</h2>
+<div id="authStatus" class="muted">Comprobando sesión…</div>
+<div id="authBox">
+<label>Correo electrónico</label><input id="authEmail" type="email" autocomplete="off" inputmode="email" placeholder="correo@ejemplo.com">
+<label>Contraseña</label><input id="authPassword" type="password" autocomplete="new-password" placeholder="Contraseña">
+<label style="font-weight:400"><input id="rememberAccess" type="checkbox" style="width:auto;margin-right:6px" checked> Recordar datos de acceso en este dispositivo</label>
+<div><button class="primary" id="loginBtn" type="button">🔐 Iniciar sesión</button><button class="secondary" id="logoutBtn" type="button">Cerrar sesión</button></div>
+</div>
+<div id="syncActions" style="display:none;margin-top:8px"><button class="primary" id="syncBtn" type="button">☁️ Sincronizar ahora</button><div id="syncMsg" class="muted" style="margin-top:8px"></div></div>
+</section>
+
 <section class="card"><h2>📝 Nueva clase</h2>
 <label>Alumno</label><select id="student"><option value="">Selecciona un alumno…</option></select>
 <div class="row"><div><label>Fecha</label><input id="date" type="date"></div><div><label>Estado</label><select id="attendance"><option value="asiste">🟢 Asiste</option><option value="falta">🔴 Falta</option></select></div></div>
@@ -792,4 +804,114 @@ renderStudents();renderSelect();render();
 </script>
 
 
+<script>
+/* SINCRONIZACIÓN SUPABASE — REST directo, sin librería externa */
+const SUPABASE_URL="https://persqgbqzbfrcrxyddft.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_JfqOoGDkKHp0dU6VN9CLsw_fD4TEfwH";
+const AUTH_STORAGE="registroSupabaseAccessV4";
+const SYNC_TABLE="registro_sync_test";
+let accessToken=localStorage.getItem("registroSupabaseTokenV1")||"";
+let refreshToken=localStorage.getItem("registroSupabaseRefreshV1")||"";
+
+function syncMsg(t){const e=q("syncMsg");if(e)e.textContent=t;}
+function savedAccess(){try{return JSON.parse(localStorage.getItem(AUTH_STORAGE)||"null")}catch(e){return null}}
+function saveTokens(a,r){accessToken=a||"";refreshToken=r||"";if(accessToken)localStorage.setItem("registroSupabaseTokenV1",accessToken);else localStorage.removeItem("registroSupabaseTokenV1");if(refreshToken)localStorage.setItem("registroSupabaseRefreshV1",refreshToken);else localStorage.removeItem("registroSupabaseRefreshV1")}
+function clearTokens(){saveTokens("","")}
+function decodeJwt(token){try{const p=token.split(".")[1];const s=p.replace(/-/g,"+").replace(/_/g,"/");return JSON.parse(decodeURIComponent(atob(s+"=".repeat((4-s.length%4)%4)).split("").map(c=>"%"+c.charCodeAt(0).toString(16).padStart(2,"0")).join("")))}catch(e){return null}}
+function currentUserId(){return decodeJwt(accessToken)?.sub||""}
+function updateAuthUI(session){
+  const st=q("authStatus"),acts=q("syncActions"),em=q("authEmail"),pw=q("authPassword");
+  const saved=savedAccess();
+  if(saved){em.value=saved.email||"";pw.value=saved.password||"";q("rememberAccess").checked=true;}
+  if(session){st.textContent="🟢 Sesión iniciada. Puedes sincronizar.";acts.style.display="block";}
+  else{st.textContent="🔴 No hay sesión iniciada.";acts.style.display="none";}
+}
+async function authFetch(path,options={}){
+  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),15000);
+  try{
+    const headers=Object.assign({"apikey":SUPABASE_PUBLISHABLE_KEY,"Content-Type":"application/json"},options.headers||{});
+    if(accessToken)headers.Authorization="Bearer "+accessToken;
+    return await fetch(SUPABASE_URL+path,Object.assign({},options,{headers,signal:controller.signal}));
+  }finally{clearTimeout(timer)}
+}
+async function refreshSession(){
+  if(!refreshToken)return false;
+  const r=await authFetch("/auth/v1/token?grant_type=refresh_token",{method:"POST",body:JSON.stringify({refresh_token:refreshToken})});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok||!data.access_token)return false;
+  saveTokens(data.access_token,data.refresh_token||refreshToken);return true;
+}
+async function checkSession(){
+  if(!accessToken)return false;
+  let r=await authFetch("/auth/v1/user",{method:"GET"});
+  if(r.ok)return true;
+  if(r.status===401&&await refreshSession())return true;
+  clearTokens();return false;
+}
+async function initSync(){
+  const saved=savedAccess();
+  updateAuthUI(null);
+  try{
+    if(await checkSession()){updateAuthUI({});syncMsg("🟢 Sesión recuperada en este dispositivo.");return;}
+    if(saved?.email&&saved?.password){
+      syncMsg("🔄 Iniciando sesión automáticamente…");
+      await doLogin(saved.email,saved.password,true);
+    }
+  }catch(e){syncMsg("⚠️ No se ha podido comprobar la sesión. Puedes intentarlo con Iniciar sesión.");}
+}
+async function doLogin(email,password,automatic=false){
+  const btn=q("loginBtn");if(!automatic)btn.disabled=true;syncMsg("🔄 Conectando con Supabase…");
+  try{
+    const r=await authFetch("/auth/v1/token?grant_type=password",{method:"POST",body:JSON.stringify({email,password})});
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok){syncMsg("❌ Error al iniciar sesión: "+(data.error_description||data.msg||data.message||("HTTP "+r.status)));return false;}
+    if(!data.access_token){syncMsg("❌ Supabase no ha devuelto una sesión válida.");return false;}
+    saveTokens(data.access_token,data.refresh_token||"");
+    if(q("rememberAccess").checked)localStorage.setItem(AUTH_STORAGE,JSON.stringify({email,password}));else localStorage.removeItem(AUTH_STORAGE);
+    updateAuthUI({});syncMsg(automatic?"🟢 Sesión iniciada automáticamente.":"🟢 Sesión iniciada correctamente. Ya puedes sincronizar.");return true;
+  }catch(e){syncMsg(e?.name==="AbortError"?"❌ La conexión ha tardado demasiado. Comprueba Internet.":"❌ Error de conexión: "+(e?.message||"desconocido"));return false;}
+  finally{if(!automatic)btn.disabled=false;}
+}
+q("loginBtn").onclick=()=>doLogin(q("authEmail").value.trim(),q("authPassword").value,false);
+q("logoutBtn").onclick=()=>{clearTokens();updateAuthUI(null);syncMsg("Sesión cerrada.");};
+q("rememberAccess").onchange=()=>{if(!q("rememberAccess").checked)localStorage.removeItem(AUTH_STORAGE);};
+function syncPayload(){return {version:12,schoolYear:year(),deviceId,students,lessons};}
+function mergeSyncData(cloud){
+  if(!cloud||typeof cloud!=="object")return {studentsAdded:0,lessonsAdded:0};
+  const cs=Array.isArray(cloud.students)?cloud.students:[],cl=Array.isArray(cloud.lessons)?cloud.lessons:[];
+  const sm=new Map(students.map(s=>[mergeKey(s.name,s.course),s])),lm=new Map(lessons.map(x=>[x.id,x]));
+  let studentsAdded=0,lessonsAdded=0;
+  for(const s of cs){if(!s||!s.name)continue;const k=mergeKey(s.name,s.course);if(!sm.has(k)){students.push(s);sm.set(k,s);studentsAdded++;}}
+  for(const x of cl){if(!x||!x.id)continue;if(!lm.has(x.id)){lessons.push(x);lm.set(x.id,x);lessonsAdded++;}}
+  saveS();saveL();renderStudents();renderSelect();render();return {studentsAdded,lessonsAdded};
+}
+async function syncRequest(method,path,body){
+  let r=await authFetch(path,{method,body:body===undefined?undefined:JSON.stringify(body)});
+  if(r.status===401&&await refreshSession())r=await authFetch(path,{method,body:body===undefined?undefined:JSON.stringify(body)});
+  return r;
+}
+q("syncBtn").onclick=async()=>{
+  const userId=currentUserId();
+  if(!accessToken||!userId){syncMsg("🔴 No hay sesión iniciada.");updateAuthUI(null);return;}
+  const btn=q("syncNow");btn.disabled=true;syncMsg("🔄 Comprobando conexión…");
+  try{
+    const r=await syncRequest("GET",`/rest/v1/${SYNC_TABLE}?select=data,updated_at&user_id=eq.${encodeURIComponent(userId)}&limit=1`);
+    if(!r.ok){const d=await r.text();throw new Error(d||("HTTP "+r.status));}
+    const rows=await r.json();let added={studentsAdded:0,lessonsAdded:0};
+    if(rows.length&&rows[0].data)added=mergeSyncData(rows[0].data);
+    const now=new Date().toISOString();
+    const payload={user_id:userId,data:syncPayload(),updated_at:now};
+    let up;
+    if(rows.length){
+      up=await syncRequest("PATCH",`/rest/v1/${SYNC_TABLE}?user_id=eq.${encodeURIComponent(userId)}`,{data:payload.data,updated_at:now});
+    }else{
+      up=await syncRequest("POST",`/rest/v1/${SYNC_TABLE}`,payload);
+    }
+    if(!up.ok){const d=await up.text();throw new Error(d||("HTTP "+up.status));}
+    syncMsg(`✅ Sincronizado correctamente. ${added.studentsAdded} alumnos y ${added.lessonsAdded} clases nuevas incorporadas.`);
+  }catch(e){syncMsg("❌ Error de sincronización: "+(e?.message||"desconocido"));}
+  finally{btn.disabled=false;}
+};
+initSync();
+</script>
 </body></html>
