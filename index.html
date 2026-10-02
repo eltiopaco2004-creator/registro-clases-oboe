@@ -503,10 +503,10 @@ q("toggleStudents").onclick=()=>{
     q("toggleStudents").textContent="👨‍🎓 Abrir alumnos";
   }
 };
-q("addStudent").onclick=()=>{let n=q("studentName").value.trim(),c=q("studentCourse").value,d=q("studentDay").value,t=q("studentTime").value;if(!n||!c)return alert("Indica nombre y curso.");if(edit){let s=students.find(x=>x.id===edit);s.name=n;s.course=c;s.scheduleDay=d;s.scheduleTime=t;lessons.forEach(x=>{if(x.studentId===edit){x.student=n;x.course=c}});edit=null;q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden");saveL();saveS()}else{if(students.some(s=>s.name.toLowerCase()===n.toLowerCase()))return alert("Ese alumno ya existe.");students.push({id:crypto.randomUUID(),name:n,course:c,scheduleDay:d,scheduleTime:t});saveS()}resetStudentForm();renderStudents();renderSelect();render()};
+q("addStudent").onclick=()=>{let n=q("studentName").value.trim(),c=q("studentCourse").value,d=q("studentDay").value,t=q("studentTime").value;if(!n||!c)return alert("Indica nombre y curso.");const newKey=mergeKey(n,c);if(edit){let s=students.find(x=>x.id===edit);s.name=n;s.course=c;s.scheduleDay=d;s.scheduleTime=t;forgetDeletedStudent(newKey);lessons.forEach(x=>{if(x.studentId===edit){x.student=n;x.course=c}});edit=null;q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden");saveL();saveS()}else{if(students.some(s=>s.name.toLowerCase()===n.toLowerCase()))return alert("Ese alumno ya existe.");forgetDeletedStudent(newKey);students.push({id:crypto.randomUUID(),name:n,course:c,scheduleDay:d,scheduleTime:t});saveS()}resetStudentForm();renderStudents();renderSelect();render()};
 q("cancelEdit").onclick=()=>{edit=null;resetStudentForm();q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden");updateStudentsPanel()};
 window.editStudent=id=>{let s=students.find(x=>x.id===id);edit=id;q("studentName").value=s.name;q("studentCourse").value=s.course;q("studentDay").value=s.scheduleDay||"";q("studentTime").value=s.scheduleTime||"";q("addStudent").textContent="💾 Guardar cambios";q("cancelEdit").classList.remove("hidden");updateStudentsPanel(true)};
-window.deleteStudent=id=>{let s=students.find(x=>x.id===id),n=lessons.filter(x=>x.studentId===id).length;if(confirm(`¿Eliminar a ${s.name}?${n?`\nSus ${n} clases NO se borrarán.`:""}`)){students=students.filter(x=>x.id!==id);saveS();renderStudents();renderSelect()}};
+window.deleteStudent=id=>{let s=students.find(x=>x.id===id),n=lessons.filter(x=>x.studentId===id).length;if(!s)return;if(confirm(`¿Eliminar a ${s.name}?${n?`\nSus ${n} clases NO se borrarán.`:""}`)){rememberDeletedStudent(mergeKey(s.name,s.course));students=students.filter(x=>x.id!==id);saveS();renderStudents();renderSelect()}};
 q("attendance").onchange=()=>{let f=q("attendance").value==="falta";q("grade").disabled=f;q("ratingsBox").style.opacity=f?".55":"1";if(f)q("grade").value=""};
 
 q("toggleClassExtras").onclick=()=>{
@@ -629,7 +629,7 @@ function renderStudentHistory(id){
 
 window.editLesson=id=>{const x=lessons.find(v=>v.id===id);if(!x)return;editingLessonId=id;q("student").value=x.studentId;q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=x.obs||"";q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";loadRatings(x.ratings||{});window.scrollTo({top:0,behavior:"smooth"});};
 q("cancelLessonEdit").onclick=()=>{editingLessonId=null;q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");q("ratingsBox").style.opacity="1";resetRatings();};
-window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){lessons=lessons.filter(x=>x.id!==id);saveL();render();renderStudents()}};
+window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){rememberDeletedLesson(id);lessons=lessons.filter(x=>x.id!==id);saveL();render();renderStudents()}};
 q("record").onclick=async()=>{try{let st=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];media=new MediaRecorder(st);media.ondataavailable=e=>e.data.size&&chunks.push(e.data);media.onstop=()=>{let b=new Blob(chunks,{type:media.mimeType||"audio/webm"}),r=new FileReader();r.onload=()=>audioData=r.result;r.readAsDataURL(b);st.getTracks().forEach(t=>t.stop())};media.start();q("record").disabled=true;q("stop").disabled=false;q("recText").textContent="🔴 Grabando…"}catch(e){alert("No se ha podido acceder al micrófono.")}};
 q("stop").onclick=()=>{if(media&&media.state!=="inactive"){media.stop();q("record").disabled=false;q("stop").disabled=true;q("recText").textContent="Grabación preparada"}};
 function filename(name,date){let p=name.trim().split(/\s+/),first=(p[0]||"Grabacion").replace(/[\\/:*?"<>|]/g,"_"),ini=p.slice(1).map(x=>x[0]).join("").toUpperCase(),d=new Date(),t=`${String(d.getHours()).padStart(2,"0")}-${String(d.getMinutes()).padStart(2,"0")}`;return `${first}${ini?"_"+ini:""}_${date}_${t}.webm`}
@@ -648,6 +648,17 @@ const DEVICE_KEY="oboeDeviceIdV1";
 let deviceId=localStorage.getItem(DEVICE_KEY);
 if(!deviceId){deviceId=(globalThis.crypto&&typeof crypto.randomUUID==="function"?crypto.randomUUID():"dev-"+Date.now().toString(36)+Math.random().toString(36).slice(2,8));localStorage.setItem(DEVICE_KEY,deviceId)}
 function mergeKey(name,course){return String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+"__"+String(course||"").toLowerCase().replace(/[^a-z0-9]+/g,"-")}
+const DEL_STUDENTS_KEY="registroSyncDeletedStudentsV1",DEL_LESSONS_KEY="registroSyncDeletedLessonsV1";
+let deletedStudentKeys=JSON.parse(localStorage.getItem(DEL_STUDENTS_KEY)||"[]");
+let deletedLessonIds=JSON.parse(localStorage.getItem(DEL_LESSONS_KEY)||"[]");
+if(!Array.isArray(deletedStudentKeys))deletedStudentKeys=[];
+if(!Array.isArray(deletedLessonIds))deletedLessonIds=[];
+function saveDeleted(){localStorage.setItem(DEL_STUDENTS_KEY,JSON.stringify([...new Set(deletedStudentKeys)]));localStorage.setItem(DEL_LESSONS_KEY,JSON.stringify([...new Set(deletedLessonIds)]));}
+function forgetDeletedStudent(key){deletedStudentKeys=deletedStudentKeys.filter(k=>k!==key);saveDeleted();}
+function rememberDeletedStudent(key){if(key&&!deletedStudentKeys.includes(key)){deletedStudentKeys.push(key);saveDeleted();}}
+function rememberDeletedLesson(id){if(id&&!deletedLessonIds.includes(id)){deletedLessonIds.push(id);saveDeleted();}}
+function forgetDeletedLesson(id){deletedLessonIds=deletedLessonIds.filter(x=>x!==id);saveDeleted();}
+
 function downloadFile(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=name;a.style.display="none";document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(url)},1000);const st=q("exportStatus");if(st){st.textContent="Archivo preparado: "+name; if(q("backupStatus")) q("backupStatus").textContent="Última exportación: "+new Date().toLocaleString("es-ES")}}
 function csvEscape(v){return `"${String(v??"").replace(/"/g,'""')}"`}
 function makeCSV(rows){return "\ufeff"+rows.map(r=>r.map(csvEscape).join(";")).join("\n")}
@@ -875,15 +886,27 @@ async function doLogin(email,password,automatic=false){
 q("loginBtn").onclick=()=>doLogin(q("authEmail").value.trim(),q("authPassword").value,false);
 q("logoutBtn").onclick=()=>{clearTokens();updateAuthUI(null);syncMsg("Sesión cerrada.");};
 q("rememberAccess").onchange=()=>{if(!q("rememberAccess").checked)localStorage.removeItem(AUTH_STORAGE);};
-function syncPayload(){return {version:12,schoolYear:year(),deviceId,students,lessons};}
+function syncPayload(){return {version:13,schoolYear:year(),deviceId,students,lessons,deletedStudentKeys:[...new Set(deletedStudentKeys)],deletedLessonIds:[...new Set(deletedLessonIds)]};}
 function mergeSyncData(cloud){
-  if(!cloud||typeof cloud!=="object")return {studentsAdded:0,lessonsAdded:0};
+  if(!cloud||typeof cloud!=="object")return {studentsAdded:0,lessonsAdded:0,studentsDeleted:0,lessonsDeleted:0};
   const cs=Array.isArray(cloud.students)?cloud.students:[],cl=Array.isArray(cloud.lessons)?cloud.lessons:[];
+  const remoteDeletedStudents=Array.isArray(cloud.deletedStudentKeys)?cloud.deletedStudentKeys:[];
+  const remoteDeletedLessons=Array.isArray(cloud.deletedLessonIds)?cloud.deletedLessonIds:[];
+  deletedStudentKeys=[...new Set([...deletedStudentKeys,...remoteDeletedStudents])];
+  deletedLessonIds=[...new Set([...deletedLessonIds,...remoteDeletedLessons])];
+  const deletedStudentSet=new Set(deletedStudentKeys),deletedLessonSet=new Set(deletedLessonIds);
+  let studentsDeleted=0,lessonsDeleted=0;
+  const beforeStudents=students.length;
+  students=students.filter(s=>!deletedStudentSet.has(mergeKey(s.name,s.course)));
+  studentsDeleted=beforeStudents-students.length;
+  const beforeLessons=lessons.length;
+  lessons=lessons.filter(x=>!deletedLessonSet.has(String(x.id||"")));
+  lessonsDeleted=beforeLessons-lessons.length;
   const sm=new Map(students.map(s=>[mergeKey(s.name,s.course),s])),lm=new Map(lessons.map(x=>[x.id,x]));
   let studentsAdded=0,lessonsAdded=0;
-  for(const s of cs){if(!s||!s.name)continue;const k=mergeKey(s.name,s.course);if(!sm.has(k)){students.push(s);sm.set(k,s);studentsAdded++;}}
-  for(const x of cl){if(!x||!x.id)continue;if(!lm.has(x.id)){lessons.push(x);lm.set(x.id,x);lessonsAdded++;}}
-  saveS();saveL();renderStudents();renderSelect();render();return {studentsAdded,lessonsAdded};
+  for(const s of cs){if(!s||!s.name)continue;const k=mergeKey(s.name,s.course);if(deletedStudentSet.has(k))continue;if(!sm.has(k)){students.push(s);sm.set(k,s);studentsAdded++;}}
+  for(const x of cl){if(!x||!x.id)continue;if(deletedLessonSet.has(String(x.id)))continue;if(!lm.has(x.id)){lessons.push(x);lm.set(x.id,x);lessonsAdded++;}}
+  saveDeleted();saveS();saveL();renderStudents();renderSelect();render();return {studentsAdded,lessonsAdded,studentsDeleted,lessonsDeleted};
 }
 async function syncRequest(method,path,body){
   let r=await authFetch(path,{method,body:body===undefined?undefined:JSON.stringify(body)});
@@ -897,7 +920,7 @@ q("syncBtn").onclick=async()=>{
   try{
     const r=await syncRequest("GET",`/rest/v1/${SYNC_TABLE}?select=data,updated_at&user_id=eq.${encodeURIComponent(userId)}&limit=1`);
     if(!r.ok){const d=await r.text();throw new Error(d||("HTTP "+r.status));}
-    const rows=await r.json();let added={studentsAdded:0,lessonsAdded:0};
+    const rows=await r.json();let added={studentsAdded:0,lessonsAdded:0,studentsDeleted:0,lessonsDeleted:0};
     if(rows.length&&rows[0].data)added=mergeSyncData(rows[0].data);
     const now=new Date().toISOString();
     const payload={user_id:userId,data:syncPayload(),updated_at:now};
@@ -908,7 +931,7 @@ q("syncBtn").onclick=async()=>{
       up=await syncRequest("POST",`/rest/v1/${SYNC_TABLE}`,payload);
     }
     if(!up.ok){const d=await up.text();throw new Error(d||("HTTP "+up.status));}
-    syncMsg(`✅ Sincronizado correctamente. ${added.studentsAdded} alumnos y ${added.lessonsAdded} clases nuevas incorporadas.`);
+    syncMsg(`✅ Sincronizado correctamente. ${added.studentsAdded} alumnos y ${added.lessonsAdded} clases nuevas incorporadas${added.studentsDeleted||added.lessonsDeleted?`. Eliminados: ${added.studentsDeleted} alumnos y ${added.lessonsDeleted} clases.`:"."}`);
   }catch(e){syncMsg("❌ Error de sincronización: "+(e?.message||"desconocido"));}
   finally{btn.disabled=false;}
 };
