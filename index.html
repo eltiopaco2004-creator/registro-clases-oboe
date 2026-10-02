@@ -151,11 +151,47 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
   #studentsCard.collapsed #studentsList{display:none!important}
   #studentsCard.collapsed .students-head{margin-bottom:0}
 </style>
+
+<style id="schedule-mode-v6">
+.schedule-control{margin:0 0 12px;padding:12px;border:1px solid #d7ded9;border-radius:12px;background:#f7f9f7}
+.schedule-control-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.schedule-mode-buttons{display:flex;gap:6px;flex-shrink:0}
+.schedule-mode-buttons button{margin:0}
+.schedule-mode-buttons button.active{background:#2f5d50;color:#fff}
+.schedule-status{margin-top:8px;font-size:13px;font-weight:600}
+.schedule-tools{margin-top:8px}
+.schedule-check{font-weight:600!important;display:flex;align-items:center;gap:6px}
+.schedule-check input{width:auto}
+.simulation-panel{margin-top:8px;padding:9px;background:#fff;border:1px dashed #c8d2cc;border-radius:10px}
+.simulation-panel.collapsed{display:none}
+@media(max-width:600px){.schedule-control-head{align-items:flex-start;flex-direction:column}.schedule-mode-buttons{width:100%}.schedule-mode-buttons button{flex:1}}
+</style>
 </head><body><div class="wrap">
 <header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p></header>
 
 
 <section class="card"><h2>📝 Nueva clase</h2>
+<div class="schedule-control" id="scheduleControl">
+  <div class="schedule-control-head">
+    <div><b>🕒 Modo de selección</b><div class="muted" id="scheduleModeHelp">Automático: propone el alumno de la franja horaria actual.</div></div>
+    <div class="schedule-mode-buttons">
+      <button type="button" class="secondary" id="modeAuto">🤖 Automático</button>
+      <button type="button" class="secondary" id="modeManual">✋ Manual</button>
+    </div>
+  </div>
+  <div id="autoScheduleStatus" class="schedule-status"></div>
+  <div class="schedule-tools">
+    <label class="schedule-check"><input type="checkbox" id="scheduleSimulation"> 🧪 Simular horario para pruebas</label>
+    <div id="simulationPanel" class="simulation-panel collapsed">
+      <div class="row">
+        <div><label for="simulationDay">Día</label><select id="simulationDay"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option></select></div>
+        <div><label for="simulationTime">Hora</label><select id="simulationTime"></select></div>
+      </div>
+      <p class="muted">La simulación solo cambia el día y la hora que usa el automático para elegir alumno. Al apagarla vuelve al día y hora reales.</p>
+    </div>
+    <button type="button" class="secondary" id="refreshAuto" style="display:none">🔄 Actualizar automático</button>
+  </div>
+</div>
 <label>Alumno</label><select id="student"><option value="">Selecciona un alumno…</option></select>
 <div class="row"><div><label>Fecha</label><input id="date" type="date"></div><div><label>Estado</label><select id="attendance"><option value="asiste">🟢 Asiste</option><option value="falta">🔴 Falta</option></select></div></div>
 <div id="gradeBox"><label>Nota (0–10)</label><input id="grade" type="number" min="0" max="10" step=".1"></div>
@@ -466,6 +502,99 @@ function surnameKey(name){const p=String(name||"").trim().split(/\s+/);return p.
 function sortStudents(list){return list.slice().sort((a,b)=>courseRank(a.course)-courseRank(b.course)||surnameKey(a.name).localeCompare(surnameKey(b.name),"es",{sensitivity:"base"})||String(a.name).localeCompare(String(b.name),"es",{sensitivity:"base"}))}
 
 function initStudentTimes(){let s=q("studentTime");for(let h=8;h<=21;h++)s.insertAdjacentHTML("beforeend",`<option>${String(h).padStart(2,"0")}:00</option>`)}initStudentTimes();
+
+// V6: selección automática opcional, siempre con posibilidad de intervención manual.
+const SCHEDULE_MODE_KEY="registroClasesScheduleModeV1";
+const SCHEDULE_SIM_KEY="registroClasesScheduleSimulationV1";
+const DAY_NAMES=["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+const TEACHING_DAYS=["Lunes","Martes","Miércoles","Jueves","Viernes"];
+let scheduleMode=localStorage.getItem(SCHEDULE_MODE_KEY)||"auto";
+let scheduleSimulation=(()=>{try{return {...{enabled:false,day:"Lunes",time:"16:00"},...(JSON.parse(localStorage.getItem(SCHEDULE_SIM_KEY)||"{}")||{})}}catch(e){return {enabled:false,day:"Lunes",time:"16:00"}}})();
+function saveSchedulePrefs(){localStorage.setItem(SCHEDULE_MODE_KEY,scheduleMode);localStorage.setItem(SCHEDULE_SIM_KEY,JSON.stringify(scheduleSimulation));}
+function pad2(n){return String(n).padStart(2,"0")}
+function isoDateLocal(d){return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`}
+function currentScheduleContext(){
+  if(scheduleSimulation.enabled){
+    const day=scheduleSimulation.day||"Lunes";
+    const time=scheduleSimulation.time||"16:00";
+    const now=new Date();
+    const jsDay=TEACHING_DAYS.indexOf(day)+1;
+    const delta=jsDay-now.getDay();
+    const simulatedDate=new Date(now.getFullYear(),now.getMonth(),now.getDate()+delta,12,0,0,0);
+    return {day,time,date:isoDateLocal(simulatedDate),simulated:true};
+  }
+  const now=new Date();
+  return {day:DAY_NAMES[now.getDay()]||"",time:`${pad2(now.getHours())}:00`,date:isoDateLocal(now),simulated:false};
+}
+function scheduleHour(time){return String(time||"").slice(0,2)}
+function studentsForSlot(day,hour){
+  return students.filter(s=>s.scheduleDay===day&&scheduleHour(s.scheduleTime)===hour);
+}
+function sortedScheduleForDay(day){
+  return students.filter(s=>s.scheduleDay===day&&s.scheduleTime).slice().sort((a,b)=>String(a.scheduleTime).localeCompare(String(b.scheduleTime))||surnameKey(a.name).localeCompare(surnameKey(b.name),"es",{sensitivity:"base"})||String(a.name).localeCompare(String(b.name),"es",{sensitivity:"base"}));
+}
+function setScheduleStatus(text,kind){
+  const el=q("autoScheduleStatus"); if(!el)return; el.textContent=text||""; el.style.color=kind==="warn"?"#9a6a00":kind==="ok"?"#2f5d50":"#69716d";
+}
+function updateScheduleUI(){
+  const auto=q("modeAuto"),manual=q("modeManual"),sim=q("scheduleSimulation"),panel=q("simulationPanel"),refresh=q("refreshAuto"),help=q("scheduleModeHelp");
+  if(!auto||!manual)return;
+  auto.classList.toggle("active",scheduleMode==="auto"); manual.classList.toggle("active",scheduleMode==="manual");
+  sim.checked=!!scheduleSimulation.enabled; panel.classList.toggle("collapsed",!scheduleSimulation.enabled); refresh.style.display=scheduleMode==="auto"?"inline-block":"none";
+  help.textContent=scheduleMode==="auto"?"Automático: propone el alumno de la franja horaria actual. Puedes cambiarlo manualmente en cualquier momento.":"Manual: tú eliges alumno y fecha sin que el horario automático intervenga.";
+}
+function resetNewLessonFormForAutomatic(ctx){
+  q("date").value=ctx.date;
+  // No borramos otros campos del formulario: solo actualizamos la propuesta de alumno.
+  const matches=studentsForSlot(ctx.day,scheduleHour(ctx.time));
+  if(matches.length){
+    q("student").value=matches[0].id;
+    const names=matches.map(s=>displayName(s.name)).join(" · ");
+    setScheduleStatus(`${ctx.simulated?"🧪 Simulación":"🤖 Automático"}: ${ctx.day} ${ctx.time} · ${names}`,"ok");
+  }else{
+    q("student").value="";
+    const dayStudents=sortedScheduleForDay(ctx.day);
+    const hint=dayStudents.length?` Hay ${dayStudents.length} alumno${dayStudents.length===1?"":"s"} programado${dayStudents.length===1?"":"s"} ese día.`:" No hay alumnos con horario ese día.";
+    setScheduleStatus(`${ctx.simulated?"🧪 Simulación":"🤖 Automático"}: ${ctx.day} ${ctx.time}. No hay alumno asignado a esta franja.${hint}`,"warn");
+  }
+}
+function refreshAutomaticSuggestion(){
+  if(scheduleMode!=="auto")return;
+  const ctx=currentScheduleContext();
+  resetNewLessonFormForAutomatic(ctx);
+}
+function goToNextScheduledStudent(){
+  if(scheduleMode!=="auto")return;
+  const ctx=currentScheduleContext();
+  const list=sortedScheduleForDay(ctx.day);
+  const currentHour=Number(scheduleHour(ctx.time));
+  const next=list.find(s=>Number(scheduleHour(s.scheduleTime))>currentHour);
+  if(next){
+    q("student").value=next.id;
+    q("date").value=ctx.date;
+    setScheduleStatus(`${ctx.simulated?"🧪 Simulación":"🤖 Automático"}: siguiente alumno · ${ctx.day} ${next.scheduleTime} · ${displayName(next.name)}`,"ok");
+  }else{
+    q("student").value="";
+    q("date").value=ctx.date;
+    setScheduleStatus(`🤖 ${ctx.day}: no quedan más alumnos programados después de las ${pad2(currentHour)}:00.`,"warn");
+  }
+}
+function setScheduleMode(mode){
+  scheduleMode=mode==="manual"?"manual":"auto"; saveSchedulePrefs(); updateScheduleUI();
+  if(scheduleMode==="auto")refreshAutomaticSuggestion();
+  else setScheduleStatus("✋ Modo manual: puedes elegir cualquier alumno y cualquier fecha.","ok");
+}
+q("modeAuto").onclick=()=>setScheduleMode("auto");
+q("modeManual").onclick=()=>setScheduleMode("manual");
+q("refreshAuto").onclick=refreshAutomaticSuggestion;
+q("scheduleSimulation").onchange=()=>{scheduleSimulation.enabled=q("scheduleSimulation").checked;saveSchedulePrefs();updateScheduleUI();if(scheduleMode==="auto")refreshAutomaticSuggestion()};
+q("simulationDay").value=scheduleSimulation.day||"Lunes";
+q("simulationTime").innerHTML="";for(let h=8;h<=21;h++)q("simulationTime").insertAdjacentHTML("beforeend",`<option>${String(h).padStart(2,"0")}:00</option>`);
+q("simulationTime").value=scheduleSimulation.time||"16:00";
+q("simulationDay").onchange=()=>{scheduleSimulation.day=q("simulationDay").value;saveSchedulePrefs();if(scheduleMode==="auto"&&scheduleSimulation.enabled)refreshAutomaticSuggestion()};
+q("simulationTime").onchange=()=>{scheduleSimulation.time=q("simulationTime").value;saveSchedulePrefs();if(scheduleMode==="auto"&&scheduleSimulation.enabled)refreshAutomaticSuggestion()};
+updateScheduleUI();
+
 function saveL(){
   try{
     localStorage.setItem(LK,JSON.stringify(lessons));
@@ -661,7 +790,7 @@ function renderStudentHistory(id){
 }
 
 window.editLesson=id=>{const x=lessons.find(v=>v.id===id);if(!x)return;editingLessonId=id;q("student").value=x.studentId;q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=x.obs||"";q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";loadRatings(x.ratings||{});window.scrollTo({top:0,behavior:"smooth"});};
-q("cancelLessonEdit").onclick=()=>{editingLessonId=null;q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");q("ratingsBox").style.opacity="1";resetRatings();};
+q("cancelLessonEdit").onclick=()=>{editingLessonId=null;q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");q("ratingsBox").style.opacity="1";resetRatings();if(scheduleMode==="auto")refreshAutomaticSuggestion();};
 window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){rememberDeletedLesson(id);lessons=lessons.filter(x=>x.id!==id);saveL();render();renderStudents()}};
 q("record").onclick=async()=>{try{let st=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];media=new MediaRecorder(st);media.ondataavailable=e=>e.data.size&&chunks.push(e.data);media.onstop=()=>{let b=new Blob(chunks,{type:media.mimeType||"audio/webm"}),r=new FileReader();r.onload=()=>audioData=r.result;r.readAsDataURL(b);st.getTracks().forEach(t=>t.stop())};media.start();q("record").disabled=true;q("stop").disabled=false;q("recText").textContent="🔴 Grabando…"}catch(e){alert("No se ha podido acceder al micrófono.")}};
 q("stop").onclick=()=>{if(media&&media.state!=="inactive"){media.stop();q("record").disabled=false;q("stop").disabled=true;q("recText").textContent="Grabación preparada"}};
@@ -673,7 +802,7 @@ function clearLessonExtras(){
 function getLessonExtras(){
   return {quickWork:window.__getQuickWork?window.__getQuickWork():[],nextClass:q("nextClass").value.trim()};
 }
-q("save").onclick=async()=>{let sid=q("student").value,att=q("attendance").value,g=q("grade").value;if(!sid)return alert("Selecciona un alumno.");if(att==="asiste"&&g==="")return alert("Indica la nota o marca falta.");let s=students.find(x=>x.id===sid);if(editingLessonId){let item=lessons.find(x=>x.id===editingLessonId);if(!item)return alert("No se ha encontrado la clase.");item.studentId=sid;item.student=s.name;item.course=s.course;item.date=q("date").value;item.attendance=att;item.grade=att==="falta"?null:Number(g);item.obs=q("obs").value.trim();const extras=getLessonExtras();item.quickWork=extras.quickWork;item.nextClass=extras.nextClass;item.ratings=att==="falta"?{}:{...ratings};item.autoComment=att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:"");item.schoolYear=year();if(audioData){item.audioData=audioData;if(dir)await saveFile(item)}editingLessonId=null;q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");alert("Cambios guardados.")}else{let item={id:crypto.randomUUID(),studentId:sid,student:s.name,course:s.course,date:q("date").value,attendance:att,grade:att==="falta"?null:Number(g),obs:q("obs").value.trim(),quickWork:getLessonExtras().quickWork,nextClass:getLessonExtras().nextClass,ratings:att==="falta"?{}:{...ratings},autoComment:att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:""),schoolYear:year(),audioData:audioData||null,created:Date.now()};lessons.push(item);if(dir&&audioData)await saveFile(item);alert("Clase guardada.")}saveL();q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";resetRatings();render();renderStudents()};
+q("save").onclick=async()=>{const wasEditing=!!editingLessonId;let sid=q("student").value,att=q("attendance").value,g=q("grade").value;if(!sid)return alert("Selecciona un alumno.");if(att==="asiste"&&g==="")return alert("Indica la nota o marca falta.");let s=students.find(x=>x.id===sid);if(editingLessonId){let item=lessons.find(x=>x.id===editingLessonId);if(!item)return alert("No se ha encontrado la clase.");item.studentId=sid;item.student=s.name;item.course=s.course;item.date=q("date").value;item.attendance=att;item.grade=att==="falta"?null:Number(g);item.obs=q("obs").value.trim();const extras=getLessonExtras();item.quickWork=extras.quickWork;item.nextClass=extras.nextClass;item.ratings=att==="falta"?{}:{...ratings};item.autoComment=att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:"");item.schoolYear=year();if(audioData){item.audioData=audioData;if(dir)await saveFile(item)}editingLessonId=null;q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");alert("Cambios guardados.")}else{let item={id:crypto.randomUUID(),studentId:sid,student:s.name,course:s.course,date:q("date").value,attendance:att,grade:att==="falta"?null:Number(g),obs:q("obs").value.trim(),quickWork:getLessonExtras().quickWork,nextClass:getLessonExtras().nextClass,ratings:att==="falta"?{}:{...ratings},autoComment:att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:""),schoolYear:year(),audioData:audioData||null,created:Date.now()};lessons.push(item);if(dir&&audioData)await saveFile(item);alert("Clase guardada.")}saveL();q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";resetRatings();render();renderStudents();if(scheduleMode==="auto"&&!wasEditing)goToNextScheduledStudent()};
 async function saveFile(x){try{let f=await dir.getDirectoryHandle("Grabaciones",{create:true}),s=await f.getDirectoryHandle(x.student.replace(/[\\/:*?"<>|]/g,"_"),{create:true}),bin=atob(x.audioData.split(",")[1]),a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);let h=await s.getFileHandle(filename(x.student,x.date),{create:true}),w=await h.createWritable();await w.write(a);await w.close()}catch(e){console.warn(e)}}
 q("chooseFolder").onclick=async()=>{if(typeof window.showDirectoryPicker!=="function"){q("folderNote").textContent="Este navegador no permite seleccionar carpetas. Las grabaciones seguirán guardándose en la aplicación.";alert("Este navegador no permite seleccionar una carpeta. Puedes seguir grabando y guardando las clases normalmente.");return;}try{dir=await window.showDirectoryPicker({mode:"readwrite"});q("folderNote").textContent="Carpeta seleccionada: las grabaciones nuevas se copiarán en Grabaciones/Alumno/."}catch(e){if(e&&e.name!=="AbortError")alert("No se ha podido seleccionar la carpeta.");}};
 function download(b,n){let a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
@@ -785,7 +914,7 @@ q("importFile").onchange=async e=>{
     }
     saveS();
     saveL();
-    renderStudents();renderSelect();render();
+    renderStudents();renderSelect();render();if(scheduleMode==="auto")refreshAutomaticSuggestion();
     q("exportStatus").textContent=`Importación completada: ${addedStudents} alumnos nuevos y ${addedLessons} clases nuevas. ${skippedLessons} clases ya estaban registradas.`;
     alert(`Importación completada.\n\nAlumnos nuevos: ${addedStudents}\nAlumnos ya existentes: ${mergedStudents}\nClases nuevas: ${addedLessons}\nClases ya existentes: ${skippedLessons}`);
   }catch(err){
@@ -794,7 +923,7 @@ q("importFile").onchange=async e=>{
   }finally{e.target.value="";}
 };
 
-renderStudents();renderSelect();render();
+renderStudents();renderSelect();render();if(scheduleMode==="auto")refreshAutomaticSuggestion();
 </script>
 <script id="mejoras-v2-js">
 (function(){
