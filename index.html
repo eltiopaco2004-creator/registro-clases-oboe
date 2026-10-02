@@ -166,6 +166,28 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 .simulation-panel.collapsed{display:none}
 @media(max-width:600px){.schedule-control-head{align-items:flex-start;flex-direction:column}.schedule-mode-buttons{width:100%}.schedule-mode-buttons button{flex:1}}
 </style>
+
+<style id="modo-profesor-v7">
+  .today-panel{margin-top:10px;padding:11px 12px;border:1px solid #d7ded9;border-radius:12px;background:#f7f9f7}
+  .today-main{display:flex;justify-content:space-between;gap:10px;align-items:center}
+  .today-name{font-size:17px;font-weight:800}
+  .today-next{font-size:12px;color:#69716d;margin-top:3px}
+  .today-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .today-actions button{margin:0}
+  .quick-class-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:9px}
+  #ratingsBox.quick-hidden,#classExtras.quick-hidden{display:none!important}
+  .weekly-card.collapsed #weeklyAgenda{display:none}
+  .weekly-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .weekly-head h2{margin:0}
+  .weekly-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
+  .weekly-table th,.weekly-table td{border:1px solid #e1e5e2;padding:7px;text-align:left;vertical-align:top}
+  .weekly-table th{background:#f4f6f4}
+  .slot-student{display:block;padding:3px 0}
+  .slot-time{font-weight:700;white-space:nowrap}
+  .week-empty{color:#69716d}
+  .week-now{outline:2px solid #2f5d50;outline-offset:-2px}
+  @media(max-width:600px){.today-main{align-items:flex-start;flex-direction:column}.weekly-table{font-size:11px}.weekly-table th,.weekly-table td{padding:5px}}
+</style>
 </head><body><div class="wrap">
 <header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p></header>
 
@@ -192,10 +214,20 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
     <button type="button" class="secondary" id="refreshAuto" style="display:none">🔄 Actualizar automático</button>
   </div>
 </div>
+<div class="today-panel" id="todayPanel">
+  <div class="today-main">
+    <div><div class="muted" id="todayLabel">Clase actual</div><div class="today-name" id="todayName">—</div><div class="today-next" id="todayNext">—</div></div>
+    <div class="today-actions">
+      <button type="button" class="secondary" id="applyToday">🎯 Cargar clase</button>
+      <button type="button" class="secondary" id="applyNext">➡️ Siguiente</button>
+    </div>
+  </div>
+</div>
 <label>Alumno</label><select id="student"><option value="">Selecciona un alumno…</option></select>
 <div class="row"><div><label>Fecha</label><input id="date" type="date"></div><div><label>Estado</label><select id="attendance"><option value="asiste">🟢 Asiste</option><option value="falta">🔴 Falta</option></select></div></div>
 <div id="gradeBox"><label>Nota (0–10)</label><input id="grade" type="number" min="0" max="10" step=".1"></div>
 
+<button type="button" class="secondary quick-class-toggle" id="quickClassToggle"><span>⚡ Clase rápida</span><span id="quickClassArrow">▾</span></button>
 <div id="ratingsBox">
 <h3>📊 Valoración de la clase</h3>
 <p class="rating-help">1 = Necesita mejorar · 2 = En proceso · 3 = Adecuado · 4 = Bien · 5 = Muy bien</p>
@@ -318,6 +350,12 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 </section>
 
 
+
+<section class="card weekly-card collapsed" id="weeklyCard">
+  <div class="weekly-head"><h2>📅 Agenda semanal</h2><button type="button" class="secondary" id="toggleWeekly">Abrir agenda</button></div>
+  <p class="muted" id="weeklyHelp">Vista rápida de los alumnos y sus franjas horarias.</p>
+  <div id="weeklyAgenda"></div>
+</section>
 
 <section class="card" id="studentsCard">
   <div class="students-head">
@@ -584,8 +622,15 @@ function setScheduleMode(mode){
   if(scheduleMode==="auto")refreshAutomaticSuggestion();
   else setScheduleStatus("✋ Modo manual: puedes elegir cualquier alumno y cualquier fecha.","ok");
 }
-q("modeAuto").onclick=()=>setScheduleMode("auto");
+q("modeAuto").onclick=()=>{manualJumpStudentId="";setScheduleMode("auto")};
 q("modeManual").onclick=()=>setScheduleMode("manual");
+q("student").addEventListener("change",()=>{
+  if(scheduleMode!=="auto")return;
+  const ctx=currentScheduleContext();
+  const expected=studentsForSlot(ctx.day,scheduleHour(ctx.time))[0];
+  const chosen=students.find(st=>st.id===q("student").value);
+  if(chosen&&(!expected||chosen.id!==expected.id)) manualJumpStudentId=chosen.id; else manualJumpStudentId="";
+});
 q("refreshAuto").onclick=refreshAutomaticSuggestion;
 q("scheduleSimulation").onchange=()=>{scheduleSimulation.enabled=q("scheduleSimulation").checked;saveSchedulePrefs();updateScheduleUI();if(scheduleMode==="auto")refreshAutomaticSuggestion()};
 q("simulationDay").value=scheduleSimulation.day||"Lunes";
@@ -594,6 +639,82 @@ q("simulationTime").value=scheduleSimulation.time||"16:00";
 q("simulationDay").onchange=()=>{scheduleSimulation.day=q("simulationDay").value;saveSchedulePrefs();if(scheduleMode==="auto"&&scheduleSimulation.enabled)refreshAutomaticSuggestion()};
 q("simulationTime").onchange=()=>{scheduleSimulation.time=q("simulationTime").value;saveSchedulePrefs();if(scheduleMode==="auto"&&scheduleSimulation.enabled)refreshAutomaticSuggestion()};
 updateScheduleUI();
+
+// V7: modo profesor. Estas funciones no modifican las grabaciones.
+let quickClassMode=false;
+let manualJumpStudentId="";
+function scheduleDisplayContext(){
+  const ctx=currentScheduleContext();
+  return ctx;
+}
+function findNextScheduledAfter(ctx, includeCurrent=false){
+  const list=sortedScheduleForDay(ctx.day);
+  const h=Number(scheduleHour(ctx.time));
+  return list.find(st=>{
+    const sh=Number(scheduleHour(st.scheduleTime));
+    return includeCurrent ? sh>=h : sh>h;
+  })||null;
+}
+function updateTodayPanel(){
+  const ctx=scheduleDisplayContext();
+  const current=studentsForSlot(ctx.day,scheduleHour(ctx.time))[0]||null;
+  const next=findNextScheduledAfter(ctx,false);
+  const name=q("todayName"),nextEl=q("todayNext"),label=q("todayLabel");
+  if(!name)return;
+  label.textContent=(ctx.simulated?"🧪 Simulación · ":"")+ctx.day+" · "+ctx.time;
+  name.textContent=current?displayName(current.name):"No hay alumno en esta franja";
+  nextEl.textContent=next?`Después: ${displayName(next.name)} · ${next.scheduleTime}`:"Después: no quedan más alumnos programados hoy";
+}
+function applyCurrentScheduleToForm(){
+  if(scheduleMode!=="auto"){setScheduleMode("auto");return;}
+  refreshAutomaticSuggestion();
+}
+function applyNextScheduleToForm(){
+  if(scheduleMode!=="auto"){setScheduleMode("auto");}
+  const ctx=scheduleDisplayContext();
+  const next=findNextScheduledAfter(ctx,false);
+  if(next){
+    q("student").value=next.id;q("date").value=ctx.date;
+    setScheduleStatus(`${ctx.simulated?"🧪 Simulación":"🤖 Automático"}: siguiente alumno · ${ctx.day} ${next.scheduleTime} · ${displayName(next.name)}`,"ok");
+  }else setScheduleStatus(`${ctx.day}: no quedan más alumnos programados después de las ${ctx.time}.`,"warn");
+}
+function renderWeeklyAgenda(){
+  const box=q("weeklyAgenda");if(!box)return;
+  const days=TEACHING_DAYS;
+  const rows=[];
+  const times=[...new Set(students.filter(s=>s.scheduleTime).map(s=>s.scheduleTime))].sort();
+  if(!times.length){box.innerHTML='<p class="week-empty">Todavía no hay horarios asignados a los alumnos.</p>';return;}
+  const ctx=scheduleDisplayContext();
+  rows.push(`<table class="weekly-table"><thead><tr><th>Hora</th>${days.map(d=>`<th>${d.slice(0,3)}</th>`).join("")}</tr></thead><tbody>`);
+  for(const t of times){
+    const cells=days.map(d=>{
+      const ss=students.filter(s=>s.scheduleDay===d&&s.scheduleTime===t);
+      const nowClass=ctx.day===d&&ctx.time===t?" class=\"week-now\"":"";
+      return `<td${nowClass}>${ss.length?ss.map(st=>`<span class="slot-student">${esc(displayName(st.name))}</span>`).join(""):"<span class=\"week-empty\">—</span>"}</td>`;
+    }).join("");
+    rows.push(`<tr><td class="slot-time">${esc(t)}</td>${cells}</tr>`);
+  }
+  rows.push('</tbody></table>');box.innerHTML=rows.join("");
+}
+function updateProfessorUI(){updateTodayPanel();renderWeeklyAgenda();}
+q("applyToday").onclick=applyCurrentScheduleToForm;
+q("applyNext").onclick=applyNextScheduleToForm;
+q("quickClassToggle").onclick=()=>{
+  quickClassMode=!quickClassMode;
+  q("ratingsBox").classList.toggle("quick-hidden",quickClassMode);
+  q("classExtras").classList.toggle("quick-hidden",quickClassMode);
+  q("quickClassArrow").textContent=quickClassMode?"▸":"▾";
+  q("quickClassToggle").querySelector("span").textContent=quickClassMode?"⚡ Clase rápida (activa)":"⚡ Clase rápida";
+};
+q("toggleWeekly").onclick=()=>{
+  const card=q("weeklyCard"),collapsed=card.classList.toggle("collapsed");
+  q("toggleWeekly").textContent=collapsed?"Abrir agenda":"Cerrar agenda";
+  if(!collapsed)renderWeeklyAgenda();
+};
+const _oldRefreshAutomaticSuggestion=refreshAutomaticSuggestion;
+refreshAutomaticSuggestion=function(){_oldRefreshAutomaticSuggestion();updateProfessorUI();};
+const _oldSetScheduleMode=setScheduleMode;
+setScheduleMode=function(mode){_oldSetScheduleMode(mode);updateProfessorUI();};
 
 function saveL(){
   try{
@@ -802,7 +923,21 @@ function clearLessonExtras(){
 function getLessonExtras(){
   return {quickWork:window.__getQuickWork?window.__getQuickWork():[],nextClass:q("nextClass").value.trim()};
 }
-q("save").onclick=async()=>{const wasEditing=!!editingLessonId;let sid=q("student").value,att=q("attendance").value,g=q("grade").value;if(!sid)return alert("Selecciona un alumno.");if(att==="asiste"&&g==="")return alert("Indica la nota o marca falta.");let s=students.find(x=>x.id===sid);if(editingLessonId){let item=lessons.find(x=>x.id===editingLessonId);if(!item)return alert("No se ha encontrado la clase.");item.studentId=sid;item.student=s.name;item.course=s.course;item.date=q("date").value;item.attendance=att;item.grade=att==="falta"?null:Number(g);item.obs=q("obs").value.trim();const extras=getLessonExtras();item.quickWork=extras.quickWork;item.nextClass=extras.nextClass;item.ratings=att==="falta"?{}:{...ratings};item.autoComment=att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:"");item.schoolYear=year();if(audioData){item.audioData=audioData;if(dir)await saveFile(item)}editingLessonId=null;q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");alert("Cambios guardados.")}else{let item={id:crypto.randomUUID(),studentId:sid,student:s.name,course:s.course,date:q("date").value,attendance:att,grade:att==="falta"?null:Number(g),obs:q("obs").value.trim(),quickWork:getLessonExtras().quickWork,nextClass:getLessonExtras().nextClass,ratings:att==="falta"?{}:{...ratings},autoComment:att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:""),schoolYear:year(),audioData:audioData||null,created:Date.now()};lessons.push(item);if(dir&&audioData)await saveFile(item);alert("Clase guardada.")}saveL();q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";resetRatings();render();renderStudents();if(scheduleMode==="auto"&&!wasEditing)goToNextScheduledStudent()};
+q("save").onclick=async()=>{const wasEditing=!!editingLessonId;let sid=q("student").value,att=q("attendance").value,g=q("grade").value;if(!sid)return alert("Selecciona un alumno.");if(att==="asiste"&&g==="")return alert("Indica la nota o marca falta.");let s=students.find(x=>x.id===sid);if(editingLessonId){let item=lessons.find(x=>x.id===editingLessonId);if(!item)return alert("No se ha encontrado la clase.");item.studentId=sid;item.student=s.name;item.course=s.course;item.date=q("date").value;item.attendance=att;item.grade=att==="falta"?null:Number(g);item.obs=q("obs").value.trim();const extras=getLessonExtras();item.quickWork=extras.quickWork;item.nextClass=extras.nextClass;item.ratings=att==="falta"?{}:{...ratings};item.autoComment=att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:"");item.schoolYear=year();if(audioData){item.audioData=audioData;if(dir)await saveFile(item)}editingLessonId=null;q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");alert("Cambios guardados.")}else{let item={id:crypto.randomUUID(),studentId:sid,student:s.name,course:s.course,date:q("date").value,attendance:att,grade:att==="falta"?null:Number(g),obs:q("obs").value.trim(),quickWork:getLessonExtras().quickWork,nextClass:getLessonExtras().nextClass,ratings:att==="falta"?{}:{...ratings},autoComment:att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:""),schoolYear:year(),audioData:audioData||null,created:Date.now()};lessons.push(item);if(dir&&audioData)await saveFile(item);alert("Clase guardada.")}saveL();q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";resetRatings();render();renderStudents();
+  if(scheduleMode==="auto"&&!wasEditing){
+    if(manualJumpStudentId){
+      const jumped=students.find(st=>st.id===manualJumpStudentId);
+      manualJumpStudentId="";
+      const ctx=currentScheduleContext();
+      const list=sortedScheduleForDay(ctx.day);
+      const idx=jumped?list.findIndex(st=>st.id===jumped.id):-1;
+      const next=idx>=0?list[idx+1]:null;
+      if(next){q("student").value=next.id;q("date").value=ctx.date;setScheduleStatus(`🤖 Automático: siguiente alumno · ${ctx.day} ${next.scheduleTime} · ${displayName(next.name)}`,"ok");}
+      else refreshAutomaticSuggestion();
+    }else goToNextScheduledStudent();
+  }
+  updateProfessorUI();
+};
 async function saveFile(x){try{let f=await dir.getDirectoryHandle("Grabaciones",{create:true}),s=await f.getDirectoryHandle(x.student.replace(/[\\/:*?"<>|]/g,"_"),{create:true}),bin=atob(x.audioData.split(",")[1]),a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);let h=await s.getFileHandle(filename(x.student,x.date),{create:true}),w=await h.createWritable();await w.write(a);await w.close()}catch(e){console.warn(e)}}
 q("chooseFolder").onclick=async()=>{if(typeof window.showDirectoryPicker!=="function"){q("folderNote").textContent="Este navegador no permite seleccionar carpetas. Las grabaciones seguirán guardándose en la aplicación.";alert("Este navegador no permite seleccionar una carpeta. Puedes seguir grabando y guardando las clases normalmente.");return;}try{dir=await window.showDirectoryPicker({mode:"readwrite"});q("folderNote").textContent="Carpeta seleccionada: las grabaciones nuevas se copiarán en Grabaciones/Alumno/."}catch(e){if(e&&e.name!=="AbortError")alert("No se ha podido seleccionar la carpeta.");}};
 function download(b,n){let a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
@@ -914,7 +1049,7 @@ q("importFile").onchange=async e=>{
     }
     saveS();
     saveL();
-    renderStudents();renderSelect();render();if(scheduleMode==="auto")refreshAutomaticSuggestion();
+    renderStudents();renderSelect();render();if(scheduleMode==="auto")refreshAutomaticSuggestion();updateProfessorUI();
     q("exportStatus").textContent=`Importación completada: ${addedStudents} alumnos nuevos y ${addedLessons} clases nuevas. ${skippedLessons} clases ya estaban registradas.`;
     alert(`Importación completada.\n\nAlumnos nuevos: ${addedStudents}\nAlumnos ya existentes: ${mergedStudents}\nClases nuevas: ${addedLessons}\nClases ya existentes: ${skippedLessons}`);
   }catch(err){
