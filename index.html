@@ -920,7 +920,7 @@ function renderStudentHistory(id){
 
 window.editLesson=id=>{const x=lessons.find(v=>v.id===id);if(!x)return;editingLessonId=id;q("student").value=x.studentId;q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=x.obs||"";q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";loadRatings(x.ratings||{});window.scrollTo({top:0,behavior:"smooth"});};
 q("cancelLessonEdit").onclick=()=>{editingLessonId=null;q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");q("ratingsBox").style.opacity="1";resetRatings();if(scheduleMode==="auto")refreshAutomaticSuggestion();};
-window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){rememberDeletedLesson(id);lessons=lessons.filter(x=>x.id!==id);saveL();render();renderStudents()}};
+window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){rememberDeletedLesson(id);lessons=lessons.filter(x=>x.id!==id);saveL();markLocalSyncDirty();render();renderStudents()}};
 q("record").onclick=async()=>{try{let st=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];media=new MediaRecorder(st);media.ondataavailable=e=>e.data.size&&chunks.push(e.data);media.onstop=()=>{let b=new Blob(chunks,{type:media.mimeType||"audio/webm"}),r=new FileReader();r.onload=()=>audioData=r.result;r.readAsDataURL(b);st.getTracks().forEach(t=>t.stop())};media.start();q("record").disabled=true;q("stop").disabled=false;q("recText").textContent="🔴 Grabando…"}catch(e){alert("No se ha podido acceder al micrófono.")}};
 q("stop").onclick=()=>{if(media&&media.state!=="inactive"){media.stop();q("record").disabled=false;q("stop").disabled=true;q("recText").textContent="Grabación preparada"}};
 function filename(name,date){let p=name.trim().split(/\s+/),first=(p[0]||"Grabacion").replace(/[\\/:*?"<>|]/g,"_"),ini=p.slice(1).map(x=>x[0]).join("").toUpperCase(),d=new Date(),t=`${String(d.getHours()).padStart(2,"0")}-${String(d.getMinutes()).padStart(2,"0")}`;return `${first}${ini?"_"+ini:""}_${date}_${t}.webm`}
@@ -931,7 +931,7 @@ function clearLessonExtras(){
 function getLessonExtras(){
   return {quickWork:window.__getQuickWork?window.__getQuickWork():[],nextClass:q("nextClass").value.trim()};
 }
-q("save").onclick=async()=>{const wasEditing=!!editingLessonId;let sid=q("student").value,att=q("attendance").value,g=q("grade").value;if(!sid)return alert("Selecciona un alumno.");if(att==="asiste"&&g==="")return alert("Indica la nota o marca falta.");let s=students.find(x=>x.id===sid);if(editingLessonId){let item=lessons.find(x=>x.id===editingLessonId);if(!item)return alert("No se ha encontrado la clase.");item.studentId=sid;item.student=s.name;item.course=s.course;item.date=q("date").value;item.attendance=att;item.grade=att==="falta"?null:Number(g);item.obs=q("obs").value.trim();const extras=getLessonExtras();item.quickWork=extras.quickWork;item.nextClass=extras.nextClass;item.ratings=att==="falta"?{}:{...ratings};item.autoComment=att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:"");item.schoolYear=year();if(audioData){item.audioData=audioData;if(dir)await saveFile(item)}editingLessonId=null;q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");alert("Cambios guardados.")}else{let item={id:crypto.randomUUID(),studentId:sid,student:s.name,course:s.course,date:q("date").value,attendance:att,grade:att==="falta"?null:Number(g),obs:q("obs").value.trim(),quickWork:getLessonExtras().quickWork,nextClass:getLessonExtras().nextClass,ratings:att==="falta"?{}:{...ratings},autoComment:att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:""),schoolYear:year(),audioData:audioData||null,created:Date.now()};lessons.push(item);if(dir&&audioData)await saveFile(item);alert("Clase guardada.")}saveL();markLocalSyncDirty();q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";resetRatings();render();renderStudents();
+q("save").onclick=async()=>{const wasEditing=!!editingLessonId;let sid=q("student").value,att=q("attendance").value,g=q("grade").value;if(!sid)return alert("Selecciona un alumno.");if(att==="asiste"&&g==="")return alert("Indica la nota o marca falta.");let s=students.find(x=>x.id===sid);if(editingLessonId){let item=lessons.find(x=>x.id===editingLessonId);if(!item)return alert("No se ha encontrado la clase.");item.studentId=sid;item.student=s.name;item.course=s.course;item.date=q("date").value;item.attendance=att;item.grade=att==="falta"?null:Number(g);item.obs=q("obs").value.trim();const extras=getLessonExtras();item.quickWork=extras.quickWork;item.nextClass=extras.nextClass;item.ratings=att==="falta"?{}:{...ratings};item.autoComment=att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:"");item.schoolYear=year();item.updatedAt=Date.now();if(audioData){item.audioData=audioData;if(dir)await saveFile(item)}editingLessonId=null;q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");alert("Cambios guardados.")}else{let item={id:crypto.randomUUID(),studentId:sid,student:s.name,course:s.course,date:q("date").value,attendance:att,grade:att==="falta"?null:Number(g),obs:q("obs").value.trim(),quickWork:getLessonExtras().quickWork,nextClass:getLessonExtras().nextClass,ratings:att==="falta"?{}:{...ratings},autoComment:att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:""),schoolYear:year(),audioData:audioData||null,created:Date.now(),updatedAt:Date.now()};lessons.push(item);if(dir&&audioData)await saveFile(item);alert("Clase guardada.")}saveL();markLocalSyncDirty();q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";resetRatings();render();renderStudents();
   if(scheduleMode==="auto"&&!wasEditing){
     if(manualJumpStudentId){
       const jumped=students.find(st=>st.id===manualJumpStudentId);
@@ -1213,16 +1213,22 @@ async function doLogin(email,password,automatic=false){
 q("loginBtn").onclick=()=>doLogin(q("authEmail").value.trim(),q("authPassword").value,false);
 q("logoutBtn").onclick=()=>{clearTokens();updateAuthUI(null);syncMsg("Sesión cerrada.");};
 q("rememberAccess").onchange=()=>{if(!q("rememberAccess").checked)localStorage.removeItem(AUTH_STORAGE);};
-function syncPayload(){return {version:14,schoolYear:year(),deviceId,students,lessons,deletedStudentKeys:[...new Set(deletedStudentKeys)],deletedLessonIds:[...new Set(deletedLessonIds)]};}
+function syncPayload(){return {version:15,schoolYear:year(),deviceId,students,lessons,deletedStudentKeys:[...new Set(deletedStudentKeys)],deletedLessonIds:[...new Set(deletedLessonIds)]};}
+function normalizeLessonForSync(x){
+  if(!x||!x.id)return null;
+  const y={...x};
+  if(!y.updatedAt)y.updatedAt=Number(y.created||0)||Date.now();
+  return y;
+}
 function mergeSyncData(cloud){
-  if(!cloud||typeof cloud!=="object")return {studentsAdded:0,lessonsAdded:0,studentsDeleted:0,lessonsDeleted:0,studentsUpdated:0};
+  if(!cloud||typeof cloud!=="object")return {studentsAdded:0,lessonsAdded:0,studentsDeleted:0,lessonsDeleted:0,studentsUpdated:0,lessonsUpdated:0};
   const cs=Array.isArray(cloud.students)?cloud.students:[],cl=Array.isArray(cloud.lessons)?cloud.lessons:[];
   const remoteDeletedStudents=Array.isArray(cloud.deletedStudentKeys)?cloud.deletedStudentKeys:[];
   const remoteDeletedLessons=Array.isArray(cloud.deletedLessonIds)?cloud.deletedLessonIds:[];
   deletedStudentKeys=[...new Set([...deletedStudentKeys,...remoteDeletedStudents])];
   deletedLessonIds=[...new Set([...deletedLessonIds,...remoteDeletedLessons])];
   const deletedStudentSet=new Set(deletedStudentKeys),deletedLessonSet=new Set(deletedLessonIds);
-  let studentsDeleted=0,lessonsDeleted=0,studentsUpdated=0;
+  let studentsDeleted=0,lessonsDeleted=0,studentsUpdated=0,lessonsUpdated=0;
   const beforeStudents=students.length;
   students=students.filter(s=>!deletedStudentSet.has(mergeKey(s.name,s.course)));
   studentsDeleted=beforeStudents-students.length;
@@ -1231,28 +1237,50 @@ function mergeSyncData(cloud){
   lessonsDeleted=beforeLessons-lessons.length;
   const sm=new Map(students.map(s=>[mergeKey(s.name,s.course),s]));
   const smById=new Map(students.filter(s=>s&&s.id).map(s=>[String(s.id),s]));
-  const lm=new Map(lessons.map(x=>[x.id,x]));
+  const lm=new Map(lessons.map(x=>[String(x.id),x]));
   let studentsAdded=0,lessonsAdded=0;
   for(const s of cs){
     if(!s||!s.name)continue;
-    const k=mergeKey(s.name,s.course); if(deletedStudentSet.has(k))continue;
+    const k=mergeKey(s.name,s.course);if(deletedStudentSet.has(k))continue;
     const local=smById.get(String(s.id))||sm.get(k);
     if(!local){students.push(s);sm.set(k,s);if(s.id)smById.set(String(s.id),s);studentsAdded++;continue;}
     const rt=Number(s.updatedAt||0),lt=Number(local.updatedAt||0);
     if(rt>lt){
-      const keepId=local.id||s.id;
-      Object.assign(local,s);
-      local.id=keepId;
-      sm.set(mergeKey(local.name,local.course),local);
-      if(local.id)smById.set(String(local.id),local);
-      studentsUpdated++;
-    }else if(!local.updatedAt&&s.updatedAt){
-      local.updatedAt=s.updatedAt;
-    }
+      const keepId=local.id||s.id;Object.assign(local,s);local.id=keepId;
+      sm.set(mergeKey(local.name,local.course),local);if(local.id)smById.set(String(local.id),local);studentsUpdated++;
+    }else if(!local.updatedAt&&s.updatedAt)local.updatedAt=s.updatedAt;
   }
-  for(const x of cl){if(!x||!x.id)continue;if(deletedLessonSet.has(String(x.id)))continue;if(!lm.has(x.id)){lessons.push(x);lm.set(x.id,x);lessonsAdded++;}}
+  for(const raw of cl){
+    const x=normalizeLessonForSync(raw);if(!x||deletedLessonSet.has(String(x.id)))continue;
+    const local=lm.get(String(x.id));
+    if(!local){lessons.push(x);lm.set(String(x.id),x);lessonsAdded++;continue;}
+    const rt=Number(x.updatedAt||x.created||0),lt=Number(local.updatedAt||local.created||0);
+    if(rt>lt){Object.assign(local,x);lessonsUpdated++;}
+    else if(!local.updatedAt&&x.updatedAt)local.updatedAt=x.updatedAt;
+  }
+  lessons=lessons.map(normalizeLessonForSync).filter(Boolean);
   saveDeleted();saveS();saveL();renderStudents();renderSelect();render();updateProfessorUI();
-  return {studentsAdded,lessonsAdded,studentsDeleted,lessonsDeleted,studentsUpdated};
+  return {studentsAdded,lessonsAdded,studentsDeleted,lessonsDeleted,studentsUpdated,lessonsUpdated};
+}
+function mergedSyncPayload(cloud){
+  const localPayload=syncPayload();
+  if(!cloud||typeof cloud!=="object")return localPayload;
+  const remoteDeletedStudents=Array.isArray(cloud.deletedStudentKeys)?cloud.deletedStudentKeys:[];
+  const remoteDeletedLessons=Array.isArray(cloud.deletedLessonIds)?cloud.deletedLessonIds:[];
+  const deletedS=[...new Set([...localPayload.deletedStudentKeys,...remoteDeletedStudents])];
+  const deletedL=[...new Set([...localPayload.deletedLessonIds,...remoteDeletedLessons])];
+  const ds=new Set(deletedS),dl=new Set(deletedL);
+  const studentMap=new Map();
+  for(const raw of [...(Array.isArray(cloud.students)?cloud.students:[]),...(Array.isArray(localPayload.students)?localPayload.students:[])]){
+    if(!raw||!raw.name)continue;const k=mergeKey(raw.name,raw.course);if(ds.has(k))continue;
+    const old=studentMap.get(k);if(!old||Number(raw.updatedAt||0)>Number(old.updatedAt||0))studentMap.set(k,raw);
+  }
+  const lessonMap=new Map();
+  for(const raw of [...(Array.isArray(cloud.lessons)?cloud.lessons:[]),...(Array.isArray(localPayload.lessons)?localPayload.lessons:[])]){
+    const x=normalizeLessonForSync(raw);if(!x||dl.has(String(x.id)))continue;
+    const old=lessonMap.get(String(x.id));if(!old||Number(x.updatedAt||x.created||0)>Number(old.updatedAt||old.created||0))lessonMap.set(String(x.id),x);
+  }
+  return {version:15,schoolYear:year(),deviceId,students:[...studentMap.values()],lessons:[...lessonMap.values()],deletedStudentKeys:deletedS,deletedLessonIds:deletedL};
 }
 async function syncRequest(method,path,body){
   let r=await authFetch(path,{method,body:body===undefined?undefined:JSON.stringify(body)});
@@ -1266,19 +1294,34 @@ q("syncBtn").onclick=async()=>{
   try{
     const r=await syncRequest("GET",`/rest/v1/${SYNC_TABLE}?select=data,updated_at&user_id=eq.${encodeURIComponent(userId)}&limit=1`);
     if(!r.ok){const d=await r.text();throw new Error(d||("HTTP "+r.status));}
-    const rows=await r.json();let added={studentsAdded:0,lessonsAdded:0,studentsDeleted:0,lessonsDeleted:0,studentsUpdated:0};
-    if(rows.length&&rows[0].data)added=mergeSyncData(rows[0].data);
+    const rows=await r.json();const cloud=rows.length&&rows[0].data?rows[0].data:null;
+    const added=cloud?mergeSyncData(cloud):{studentsAdded:0,lessonsAdded:0,studentsDeleted:0,lessonsDeleted:0,studentsUpdated:0,lessonsUpdated:0};
+    const combined=mergedSyncPayload(cloud);
     const now=new Date().toISOString();
-    const payload={user_id:userId,data:syncPayload(),updated_at:now};
+    const payload={user_id:userId,data:combined,updated_at:now};
     let up;
     if(rows.length)up=await syncRequest("PATCH",`/rest/v1/${SYNC_TABLE}?user_id=eq.${encodeURIComponent(userId)}`,{data:payload.data,updated_at:now});
     else up=await syncRequest("POST",`/rest/v1/${SYNC_TABLE}`,payload);
     if(!up.ok){const d=await up.text();throw new Error(d||("HTTP "+up.status));}
+    // Verify that the cloud actually contains the lesson IDs we just sent.
+    const check=await syncRequest("GET",`/rest/v1/${SYNC_TABLE}?select=data&user_id=eq.${encodeURIComponent(userId)}&limit=1`);
+    if(!check.ok)throw new Error("No se ha podido verificar la sincronización.");
+    const checkRows=await check.json();const remoteAfter=checkRows.length&&checkRows[0].data?checkRows[0].data:null;
+    const expectedLessonIds=new Set((combined.lessons||[]).map(x=>String(x.id)));
+    const remoteLessonIds=new Set((remoteAfter?.lessons||[]).map(x=>String(x.id)));
+    const missing=[...expectedLessonIds].filter(id=>!remoteLessonIds.has(id));
+    if(missing.length){
+      const retryNow=new Date().toISOString();
+      const retryData=mergedSyncPayload(remoteAfter);
+      const retry=await syncRequest("PATCH",`/rest/v1/${SYNC_TABLE}?user_id=eq.${encodeURIComponent(userId)}`,{data:retryData,updated_at:retryNow});
+      if(!retry.ok){const d=await retry.text();throw new Error(d||("HTTP "+retry.status));}
+    }
     saveSyncMeta({lastSyncAt:now,localDirty:false});
     const parts=[];
     if(added.studentsAdded)parts.push(`${added.studentsAdded} alumno${added.studentsAdded===1?"":"s"} nuevo${added.studentsAdded===1?"":"s"}`);
-    if(added.studentsUpdated)parts.push(`${added.studentsUpdated} horario${added.studentsUpdated===1?"":"s"} actualizado${added.studentsUpdated===1?"":"s"}`);
+    if(added.studentsUpdated)parts.push(`${added.studentsUpdated} ficha${added.studentsUpdated===1?"":"s"} actualizada${added.studentsUpdated===1?"":"s"}`);
     if(added.lessonsAdded)parts.push(`${added.lessonsAdded} clase${added.lessonsAdded===1?"":"s"} nueva${added.lessonsAdded===1?"":"s"}`);
+    if(added.lessonsUpdated)parts.push(`${added.lessonsUpdated} clase${added.lessonsUpdated===1?"":"s"} actualizada${added.lessonsUpdated===1?"":"s"}`);
     if(added.studentsDeleted||added.lessonsDeleted)parts.push(`${added.studentsDeleted} alumno${added.studentsDeleted===1?"":"s"} y ${added.lessonsDeleted} clase${added.lessonsDeleted===1?"":"s"} eliminados`);
     syncMsg(parts.length?`✅ Sincronización completada: ${parts.join(" · ")}.`:`✅ Sincronización completada. No había cambios nuevos.`);
     updateSyncState(now);
