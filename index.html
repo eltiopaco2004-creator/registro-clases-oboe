@@ -188,6 +188,9 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
   .week-now{outline:2px solid #2f5d50;outline-offset:-2px}
   @media(max-width:600px){.today-main{align-items:flex-start;flex-direction:column}.weekly-table{font-size:11px}.weekly-table th,.weekly-table td{padding:5px}}
 </style>
+<style id="student-profile-v10">
+.student-link{background:none!important;border:0!important;padding:0!important;margin:0!important;color:#2f5d50!important;font:inherit!important;font-weight:800!important;text-align:left!important;cursor:pointer!important;text-decoration:none!important}.student-link:hover{text-decoration:underline!important}.student-profile-modal{position:fixed;inset:0;background:rgba(20,28,24,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}.student-profile-modal.hidden{display:none!important}.student-profile-dialog{background:#fff;border-radius:18px;max-width:760px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 18px 60px rgba(0,0,0,.22)}.student-profile-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 18px 12px;position:sticky;top:0;background:#fff;border-bottom:1px solid #e3e8e5;z-index:2}.student-profile-title{font-size:22px;font-weight:800;color:#25312c}.student-profile-subtitle{font-size:13px;color:#69716d;margin-top:4px}.student-profile-body{padding:16px 18px 22px}.profile-block{border:1px solid #dde4e0;border-radius:13px;padding:13px;margin-bottom:12px;background:#fbfcfb}.profile-block h3{margin:0 0 10px;font-size:15px}.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.profile-contact{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.profile-contact a{color:#2f5d50;font-weight:700;text-decoration:none}.profile-contact a:hover{text-decoration:underline}.profile-readonly{white-space:pre-wrap;line-height:1.45;color:#303936}.profile-history-item{border-top:1px solid #e1e6e3;padding:10px 0}.profile-history-item:first-child{border-top:0;padding-top:0}.profile-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.profile-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.profile-empty{color:#69716d;font-size:13px}@media(max-width:600px){.student-profile-modal{padding:0;align-items:stretch}.student-profile-dialog{max-height:100vh;border-radius:0}.profile-grid,.profile-edit-grid{grid-template-columns:1fr}.student-profile-title{font-size:20px}.student-profile-head{padding-top:14px}}
+</style>
 </head><body><div class="wrap">
 <header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p></header>
 
@@ -300,7 +303,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V9 · Sincronización intuitiva</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10 · Fichas de alumnos</b></div>
   </div>
 
   <div class="config-section-block" id="syncBlock">
@@ -667,8 +670,8 @@ function updateTodayPanel(){
   const name=q("todayName"),nextEl=q("todayNext"),label=q("todayLabel");
   if(!name)return;
   label.textContent=(ctx.simulated?"🧪 Simulación · ":"")+ctx.day+" · "+ctx.time;
-  name.textContent=current?displayName(current.name):"No hay alumno en esta franja";
-  nextEl.textContent=next?`Después: ${displayName(next.name)} · ${next.scheduleTime}`:"Después: no quedan más alumnos programados hoy";
+  name.innerHTML=current?`<button type="button" class="student-link" onclick="openStudentProfile('${esc(current.id)}')">${esc(displayName(current.name))}</button>`:"No hay alumno en esta franja";
+  nextEl.innerHTML=next?`Después: <button type="button" class="student-link" onclick="openStudentProfile('${esc(next.id)}')">${esc(displayName(next.name))}</button> · ${esc(next.scheduleTime)}`:"Después: no quedan más alumnos programados hoy";
 }
 function applyCurrentScheduleToForm(){
   if(scheduleMode!=="auto"){setScheduleMode("auto");return;}
@@ -695,7 +698,7 @@ function renderWeeklyAgenda(){
     const cells=days.map(d=>{
       const ss=students.filter(s=>s.scheduleDay===d&&s.scheduleTime===t);
       const nowClass=ctx.day===d&&ctx.time===t?" class=\"week-now\"":"";
-      return `<td${nowClass}>${ss.length?ss.map(st=>`<span class="slot-student">${esc(displayName(st.name))}</span>`).join(""):"<span class=\"week-empty\">—</span>"}</td>`;
+      return `<td${nowClass}>${ss.length?ss.map(st=>`<span class="slot-student"><button type="button" class="student-link" onclick="openStudentProfile('${esc(st.id)}')">${esc(displayName(st.name))}</button></span>`).join(""):"<span class=\"week-empty\">—</span>"}</td>`;
     }).join("");
     rows.push(`<tr><td class="slot-time">${esc(t)}</td>${cells}</tr>`);
   }
@@ -773,7 +776,7 @@ function renderStudents(){
     let n=lessons.filter(x=>(x.schoolYear||year())===year()&&x.studentId===s.id).length,
         f=lessons.filter(x=>(x.schoolYear||year())===year()&&x.studentId===s.id&&x.attendance==="falta").length,
         hor=s.scheduleDay&&s.scheduleTime?` · ${esc(s.scheduleDay)} ${esc(s.scheduleTime)}`:"";
-    return `<div class="item"><b>${esc(displayName(s.name))}</b><div class="muted">${esc(s.course)}${hor} · ${n} clases · ${f} faltas</div><button class="secondary" onclick="editStudent('${s.id}')">✏️ Editar</button><button class="danger" onclick="deleteStudent('${s.id}')">🗑️</button></div>`
+    return `<div class="item"><button type="button" class="student-link" onclick="openStudentProfile('${esc(s.id)}')">${esc(displayName(s.name))}</button><div class="muted">${esc(s.course)}${hor} · ${n} clases · ${f} faltas</div><button class="secondary" onclick="editStudent('${s.id}')">✏️ Editar</button><button class="danger" onclick="deleteStudent('${s.id}')">🗑️</button></div>`
   }).join("");
   updateStudentsPanel();
 }
@@ -847,7 +850,7 @@ function renderHistoryStudents(){
     const next=ls.find(x=>x.nextClass);
     return `<div class="item student-card history-student" data-student-id="${esc(s.id)}" style="cursor:pointer">
       <div class="student-top">
-        <div><b>${esc(displayName(s.name))}</b><div class="student-last">${esc(s.course)} · ${ls.length} clases · ${f} faltas · media ${av}</div><div class="student-last">${esc(lastText)}</div>${next?`<div class="student-last">➡️ ${esc(next.nextClass)}</div>`:""}</div>
+        <div><button type="button" class="student-link" onclick="openStudentProfile('${esc(s.id)}');event.stopPropagation()">${esc(displayName(s.name))}</button><div class="student-last">${esc(s.course)} · ${ls.length} clases · ${f} faltas · media ${av}</div><div class="student-last">${esc(lastText)}</div>${next?`<div class="student-last">➡️ ${esc(next.nextClass)}</div>`:""}</div>
         <button type="button" class="secondary history-open" data-student-id="${esc(s.id)}">📚 Ver ficha</button>
       </div>
     </div>`;
@@ -1226,18 +1229,22 @@ function mergeSyncData(cloud){
   const beforeLessons=lessons.length;
   lessons=lessons.filter(x=>!deletedLessonSet.has(String(x.id||"")));
   lessonsDeleted=beforeLessons-lessons.length;
-  const sm=new Map(students.map(s=>[mergeKey(s.name,s.course),s])),lm=new Map(lessons.map(x=>[x.id,x]));
+  const sm=new Map(students.map(s=>[mergeKey(s.name,s.course),s]));
+  const smById=new Map(students.filter(s=>s&&s.id).map(s=>[String(s.id),s]));
+  const lm=new Map(lessons.map(x=>[x.id,x]));
   let studentsAdded=0,lessonsAdded=0;
   for(const s of cs){
     if(!s||!s.name)continue;
     const k=mergeKey(s.name,s.course); if(deletedStudentSet.has(k))continue;
-    const local=sm.get(k);
-    if(!local){students.push(s);sm.set(k,s);studentsAdded++;continue;}
+    const local=smById.get(String(s.id))||sm.get(k);
+    if(!local){students.push(s);sm.set(k,s);if(s.id)smById.set(String(s.id),s);studentsAdded++;continue;}
     const rt=Number(s.updatedAt||0),lt=Number(local.updatedAt||0);
     if(rt>lt){
-      const keepId=local.id;
+      const keepId=local.id||s.id;
       Object.assign(local,s);
       local.id=keepId;
+      sm.set(mergeKey(local.name,local.course),local);
+      if(local.id)smById.set(String(local.id),local);
       studentsUpdated++;
     }else if(!local.updatedAt&&s.updatedAt){
       local.updatedAt=s.updatedAt;
@@ -1280,5 +1287,25 @@ q("syncBtn").onclick=async()=>{
 };
 initSync();
 setTimeout(updateSyncState,100);
+</script>
+
+<div id="studentProfileModal" class="student-profile-modal hidden" role="dialog" aria-modal="true" aria-labelledby="studentProfileTitle"><div class="student-profile-dialog" onclick="event.stopPropagation()"><div class="student-profile-head"><div><div id="studentProfileTitle" class="student-profile-title">Ficha del alumno</div><div id="studentProfileSubtitle" class="student-profile-subtitle"></div></div><button type="button" class="secondary" onclick="closeStudentProfile()">✖️ Cerrar</button></div><div id="studentProfileBody" class="student-profile-body"></div></div></div>
+<script id="student-profile-v10-js">
+(function(){
+function studentParts(s){if(s.firstName||s.lastName)return{first:String(s.firstName||""),last:String(s.lastName||"")};const p=String(s.name||"").trim().split(/\s+/);return{first:p.shift()||"",last:p.join(" ")}}
+function syncStudentName(s){const first=String(s.firstName||"").trim(),last=String(s.lastName||"").trim();s.name=[first,last].filter(Boolean).join(" ").trim()}
+function normalizeStudentContact(s){if(s.phone==null)s.phone="";if(s.email==null)s.email="";if(s.generalNotes==null)s.generalNotes="";if(s.objectives==null)s.objectives="";if(s.repertoire==null)s.repertoire="";if(!s.firstName&&!s.lastName){const p=studentParts(s);s.firstName=p.first;s.lastName=p.last}}
+function phoneHref(v){return String(v||"").replace(/[^0-9+]/g,"")}
+function historyFor(s){const y=year();return lessons.filter(x=>(x.schoolYear||y)===y&&x.studentId===s.id).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||((b.created||0)-(a.created||0)))}
+function renderHistoryItems(s){const a=historyFor(s);if(!a.length)return '<div class="profile-empty">No hay clases registradas de este alumno en el curso seleccionado.</div>';return a.map(x=>`<div class="profile-history-item"><div><b>${new Date(x.date+"T12:00:00").toLocaleDateString("es-ES")}</b> · ${x.attendance==="falta"?"🔴 Falta":"🟢 Asiste"}${x.attendance!=="falta"&&x.grade!==null&&x.grade!==""?` · <b>Nota ${esc(x.grade)}</b>`:""}</div>${x.autoComment?`<div class="muted" style="margin-top:4px"><b>Valoración:</b> ${esc(x.autoComment)}</div>`:""}${x.obs?`<div style="margin-top:4px">${esc(x.obs)}</div>`:""}${x.nextClass?`<div class="muted" style="margin-top:4px">➡️ ${esc(x.nextClass)}</div>`:""}<div class="profile-actions"><button type="button" class="secondary" onclick="editLesson('${esc(x.id)}');closeStudentProfile()">✏️ Editar clase</button></div></div>`).join("")}
+function contactHTML(s){const ph=phoneHref(s.phone),em=String(s.email||"").trim();const parts=[];if(ph)parts.push(`<span>📱 <a href="tel:${esc(ph)}">${esc(s.phone)}</a></span>`);if(em)parts.push(`<span>✉️ <a href="mailto:${esc(em)}">${esc(em)}</a></span>`);return parts.length?`<div class="profile-contact">${parts.join("<span class=\"muted\">·</span>")}</div>`:'<div class="profile-empty">Sin datos de contacto.</div>'}
+function profileHTML(s){normalizeStudentContact(s);const a=historyFor(s);const notes=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(1):"—";return `<div class="profile-block"><h3>👤 Datos personales</h3>${contactHTML(s)}</div><div class="profile-block"><h3>🎓 Datos académicos</h3><div class="profile-grid"><div><div class="muted">Curso</div><b>${esc(s.course||"—")}</b></div><div><div class="muted">Horario</div><b>${s.scheduleDay&&s.scheduleTime?esc(s.scheduleDay+" · "+s.scheduleTime):"Sin horario asignado"}</b></div></div></div><div class="profile-block"><h3>🎯 Seguimiento</h3><div class="muted">Objetivos</div><div class="profile-readonly">${esc(s.objectives||"Sin objetivos registrados.")}</div><div class="muted" style="margin-top:10px">Repertorio</div><div class="profile-readonly">${esc(s.repertoire||"Sin repertorio registrado.")}</div><div class="muted" style="margin-top:10px">Observaciones generales</div><div class="profile-readonly">${esc(s.generalNotes||"Sin observaciones generales.")}</div></div><div class="profile-block"><h3>📊 Resumen del curso ${esc(year())}</h3><div class="profile-grid"><div><div class="muted">Clases</div><b>${a.length}</b></div><div><div class="muted">Media</div><b>${avg}</b></div></div></div><div class="profile-block"><h3>📚 Historial de clases</h3>${renderHistoryItems(s)}</div><div class="profile-actions"><button type="button" class="primary" onclick="editStudentProfile('${esc(s.id)}')">✏️ Editar ficha</button></div>`}
+function renderProfile(id){const s=students.find(x=>x.id===id);if(!s)return;normalizeStudentContact(s);q("studentProfileTitle").textContent=displayName(s.name)||"Ficha del alumno";q("studentProfileSubtitle").textContent=[s.course,s.scheduleDay&&s.scheduleTime?s.scheduleDay+" · "+s.scheduleTime:""] .filter(Boolean).join(" · ");q("studentProfileBody").innerHTML=profileHTML(s)}
+window.openStudentProfile=function(id){if(!students.some(s=>s.id===id))return;renderProfile(id);q("studentProfileModal").classList.remove("hidden");document.body.style.overflow="hidden"}
+window.closeStudentProfile=function(){q("studentProfileModal").classList.add("hidden");document.body.style.overflow=""}
+window.editStudentProfile=function(id){const s=students.find(x=>x.id===id);if(!s)return;normalizeStudentContact(s);const p=studentParts(s);q("studentProfileTitle").textContent="Editar ficha del alumno";q("studentProfileSubtitle").textContent=displayName(s.name);q("studentProfileBody").innerHTML=`<div class="profile-block"><h3>👤 Datos personales</h3><div class="profile-edit-grid"><div><label>Nombre</label><input id="profileFirstName" value="${esc(p.first)}"></div><div><label>Apellidos</label><input id="profileLastName" value="${esc(p.last)}"></div><div><label>📱 Teléfono</label><input id="profilePhone" type="tel" inputmode="tel" value="${esc(s.phone||"")}" placeholder="Ej.: 600 123 456"></div><div><label>✉️ Email</label><input id="profileEmail" type="email" value="${esc(s.email||"")}" placeholder="correo@ejemplo.com"></div></div></div><div class="profile-block"><h3>🎓 Datos académicos</h3><label>Curso</label><select id="profileCourse"><option value="">Selecciona el curso…</option><optgroup label="Enseñanzas Elementales"><option>1.º Elemental</option><option>2.º Elemental</option><option>3.º Elemental</option><option>4.º Elemental</option></optgroup><optgroup label="Enseñanzas Profesionales"><option>1.º Profesional</option><option>2.º Profesional</option><option>3.º Profesional</option><option>4.º Profesional</option><option>5.º Profesional</option><option>6.º Profesional</option></optgroup></select><div class="profile-grid" style="margin-top:10px"><div><label>Día de clase</label><select id="profileDay"><option value="">Sin día</option><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option></select></div><div><label>Hora de clase</label><select id="profileTime"><option value="">Sin hora</option></select></div></div></div><div class="profile-block"><h3>🎯 Seguimiento</h3><label>Objetivos</label><textarea id="profileObjectives" rows="3" placeholder="Objetivos del alumno..."></textarea><label>Repertorio</label><textarea id="profileRepertoire" rows="3" placeholder="Obras, estudios o repertorio en curso..."></textarea><label>Observaciones generales</label><textarea id="profileGeneralNotes" rows="3" placeholder="Información general del alumno..."></textarea></div><div class="profile-actions"><button type="button" class="primary" onclick="saveStudentProfile('${esc(s.id)}')">💾 Guardar ficha</button><button type="button" class="secondary" onclick="openStudentProfile('${esc(s.id)}')">Cancelar</button></div>`;q("profileCourse").value=s.course||"";q("profileDay").value=s.scheduleDay||"";q("profileTime").innerHTML='<option value="">Sin hora</option>';for(let h=8;h<=21;h++)q("profileTime").insertAdjacentHTML("beforeend",`<option>${String(h).padStart(2,"0")}:00</option>`);q("profileTime").value=s.scheduleTime||"";q("profileObjectives").value=s.objectives||"";q("profileRepertoire").value=s.repertoire||"";q("profileGeneralNotes").value=s.generalNotes||""}
+window.saveStudentProfile=function(id){const s=students.find(x=>x.id===id);if(!s)return;const oldKey=mergeKey(s.name,s.course);s.firstName=q("profileFirstName").value.trim();s.lastName=q("profileLastName").value.trim();syncStudentName(s);s.phone=q("profilePhone").value.trim();s.email=q("profileEmail").value.trim();s.course=q("profileCourse").value;s.scheduleDay=q("profileDay").value;s.scheduleTime=q("profileTime").value;s.objectives=q("profileObjectives").value.trim();s.repertoire=q("profileRepertoire").value.trim();s.generalNotes=q("profileGeneralNotes").value.trim();s.updatedAt=Date.now();const newKey=mergeKey(s.name,s.course);if(oldKey!==newKey){forgetDeletedStudent(newKey)}lessons.forEach(x=>{if(x.studentId===id){x.student=s.name;x.course=s.course}});saveS();saveL();markLocalSyncDirty();renderStudents();renderSelect();render();updateProfessorUI();renderProfile(id)}
+q("studentProfileModal").addEventListener("click",function(e){if(e.target===this)closeStudentProfile()});document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!q("studentProfileModal").classList.contains("hidden"))closeStudentProfile()});
+})();
 </script>
 </body></html>
