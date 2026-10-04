@@ -303,7 +303,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10.5 · Edición de clase</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10.6 · Trabajo rápido</b></div>
   </div>
 
   <div class="config-section-block" id="syncBlock">
@@ -912,14 +912,14 @@ function renderStudentHistory(id){
       ${x.ratings&&Object.keys(x.ratings).length?`<div class="muted"><b>Valoración:</b> ${Object.entries(x.ratings).map(([k,v])=>`${esc(ratingLabels[k]||k)} ${v}/5`).join(" · ")}</div>`:""}
       ${x.autoComment?`<p class="muted"><b>Valoración general:</b> ${esc(x.autoComment)}</p>`:""}
       ${x.obs?`<p>${esc(x.obs)}</p>`:""}
-      ${x.quickWork&&x.quickWork.length?`<p class="muted"><b>Trabajo:</b> ${esc(x.quickWork.join(" · "))}</p>`:""}
+      ${x.quickWork&&x.quickWork.length&&!/^Hoy hemos trabajado:/i.test(String(x.obs||""))?`<p class="muted"><b>Trabajo:</b> ${esc(x.quickWork.join(" · "))}</p>`:""}
       ${x.nextClass?`<p class="muted"><b>Próxima clase:</b> ${esc(x.nextClass)}</p>`:""}
       ${x.audioData?`<audio controls style="width:100%" src="${x.audioData}"></audio>`:""}
       <button class="secondary" onclick="editLesson('${esc(x.id)}')">✏️ Editar</button><button class="danger" onclick="removeLesson('${esc(x.id)}')">Eliminar</button>
     </div>`).join(""):'<p class="muted">No hay clases registradas de este alumno en este curso escolar.</p>'}</div>`;
 }
 
-window.editLesson=id=>{const x=lessons.find(v=>v.id===id);if(!x)return;editingLessonId=id;editingLessonReturnStudentId=x.studentId||null;q("lessonFormTitle").textContent="✏️ Editar clase";q("student").value=x.studentId;q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=x.obs||"";q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";loadRatings(x.ratings||{});window.scrollTo({top:0,behavior:"smooth"});};
+window.editLesson=id=>{const x=lessons.find(v=>v.id===id);if(!x)return;editingLessonId=id;editingLessonReturnStudentId=x.studentId||null;q("lessonFormTitle").textContent="✏️ Editar clase";q("student").value=x.studentId;q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=stripQuickObservation(x.obs||"");q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";loadRatings(x.ratings||{});window.scrollTo({top:0,behavior:"smooth"});};
 q("cancelLessonEdit").onclick=()=>{const returnStudentId=editingLessonReturnStudentId;editingLessonId=null;editingLessonReturnStudentId=null;q("lessonFormTitle").textContent="📝 Nueva clase";q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");q("ratingsBox").style.opacity="1";resetRatings();if(returnStudentId){render();renderStudents();openStudentProfile(returnStudentId);return;}if(scheduleMode==="auto")refreshAutomaticSuggestion();};
 window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){rememberDeletedLesson(id);recordSyncChange("lessons","deleted");lessons=lessons.filter(x=>x.id!==id);saveL();markLocalSyncDirty();render();renderStudents()}};
 q("record").onclick=async()=>{try{let st=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];media=new MediaRecorder(st);media.ondataavailable=e=>e.data.size&&chunks.push(e.data);media.onstop=()=>{let b=new Blob(chunks,{type:media.mimeType||"audio/webm"}),r=new FileReader();r.onload=()=>audioData=r.result;r.readAsDataURL(b);st.getTracks().forEach(t=>t.stop())};media.start();q("record").disabled=true;q("stop").disabled=false;q("recText").textContent="🔴 Grabando…"}catch(e){alert("No se ha podido acceder al micrófono.")}};
@@ -932,7 +932,17 @@ function clearLessonExtras(){
 function getLessonExtras(){
   return {quickWork:window.__getQuickWork?window.__getQuickWork():[],nextClass:q("nextClass").value.trim()};
 }
-q("save").onclick=async()=>{const wasEditing=!!editingLessonId;const returnStudentId=editingLessonReturnStudentId;let sid=q("student").value,att=q("attendance").value,g=q("grade").value;if(!sid)return alert("Selecciona un alumno.");if(att==="asiste"&&g==="")return alert("Indica la nota o marca falta.");let s=students.find(x=>x.id===sid);if(editingLessonId){let item=lessons.find(x=>x.id===editingLessonId);if(!item)return alert("No se ha encontrado la clase.");item.studentId=sid;item.student=s.name;item.course=s.course;item.date=q("date").value;item.attendance=att;item.grade=att==="falta"?null:Number(g);item.obs=q("obs").value.trim();const extras=getLessonExtras();item.quickWork=extras.quickWork;item.nextClass=extras.nextClass;item.ratings=att==="falta"?{}:{...ratings};item.autoComment=att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:"");item.schoolYear=year();item.updatedAt=Date.now();if(audioData){item.audioData=audioData;if(dir)await saveFile(item)}editingLessonId=null;editingLessonReturnStudentId=null;q("lessonFormTitle").textContent="📝 Nueva clase";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");recordSyncChange("lessons","updated");alert("Cambios guardados.")}else{let item={id:crypto.randomUUID(),studentId:sid,student:s.name,course:s.course,date:q("date").value,attendance:att,grade:att==="falta"?null:Number(g),obs:q("obs").value.trim(),quickWork:getLessonExtras().quickWork,nextClass:getLessonExtras().nextClass,ratings:att==="falta"?{}:{...ratings},autoComment:att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:""),schoolYear:year(),audioData:audioData||null,created:Date.now(),updatedAt:Date.now()};lessons.push(item);if(dir&&audioData)await saveFile(item);recordSyncChange("lessons","added");alert("Clase guardada.")}saveL();markLocalSyncDirty();q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";resetRatings();render();renderStudents();if(wasEditing&&returnStudentId)openStudentProfile(returnStudentId);
+function composeLessonObservation(baseObs, quickWork){
+  const base=String(baseObs||"").trim();
+  const works=Array.isArray(quickWork)?quickWork.filter(Boolean):[];
+  if(!works.length)return base;
+  const prefix=`Hoy hemos trabajado: ${works.join(", ")}.`;
+  return base?`${prefix}\n${base}`:prefix;
+}
+function stripQuickObservation(text){
+  return String(text||"").replace(/^Hoy hemos trabajado:\s*[^\n.]+\.?\s*(?:\n|$)/i,"").trim();
+}
+q("save").onclick=async()=>{const wasEditing=!!editingLessonId;const returnStudentId=editingLessonReturnStudentId;let sid=q("student").value,att=q("attendance").value,g=q("grade").value;if(!sid)return alert("Selecciona un alumno.");if(att==="asiste"&&g==="")return alert("Indica la nota o marca falta.");let s=students.find(x=>x.id===sid);if(editingLessonId){let item=lessons.find(x=>x.id===editingLessonId);if(!item)return alert("No se ha encontrado la clase.");item.studentId=sid;item.student=s.name;item.course=s.course;item.date=q("date").value;item.attendance=att;item.grade=att==="falta"?null:Number(g);const extras=getLessonExtras();item.obs=composeLessonObservation(q("obs").value,extras.quickWork);item.quickWork=extras.quickWork;item.nextClass=extras.nextClass;item.ratings=att==="falta"?{}:{...ratings};item.autoComment=att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:"");item.schoolYear=year();item.updatedAt=Date.now();if(audioData){item.audioData=audioData;if(dir)await saveFile(item)}editingLessonId=null;editingLessonReturnStudentId=null;q("lessonFormTitle").textContent="📝 Nueva clase";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");recordSyncChange("lessons","updated");alert("Cambios guardados.")}else{let item={id:crypto.randomUUID(),studentId:sid,student:s.name,course:s.course,date:q("date").value,attendance:att,grade:att==="falta"?null:Number(g),obs:composeLessonObservation(q("obs").value,getLessonExtras().quickWork),quickWork:getLessonExtras().quickWork,nextClass:getLessonExtras().nextClass,ratings:att==="falta"?{}:{...ratings},autoComment:att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:""),schoolYear:year(),audioData:audioData||null,created:Date.now(),updatedAt:Date.now()};lessons.push(item);if(dir&&audioData)await saveFile(item);recordSyncChange("lessons","added");alert("Clase guardada.")}saveL();markLocalSyncDirty();q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";resetRatings();render();renderStudents();if(wasEditing&&returnStudentId)openStudentProfile(returnStudentId);
   if(scheduleMode==="auto"&&!wasEditing){
     if(manualJumpStudentId){
       const jumped=students.find(st=>st.id===manualJumpStudentId);
@@ -1080,7 +1090,9 @@ renderStudents();renderSelect();render();if(scheduleMode==="auto")refreshAutomat
   }
   function renderWorks(){
     const vals = selectedWorks();
-    summary.textContent = vals.length ? 'Seleccionado: ' + vals.join(' · ') : '';
+    summary.textContent = vals.length
+      ? 'Se guardará en la observación: Hoy hemos trabajado: ' + vals.join(', ') + '.'
+      : '';
   }
   quick.querySelectorAll('button').forEach(btn=>{
     btn.addEventListener('click', ()=>{
