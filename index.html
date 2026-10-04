@@ -195,7 +195,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 <header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p></header>
 
 
-<section class="card"><h2>📝 Nueva clase</h2>
+<section class="card"><h2 id="lessonFormTitle">📝 Nueva clase</h2>
 <div class="schedule-control" id="scheduleControl">
   <div class="schedule-control-head">
     <div><b>🕒 Modo de selección</b><div class="muted" id="scheduleModeHelp">Automático: propone el alumno de la franja horaria actual.</div></div>
@@ -303,7 +303,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10.4 · Edición y sincronización de clases</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10.5 · Edición de clase</b></div>
   </div>
 
   <div class="config-section-block" id="syncBlock">
@@ -709,7 +709,6 @@ q("applyToday").onclick=applyCurrentScheduleToForm;
 q("applyNext").onclick=applyNextScheduleToForm;
 function applyQuickClassMode(){
   q("ratingsBox").classList.toggle("quick-hidden",quickClassMode);
-  q("classExtras").classList.toggle("quick-hidden",quickClassMode);
   q("quickClassArrow").textContent=quickClassMode?"▸":"▾";
   q("quickClassToggle").querySelector("span").textContent=quickClassMode?"⚡ Clase rápida (activa)":"⚡ Clase rápida";
 }
@@ -777,7 +776,7 @@ function renderStudents(){
     let n=lessons.filter(x=>(x.schoolYear||year())===year()&&x.studentId===s.id).length,
         f=lessons.filter(x=>(x.schoolYear||year())===year()&&x.studentId===s.id&&x.attendance==="falta").length,
         hor=s.scheduleDay&&s.scheduleTime?` · ${esc(s.scheduleDay)} ${esc(s.scheduleTime)}`:"";
-    return `<div class="item"><button type="button" class="student-link" onclick="openStudentProfile('${esc(s.id)}')">${esc(displayName(s.name))}</button><div class="muted">${esc(s.course)}${hor} · ${n} clases · ${f} faltas</div><button class="secondary" onclick="editStudent('${s.id}')">✏️ Editar</button><button class="danger" onclick="deleteStudent('${s.id}')">🗑️</button></div>`
+    return `<div class="item"><button type="button" class="student-link" onclick="openStudentProfile('${esc(s.id)}')">${esc(displayName(s.name))}</button><div class="muted">${esc(s.course)}${hor} · ${n} clases · ${f} faltas</div><button class="secondary" onclick="editStudentProfile('${s.id}')">✏️ Editar</button><button class="danger" onclick="deleteStudent('${s.id}')">🗑️</button></div>`
   }).join("");
   updateStudentsPanel();
 }
@@ -795,10 +794,10 @@ q("toggleStudents").onclick=()=>{
     q("toggleStudents").textContent="👨‍🎓 Abrir alumnos";
   }
 };
-q("addStudent").onclick=()=>{let n=q("studentName").value.trim(),c=q("studentCourse").value,d=q("studentDay").value,t=q("studentTime").value;if(!n||!c)return alert("Indica nombre y curso.");const newKey=mergeKey(n,c);if(edit){let s=students.find(x=>x.id===edit);s.name=n;s.course=c;s.scheduleDay=d;s.scheduleTime=t;s.updatedAt=Date.now();forgetDeletedStudent(newKey);markLocalSyncDirty();lessons.forEach(x=>{if(x.studentId===edit){x.student=n;x.course=c}});edit=null;q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden");saveL();saveS()}else{if(students.some(s=>s.name.toLowerCase()===n.toLowerCase()))return alert("Ese alumno ya existe.");forgetDeletedStudent(newKey);students.push({id:crypto.randomUUID(),name:n,course:c,scheduleDay:d,scheduleTime:t,updatedAt:Date.now()});saveS();markLocalSyncDirty()}resetStudentForm();renderStudents();renderSelect();render();updateProfessorUI()};
+q("addStudent").onclick=()=>{let n=q("studentName").value.trim(),c=q("studentCourse").value,d=q("studentDay").value,t=q("studentTime").value;if(!n||!c)return alert("Indica nombre y curso.");const newKey=mergeKey(n,c);if(edit){let s=students.find(x=>x.id===edit);s.name=n;s.course=c;s.scheduleDay=d;s.scheduleTime=t;s.updatedAt=Date.now();forgetDeletedStudent(newKey);recordSyncChange("students","updated");markLocalSyncDirty();lessons.forEach(x=>{if(x.studentId===edit){x.student=n;x.course=c}});edit=null;q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden");saveL();saveS()}else{if(students.some(s=>s.name.toLowerCase()===n.toLowerCase()))return alert("Ese alumno ya existe.");forgetDeletedStudent(newKey);students.push({id:crypto.randomUUID(),name:n,course:c,scheduleDay:d,scheduleTime:t,updatedAt:Date.now()});saveS();recordSyncChange("students","added");markLocalSyncDirty()}resetStudentForm();renderStudents();renderSelect();render();updateProfessorUI()};
 q("cancelEdit").onclick=()=>{edit=null;resetStudentForm();q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden");updateStudentsPanel()};
-window.editStudent=id=>{let s=students.find(x=>x.id===id);edit=id;q("studentName").value=s.name;q("studentCourse").value=s.course;q("studentDay").value=s.scheduleDay||"";q("studentTime").value=s.scheduleTime||"";q("addStudent").textContent="💾 Guardar cambios";q("cancelEdit").classList.remove("hidden");updateStudentsPanel(true)};
-window.deleteStudent=id=>{let s=students.find(x=>x.id===id),n=lessons.filter(x=>x.studentId===id).length;if(!s)return;if(confirm(`¿Eliminar a ${s.name}?${n?`\nSus ${n} clases NO se borrarán.`:""}`)){rememberDeletedStudent(mergeKey(s.name,s.course));students=students.filter(x=>x.id!==id);saveS();markLocalSyncDirty();renderStudents();renderSelect()}};
+window.editStudent=id=>{if(students.some(x=>x.id===id))editStudentProfile(id)};
+window.deleteStudent=id=>{let s=students.find(x=>x.id===id),n=lessons.filter(x=>x.studentId===id).length;if(!s)return;if(confirm(`¿Eliminar a ${s.name}?${n?`\nSus ${n} clases NO se borrarán.`:""}`)){rememberDeletedStudent(mergeKey(s.name,s.course));recordSyncChange("students","deleted");students=students.filter(x=>x.id!==id);saveS();markLocalSyncDirty();renderStudents();renderSelect()}};
 q("attendance").onchange=()=>{let f=q("attendance").value==="falta";q("grade").disabled=f;q("ratingsBox").style.opacity=f?".55":"1";if(f)q("grade").value=""};
 
 q("toggleClassExtras").onclick=()=>{
@@ -819,6 +818,7 @@ q("toggleHistory").onclick=()=>{
   if(closed) renderHistoryStudents();
 };
 let selectedStudentHistory=null;
+let editingLessonReturnStudentId=null;
 function render(){
   if(!q("historyCard")?.classList.contains("collapsed")) renderHistoryStudents();
 }
@@ -893,7 +893,7 @@ function renderStudentHistory(id){
   const recentNotes=a.filter(x=>x.obs||x.nextClass).slice(0,4);
   q("history").innerHTML=`<button class="secondary" onclick="selectedStudentHistory=null;renderHistoryStudents()">← Volver</button>
     <div class="profile-header"><div><div class="profile-name">${esc(displayName(s.name))}</div><div class="profile-course">${esc(s.course)} · Curso ${esc(y)}</div></div>
-      <button class="secondary" onclick="editStudent('${esc(s.id)}')">✏️ Editar alumno</button></div>
+      <button class="secondary" onclick="editStudentProfile('${esc(s.id)}')">✏️ Editar alumno</button></div>
     <div class="profile-stats">
       <div class="profile-stat"><b>${a.length}</b><span>Clases</span></div>
       <div class="profile-stat"><b>${f}</b><span>Faltas</span></div>
@@ -919,9 +919,9 @@ function renderStudentHistory(id){
     </div>`).join(""):'<p class="muted">No hay clases registradas de este alumno en este curso escolar.</p>'}</div>`;
 }
 
-window.editLesson=id=>{const x=lessons.find(v=>String(v.id)===String(id));if(!x)return;const student=students.find(s=>String(s.id)===String(x.studentId))||students.find(s=>mergeKey(s.name,s.course)===mergeKey(x.student,x.course));if(!student)return alert("No se ha encontrado el alumno asociado a esta clase.");editingLessonId=x.id;renderSelect();q("student").value=student.id;if(q("student").value!==String(student.id)){q("student").value=student.id;}q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=x.obs||"";q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";loadRatings(x.ratings||{});document.querySelector("section.card h2")?.scrollIntoView({behavior:"smooth",block:"start"});};
-q("cancelLessonEdit").onclick=()=>{editingLessonId=null;q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");q("ratingsBox").style.opacity="1";resetRatings();if(scheduleMode==="auto")refreshAutomaticSuggestion();};
-window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){rememberDeletedLesson(id);lessons=lessons.filter(x=>x.id!==id);saveL();markLocalSyncDirty();render();renderStudents()}};
+window.editLesson=id=>{const x=lessons.find(v=>v.id===id);if(!x)return;editingLessonId=id;editingLessonReturnStudentId=x.studentId||null;q("lessonFormTitle").textContent="✏️ Editar clase";q("student").value=x.studentId;q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=x.obs||"";q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";loadRatings(x.ratings||{});window.scrollTo({top:0,behavior:"smooth"});};
+q("cancelLessonEdit").onclick=()=>{const returnStudentId=editingLessonReturnStudentId;editingLessonId=null;editingLessonReturnStudentId=null;q("lessonFormTitle").textContent="📝 Nueva clase";q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");q("ratingsBox").style.opacity="1";resetRatings();if(returnStudentId){render();renderStudents();openStudentProfile(returnStudentId);return;}if(scheduleMode==="auto")refreshAutomaticSuggestion();};
+window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){rememberDeletedLesson(id);recordSyncChange("lessons","deleted");lessons=lessons.filter(x=>x.id!==id);saveL();markLocalSyncDirty();render();renderStudents()}};
 q("record").onclick=async()=>{try{let st=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];media=new MediaRecorder(st);media.ondataavailable=e=>e.data.size&&chunks.push(e.data);media.onstop=()=>{let b=new Blob(chunks,{type:media.mimeType||"audio/webm"}),r=new FileReader();r.onload=()=>audioData=r.result;r.readAsDataURL(b);st.getTracks().forEach(t=>t.stop())};media.start();q("record").disabled=true;q("stop").disabled=false;q("recText").textContent="🔴 Grabando…"}catch(e){alert("No se ha podido acceder al micrófono.")}};
 q("stop").onclick=()=>{if(media&&media.state!=="inactive"){media.stop();q("record").disabled=false;q("stop").disabled=true;q("recText").textContent="Grabación preparada"}};
 function filename(name,date){let p=name.trim().split(/\s+/),first=(p[0]||"Grabacion").replace(/[\\/:*?"<>|]/g,"_"),ini=p.slice(1).map(x=>x[0]).join("").toUpperCase(),d=new Date(),t=`${String(d.getHours()).padStart(2,"0")}-${String(d.getMinutes()).padStart(2,"0")}`;return `${first}${ini?"_"+ini:""}_${date}_${t}.webm`}
@@ -932,7 +932,7 @@ function clearLessonExtras(){
 function getLessonExtras(){
   return {quickWork:window.__getQuickWork?window.__getQuickWork():[],nextClass:q("nextClass").value.trim()};
 }
-q("save").onclick=async()=>{const wasEditing=!!editingLessonId;let sid=q("student").value,att=q("attendance").value,g=q("grade").value;if(!sid)return alert("Selecciona un alumno.");if(att==="asiste"&&g==="")return alert("Indica la nota o marca falta.");let s=students.find(x=>x.id===sid);if(editingLessonId){let item=lessons.find(x=>x.id===editingLessonId);if(!item)return alert("No se ha encontrado la clase.");item.studentId=sid;item.student=s.name;item.course=s.course;item.date=q("date").value;item.attendance=att;item.grade=att==="falta"?null:Number(g);item.obs=q("obs").value.trim();const extras=getLessonExtras();item.quickWork=extras.quickWork;item.nextClass=extras.nextClass;item.ratings=att==="falta"?{}:{...ratings};item.autoComment=att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:"");item.schoolYear=year();item.updatedAt=Date.now();if(audioData){item.audioData=audioData;if(dir)await saveFile(item)}editingLessonId=null;q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");alert("Cambios guardados.")}else{let item={id:crypto.randomUUID(),studentId:sid,student:s.name,course:s.course,date:q("date").value,attendance:att,grade:att==="falta"?null:Number(g),obs:q("obs").value.trim(),quickWork:getLessonExtras().quickWork,nextClass:getLessonExtras().nextClass,ratings:att==="falta"?{}:{...ratings},autoComment:att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:""),schoolYear:year(),audioData:audioData||null,created:Date.now(),updatedAt:Date.now()};lessons.push(item);if(dir&&audioData)await saveFile(item);alert("Clase guardada.")}saveL();markLocalSyncDirty();q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";resetRatings();render();renderStudents();
+q("save").onclick=async()=>{const wasEditing=!!editingLessonId;const returnStudentId=editingLessonReturnStudentId;let sid=q("student").value,att=q("attendance").value,g=q("grade").value;if(!sid)return alert("Selecciona un alumno.");if(att==="asiste"&&g==="")return alert("Indica la nota o marca falta.");let s=students.find(x=>x.id===sid);if(editingLessonId){let item=lessons.find(x=>x.id===editingLessonId);if(!item)return alert("No se ha encontrado la clase.");item.studentId=sid;item.student=s.name;item.course=s.course;item.date=q("date").value;item.attendance=att;item.grade=att==="falta"?null:Number(g);item.obs=q("obs").value.trim();const extras=getLessonExtras();item.quickWork=extras.quickWork;item.nextClass=extras.nextClass;item.ratings=att==="falta"?{}:{...ratings};item.autoComment=att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:"");item.schoolYear=year();item.updatedAt=Date.now();if(audioData){item.audioData=audioData;if(dir)await saveFile(item)}editingLessonId=null;editingLessonReturnStudentId=null;q("lessonFormTitle").textContent="📝 Nueva clase";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");recordSyncChange("lessons","updated");alert("Cambios guardados.")}else{let item={id:crypto.randomUUID(),studentId:sid,student:s.name,course:s.course,date:q("date").value,attendance:att,grade:att==="falta"?null:Number(g),obs:q("obs").value.trim(),quickWork:getLessonExtras().quickWork,nextClass:getLessonExtras().nextClass,ratings:att==="falta"?{}:{...ratings},autoComment:att==="falta"?"":(ratings.general?ratingDefinitions.general[ratings.general-1]:""),schoolYear:year(),audioData:audioData||null,created:Date.now(),updatedAt:Date.now()};lessons.push(item);if(dir&&audioData)await saveFile(item);recordSyncChange("lessons","added");alert("Clase guardada.")}saveL();markLocalSyncDirty();q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";resetRatings();render();renderStudents();if(wasEditing&&returnStudentId)openStudentProfile(returnStudentId);
   if(scheduleMode==="auto"&&!wasEditing){
     if(manualJumpStudentId){
       const jumped=students.find(st=>st.id===manualJumpStudentId);
@@ -1135,6 +1135,11 @@ function syncMsg(t){const e=q("syncMsg");if(e)e.textContent=t;}
 function syncMeta(){try{return JSON.parse(localStorage.getItem(SYNC_META_KEY)||"{}")||{}}catch(e){return {}}}
 function saveSyncMeta(x){localStorage.setItem(SYNC_META_KEY,JSON.stringify(x||{}))}
 function syncDirty(){return !!syncMeta().localDirty}
+const SYNC_CHANGES_KEY="registroSyncChangesV1";
+function pendingSyncChanges(){try{return JSON.parse(localStorage.getItem(SYNC_CHANGES_KEY)||"null")||{students:{added:0,updated:0,deleted:0},lessons:{added:0,updated:0,deleted:0}}}catch(e){return {students:{added:0,updated:0,deleted:0},lessons:{added:0,updated:0,deleted:0}}}}
+function savePendingSyncChanges(v){localStorage.setItem(SYNC_CHANGES_KEY,JSON.stringify(v||{students:{added:0,updated:0,deleted:0},lessons:{added:0,updated:0,deleted:0}}))}
+function recordSyncChange(kind,action){const v=pendingSyncChanges();if(!v[kind])v[kind]={added:0,updated:0,deleted:0};if(v[kind][action]!==undefined)v[kind][action]++;savePendingSyncChanges(v)}
+function clearPendingSyncChanges(){localStorage.removeItem(SYNC_CHANGES_KEY)}
 function markLocalSyncDirty(){const m=syncMeta();m.localDirty=true;saveSyncMeta(m);updateSyncState()}
 function formatSyncDate(v){if(!v)return "Nunca";try{return new Date(v).toLocaleString("es-ES",{dateStyle:"short",timeStyle:"short"})}catch(e){return "Nunca"}}
 function updateSyncState(remoteUpdatedAt){
@@ -1299,8 +1304,6 @@ q("syncBtn").onclick=async()=>{
     const localDirtyBefore=syncDirty();
     const localStudentsBefore=students.slice();
     const localLessonsBefore=lessons.slice();
-    const localDeletedStudentsBefore=[...new Set(deletedStudentKeys)];
-    const localDeletedLessonsBefore=[...new Set(deletedLessonIds)];
     const added=cloud?mergeSyncData(cloud):{studentsAdded:0,lessonsAdded:0,studentsDeleted:0,lessonsDeleted:0,studentsUpdated:0,lessonsUpdated:0};
     const combined=mergedSyncPayload(cloud);
     const now=new Date().toISOString();
@@ -1323,44 +1326,20 @@ q("syncBtn").onclick=async()=>{
       if(!retry.ok){const d=await retry.text();throw new Error(d||("HTTP "+retry.status));}
     }
     saveSyncMeta({lastSyncAt:now,localDirty:false});
-    const cloudStudentsBefore=Array.isArray(cloud?.students)?cloud.students:[];
-    const cloudLessonsBefore=Array.isArray(cloud?.lessons)?cloud.lessons:[];
-    const cloudStudentMap=new Map(cloudStudentsBefore.filter(Boolean).map(x=>[x.id?"id:"+x.id:"key:"+mergeKey(x.name,x.course),x]));
-    const cloudLessonMap=new Map(cloudLessonsBefore.filter(x=>x&&x.id).map(x=>[String(x.id),x]));
-    let uploadedStudentsAdded=0,uploadedStudentsUpdated=0,uploadedLessonsAdded=0,uploadedLessonsUpdated=0;
-    if(localDirtyBefore){
-      for(const s of localStudentsBefore){
-        const key=s?.id?"id:"+s.id:"key:"+mergeKey(s?.name,s?.course);
-        const old=cloudStudentMap.get(key);
-        if(!old)uploadedStudentsAdded++;
-        else if(Number(s.updatedAt||0)>Number(old.updatedAt||0))uploadedStudentsUpdated++;
-      }
-      for(const x of localLessonsBefore){
-        if(!x?.id)continue;
-        const old=cloudLessonMap.get(String(x.id));
-        if(!old)uploadedLessonsAdded++;
-        else if(Number(x.updatedAt||x.created||0)>Number(old.updatedAt||old.created||0))uploadedLessonsUpdated++;
-      }
-    }
-    const cloudDeletedStudentsBefore=new Set(Array.isArray(cloud?.deletedStudentKeys)?cloud.deletedStudentKeys:[]);
-    const cloudDeletedLessonsBefore=new Set((Array.isArray(cloud?.deletedLessonIds)?cloud.deletedLessonIds:[]).map(String));
-    const uploadedStudentsDeleted=localDirtyBefore?localDeletedStudentsBefore.filter(k=>!cloudDeletedStudentsBefore.has(k)).length:0;
-    const uploadedLessonsDeleted=localDirtyBefore?localDeletedLessonsBefore.filter(id=>!cloudDeletedLessonsBefore.has(String(id))).length:0;
-    const uploadedStudents=uploadedStudentsAdded+uploadedStudentsUpdated;
-    const uploadedLessons=uploadedLessonsAdded+uploadedLessonsUpdated;
-    const downloadedStudents=added.studentsAdded+added.studentsUpdated;
-    const downloadedLessons=added.lessonsAdded+added.lessonsUpdated;
-    const downloadedDeleted=added.studentsDeleted+added.lessonsDeleted;
+    const pending=pendingSyncChanges();
+    const uploadedStudentsAdded=Number(pending.students?.added||0),uploadedStudentsUpdated=Number(pending.students?.updated||0),uploadedStudentsDeleted=Number(pending.students?.deleted||0);
+    const uploadedLessonsAdded=Number(pending.lessons?.added||0),uploadedLessonsUpdated=Number(pending.lessons?.updated||0),uploadedLessonsDeleted=Number(pending.lessons?.deleted||0);
+    const downloadedDeletedStudents=added.studentsDeleted,downloadedDeletedLessons=added.lessonsDeleted;
     const lines=["✅ SINCRONIZACIÓN COMPLETADA"];
     lines.push("☁️ SUBIDO DESDE ESTE EQUIPO:");
-    lines.push(uploadedLessons||uploadedLessonsDeleted?"• "+(uploadedLessonsAdded?uploadedLessonsAdded+" clase"+(uploadedLessonsAdded===1?"":"s")+" nueva"+(uploadedLessonsAdded===1?"":"s"):"")+((uploadedLessonsAdded&&uploadedLessonsUpdated)?" · ":"")+(uploadedLessonsUpdated?uploadedLessonsUpdated+" clase"+(uploadedLessonsUpdated===1?"":"s")+" modificada"+(uploadedLessonsUpdated===1?"":"s"):"")+((uploadedLessonsAdded||uploadedLessonsUpdated)&&uploadedLessonsDeleted?" · ":"")+(uploadedLessonsDeleted?uploadedLessonsDeleted+" clase"+(uploadedLessonsDeleted===1?"":"s")+" eliminada"+(uploadedLessonsDeleted===1?"":"s"):""):"• Ninguna clase nueva, modificada o eliminada");
-    lines.push(uploadedStudents||uploadedStudentsDeleted?"• "+(uploadedStudentsAdded?uploadedStudentsAdded+" alumno"+(uploadedStudentsAdded===1?"":"s")+" nuevo"+(uploadedStudentsAdded===1?"":"s"):"")+((uploadedStudentsAdded&&uploadedStudentsUpdated)?" · ":"")+(uploadedStudentsUpdated?uploadedStudentsUpdated+" alumno"+(uploadedStudentsUpdated===1?"":"s")+" modificado"+(uploadedStudentsUpdated===1?"":"s"):"")+((uploadedStudentsAdded||uploadedStudentsUpdated)&&uploadedStudentsDeleted?" · ":"")+(uploadedStudentsDeleted?uploadedStudentsDeleted+" alumno"+(uploadedStudentsDeleted===1?"":"s")+" eliminado"+(uploadedStudentsDeleted===1?"":"s"):""):"• Ningún alumno nuevo, modificado o eliminado");
+    lines.push((uploadedLessonsAdded||uploadedLessonsUpdated||uploadedLessonsDeleted)?"• Clases: "+uploadedLessonsAdded+" nuevas · "+uploadedLessonsUpdated+" modificadas · "+uploadedLessonsDeleted+" eliminadas":"• Clases: ningún cambio");
+    lines.push((uploadedStudentsAdded||uploadedStudentsUpdated||uploadedStudentsDeleted)?"• Alumnos: "+uploadedStudentsAdded+" nuevos · "+uploadedStudentsUpdated+" modificados · "+uploadedStudentsDeleted+" eliminados":"• Alumnos: ningún cambio");
     lines.push("⬇️ DESCARGADO DE OTROS EQUIPOS:");
-    lines.push(downloadedLessons?"• "+added.lessonsAdded+" clase"+(added.lessonsAdded===1?"":"s")+" nueva"+(added.lessonsAdded===1?"":"s")+(added.lessonsUpdated?" · "+added.lessonsUpdated+" modificada"+(added.lessonsUpdated===1?"":"s"):""):"• Ninguna clase nueva o modificada");
-    lines.push(downloadedStudents?"• "+added.studentsAdded+" alumno"+(added.studentsAdded===1?"":"s")+" nuevo"+(added.studentsAdded===1?"":"s")+(added.studentsUpdated?" · "+added.studentsUpdated+" modificado"+(added.studentsUpdated===1?"":"s"):""):"• Ningún alumno nuevo o modificado");
-    if(downloadedDeleted)lines.push("• 🗑️ "+downloadedDeleted+" elemento"+(downloadedDeleted===1?"":"s")+" eliminado"+(downloadedDeleted===1?"":"s")+" en este equipo");
+    lines.push((added.lessonsAdded||added.lessonsUpdated||downloadedDeletedLessons)?"• Clases: "+added.lessonsAdded+" nuevas · "+added.lessonsUpdated+" modificadas · "+downloadedDeletedLessons+" eliminadas":"• Clases: ningún cambio");
+    lines.push((added.studentsAdded||added.studentsUpdated||downloadedDeletedStudents)?"• Alumnos: "+added.studentsAdded+" nuevos · "+added.studentsUpdated+" modificados · "+downloadedDeletedStudents+" eliminados":"• Alumnos: ningún cambio");
     lines.push("📱💻 Tus datos están actualizados.");
     syncMsg(lines.join("\n"));
+    clearPendingSyncChanges();
     updateSyncState(now);
   }catch(e){syncMsg("❌ Error de sincronización: "+(e?.message||"desconocido"));await refreshSyncState();}
   finally{btn.disabled=false;}
@@ -1378,14 +1357,14 @@ function normalizeStudentContact(s){if(s.phone==null)s.phone="";if(s.email==null
 function phoneHref(v){return String(v||"").replace(/[^0-9+]/g,"")}
 function historyFor(s){const y=year();return lessons.filter(x=>(x.schoolYear||y)===y&&x.studentId===s.id).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||((b.created||0)-(a.created||0)))}
 function renderHistoryItems(s){const a=historyFor(s);if(!a.length)return '<div class="profile-empty">No hay clases registradas de este alumno en el curso seleccionado.</div>';return a.map(x=>`<div class="profile-history-item"><div><b>${new Date(x.date+"T12:00:00").toLocaleDateString("es-ES")}</b> · ${x.attendance==="falta"?"🔴 Falta":"🟢 Asiste"}${x.attendance!=="falta"&&x.grade!==null&&x.grade!==""?` · <b>Nota ${esc(x.grade)}</b>`:""}</div>${x.autoComment?`<div class="muted" style="margin-top:4px"><b>Valoración:</b> ${esc(x.autoComment)}</div>`:""}${x.obs?`<div style="margin-top:4px">${esc(x.obs)}</div>`:""}${x.nextClass?`<div class="muted" style="margin-top:4px">➡️ ${esc(x.nextClass)}</div>`:""}<div class="profile-actions"><button type="button" class="secondary" onclick="closeStudentProfile();editLesson('${esc(x.id)}')">✏️ Editar clase</button><button type="button" class="danger" onclick="deleteLessonFromProfile('${esc(x.id)}','${esc(s.id)}')">🗑️ Eliminar clase</button></div></div>`).join("")}
-window.deleteLessonFromProfile=function(id,studentId){if(!confirm("¿Eliminar esta clase?"))return;rememberDeletedLesson(id);lessons=lessons.filter(x=>String(x.id)!==String(id));saveL();markLocalSyncDirty();render();renderStudents();renderProfile(studentId)}
+window.deleteLessonFromProfile=function(id,studentId){if(!confirm("¿Eliminar esta clase?"))return;rememberDeletedLesson(id);recordSyncChange("lessons","deleted");lessons=lessons.filter(x=>String(x.id)!==String(id));saveL();markLocalSyncDirty();render();renderStudents();renderProfile(studentId)}
 function contactHTML(s){const ph=phoneHref(s.phone),em=String(s.email||"").trim();const parts=[];if(ph)parts.push(`<span>📱 <a href="tel:${esc(ph)}">${esc(s.phone)}</a></span>`);if(em)parts.push(`<span>✉️ <a href="mailto:${esc(em)}">${esc(em)}</a></span>`);return parts.length?`<div class="profile-contact">${parts.join("<span class=\"muted\">·</span>")}</div>`:'<div class="profile-empty">Sin datos de contacto.</div>'}
 function profileHTML(s){normalizeStudentContact(s);const a=historyFor(s);const notes=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(1):"—";return `<div class="profile-block"><h3>👤 Datos personales</h3>${contactHTML(s)}</div><div class="profile-block"><h3>🎓 Datos académicos</h3><div class="profile-grid"><div><div class="muted">Curso</div><b>${esc(s.course||"—")}</b></div><div><div class="muted">Horario</div><b>${s.scheduleDay&&s.scheduleTime?esc(s.scheduleDay+" · "+s.scheduleTime):"Sin horario asignado"}</b></div></div></div><div class="profile-block"><h3>🎯 Seguimiento</h3><div class="muted">Objetivos</div><div class="profile-readonly">${esc(s.objectives||"Sin objetivos registrados.")}</div><div class="muted" style="margin-top:10px">Repertorio</div><div class="profile-readonly">${esc(s.repertoire||"Sin repertorio registrado.")}</div><div class="muted" style="margin-top:10px">Observaciones generales</div><div class="profile-readonly">${esc(s.generalNotes||"Sin observaciones generales.")}</div></div><div class="profile-block"><h3>📊 Resumen del curso ${esc(year())}</h3><div class="profile-grid"><div><div class="muted">Clases</div><b>${a.length}</b></div><div><div class="muted">Media</div><b>${avg}</b></div></div></div><div class="profile-block"><h3>📚 Historial de clases</h3>${renderHistoryItems(s)}</div><div class="profile-actions"><button type="button" class="primary" onclick="editStudentProfile('${esc(s.id)}')">✏️ Editar ficha</button></div>`}
 function renderProfile(id){const s=students.find(x=>x.id===id);if(!s)return;normalizeStudentContact(s);q("studentProfileTitle").textContent=displayName(s.name)||"Ficha del alumno";q("studentProfileSubtitle").textContent=[s.course,s.scheduleDay&&s.scheduleTime?s.scheduleDay+" · "+s.scheduleTime:""] .filter(Boolean).join(" · ");q("studentProfileBody").innerHTML=profileHTML(s)}
 window.openStudentProfile=function(id){if(!students.some(s=>s.id===id))return;renderProfile(id);q("studentProfileModal").classList.remove("hidden");document.body.style.overflow="hidden"}
 window.closeStudentProfile=function(){q("studentProfileModal").classList.add("hidden");document.body.style.overflow=""}
 window.editStudentProfile=function(id){const s=students.find(x=>x.id===id);if(!s)return;normalizeStudentContact(s);const p=studentParts(s);q("studentProfileTitle").textContent="Editar ficha del alumno";q("studentProfileSubtitle").textContent=displayName(s.name);q("studentProfileBody").innerHTML=`<div class="profile-block"><h3>👤 Datos personales</h3><div class="profile-edit-grid"><div><label>Nombre</label><input id="profileFirstName" value="${esc(p.first)}"></div><div><label>Apellidos</label><input id="profileLastName" value="${esc(p.last)}"></div><div><label>📱 Teléfono</label><input id="profilePhone" type="tel" inputmode="tel" value="${esc(s.phone||"")}" placeholder="Ej.: 600 123 456"></div><div><label>✉️ Email</label><input id="profileEmail" type="email" value="${esc(s.email||"")}" placeholder="correo@ejemplo.com"></div></div></div><div class="profile-block"><h3>🎓 Datos académicos</h3><label>Curso</label><select id="profileCourse"><option value="">Selecciona el curso…</option><optgroup label="Enseñanzas Elementales"><option>1.º Elemental</option><option>2.º Elemental</option><option>3.º Elemental</option><option>4.º Elemental</option></optgroup><optgroup label="Enseñanzas Profesionales"><option>1.º Profesional</option><option>2.º Profesional</option><option>3.º Profesional</option><option>4.º Profesional</option><option>5.º Profesional</option><option>6.º Profesional</option></optgroup></select><div class="profile-grid" style="margin-top:10px"><div><label>Día de clase</label><select id="profileDay"><option value="">Sin día</option><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option></select></div><div><label>Hora de clase</label><select id="profileTime"><option value="">Sin hora</option></select></div></div></div><div class="profile-block"><h3>🎯 Seguimiento</h3><label>Objetivos</label><textarea id="profileObjectives" rows="3" placeholder="Objetivos del alumno..."></textarea><label>Repertorio</label><textarea id="profileRepertoire" rows="3" placeholder="Obras, estudios o repertorio en curso..."></textarea><label>Observaciones generales</label><textarea id="profileGeneralNotes" rows="3" placeholder="Información general del alumno..."></textarea></div><div class="profile-actions"><button type="button" class="primary" onclick="saveStudentProfile('${esc(s.id)}')">💾 Guardar ficha</button><button type="button" class="secondary" onclick="openStudentProfile('${esc(s.id)}')">Cancelar</button></div>`;q("profileCourse").value=s.course||"";q("profileDay").value=s.scheduleDay||"";q("profileTime").innerHTML='<option value="">Sin hora</option>';for(let h=8;h<=21;h++)q("profileTime").insertAdjacentHTML("beforeend",`<option>${String(h).padStart(2,"0")}:00</option>`);q("profileTime").value=s.scheduleTime||"";q("profileObjectives").value=s.objectives||"";q("profileRepertoire").value=s.repertoire||"";q("profileGeneralNotes").value=s.generalNotes||""}
-window.saveStudentProfile=function(id){const s=students.find(x=>x.id===id);if(!s)return;const oldKey=mergeKey(s.name,s.course);s.firstName=q("profileFirstName").value.trim();s.lastName=q("profileLastName").value.trim();syncStudentName(s);s.phone=q("profilePhone").value.trim();s.email=q("profileEmail").value.trim();s.course=q("profileCourse").value;s.scheduleDay=q("profileDay").value;s.scheduleTime=q("profileTime").value;s.objectives=q("profileObjectives").value.trim();s.repertoire=q("profileRepertoire").value.trim();s.generalNotes=q("profileGeneralNotes").value.trim();s.updatedAt=Date.now();const newKey=mergeKey(s.name,s.course);if(oldKey!==newKey){forgetDeletedStudent(newKey)}lessons.forEach(x=>{if(x.studentId===id){x.student=s.name;x.course=s.course}});saveS();saveL();markLocalSyncDirty();renderStudents();renderSelect();render();updateProfessorUI();renderProfile(id)}
+window.saveStudentProfile=function(id){const s=students.find(x=>x.id===id);if(!s)return;const oldKey=mergeKey(s.name,s.course);s.firstName=q("profileFirstName").value.trim();s.lastName=q("profileLastName").value.trim();syncStudentName(s);s.phone=q("profilePhone").value.trim();s.email=q("profileEmail").value.trim();s.course=q("profileCourse").value;s.scheduleDay=q("profileDay").value;s.scheduleTime=q("profileTime").value;s.objectives=q("profileObjectives").value.trim();s.repertoire=q("profileRepertoire").value.trim();s.generalNotes=q("profileGeneralNotes").value.trim();s.updatedAt=Date.now();recordSyncChange("students","updated");const newKey=mergeKey(s.name,s.course);if(oldKey!==newKey){forgetDeletedStudent(newKey)}lessons.forEach(x=>{if(x.studentId===id){x.student=s.name;x.course=s.course}});saveS();saveL();markLocalSyncDirty();renderStudents();renderSelect();render();updateProfessorUI();renderProfile(id)}
 q("studentProfileModal").addEventListener("click",function(e){if(e.target===this)closeStudentProfile()});document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!q("studentProfileModal").classList.contains("hidden"))closeStudentProfile()});
 })();
 </script>
