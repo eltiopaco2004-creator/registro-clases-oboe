@@ -303,7 +303,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10 · Fichas de alumnos</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10.2 · Sincronización clara</b></div>
   </div>
 
   <div class="config-section-block" id="syncBlock">
@@ -649,7 +649,7 @@ q("simulationTime").onchange=()=>{scheduleSimulation.time=q("simulationTime").va
 updateScheduleUI();
 
 // V7: modo profesor. Estas funciones no modifican las grabaciones.
-let quickClassMode=false;
+let quickClassMode=true;
 let manualJumpStudentId="";
 function scheduleDisplayContext(){
   const ctx=currentScheduleContext();
@@ -707,13 +707,14 @@ function renderWeeklyAgenda(){
 function updateProfessorUI(){updateTodayPanel();renderWeeklyAgenda();}
 q("applyToday").onclick=applyCurrentScheduleToForm;
 q("applyNext").onclick=applyNextScheduleToForm;
-q("quickClassToggle").onclick=()=>{
-  quickClassMode=!quickClassMode;
+function applyQuickClassMode(){
   q("ratingsBox").classList.toggle("quick-hidden",quickClassMode);
   q("classExtras").classList.toggle("quick-hidden",quickClassMode);
   q("quickClassArrow").textContent=quickClassMode?"▸":"▾";
   q("quickClassToggle").querySelector("span").textContent=quickClassMode?"⚡ Clase rápida (activa)":"⚡ Clase rápida";
-};
+}
+q("quickClassToggle").onclick=()=>{quickClassMode=!quickClassMode;applyQuickClassMode();};
+applyQuickClassMode();
 q("toggleWeekly").onclick=()=>{
   const card=q("weeklyCard"),collapsed=card.classList.toggle("collapsed");
   q("toggleWeekly").textContent=collapsed?"Abrir agenda":"Cerrar agenda";
@@ -1295,6 +1296,9 @@ q("syncBtn").onclick=async()=>{
     const r=await syncRequest("GET",`/rest/v1/${SYNC_TABLE}?select=data,updated_at&user_id=eq.${encodeURIComponent(userId)}&limit=1`);
     if(!r.ok){const d=await r.text();throw new Error(d||("HTTP "+r.status));}
     const rows=await r.json();const cloud=rows.length&&rows[0].data?rows[0].data:null;
+    const localDirtyBefore=syncDirty();
+    const localStudentsBefore=students.slice();
+    const localLessonsBefore=lessons.slice();
     const added=cloud?mergeSyncData(cloud):{studentsAdded:0,lessonsAdded:0,studentsDeleted:0,lessonsDeleted:0,studentsUpdated:0,lessonsUpdated:0};
     const combined=mergedSyncPayload(cloud);
     const now=new Date().toISOString();
@@ -1317,13 +1321,40 @@ q("syncBtn").onclick=async()=>{
       if(!retry.ok){const d=await retry.text();throw new Error(d||("HTTP "+retry.status));}
     }
     saveSyncMeta({lastSyncAt:now,localDirty:false});
-    const parts=[];
-    if(added.studentsAdded)parts.push(`${added.studentsAdded} alumno${added.studentsAdded===1?"":"s"} nuevo${added.studentsAdded===1?"":"s"}`);
-    if(added.studentsUpdated)parts.push(`${added.studentsUpdated} ficha${added.studentsUpdated===1?"":"s"} actualizada${added.studentsUpdated===1?"":"s"}`);
-    if(added.lessonsAdded)parts.push(`${added.lessonsAdded} clase${added.lessonsAdded===1?"":"s"} nueva${added.lessonsAdded===1?"":"s"}`);
-    if(added.lessonsUpdated)parts.push(`${added.lessonsUpdated} clase${added.lessonsUpdated===1?"":"s"} actualizada${added.lessonsUpdated===1?"":"s"}`);
-    if(added.studentsDeleted||added.lessonsDeleted)parts.push(`${added.studentsDeleted} alumno${added.studentsDeleted===1?"":"s"} y ${added.lessonsDeleted} clase${added.lessonsDeleted===1?"":"s"} eliminados`);
-    syncMsg(parts.length?`✅ Sincronización completada: ${parts.join(" · ")}.`:`✅ Sincronización completada. No había cambios nuevos.`);
+    const cloudStudentsBefore=Array.isArray(cloud?.students)?cloud.students:[];
+    const cloudLessonsBefore=Array.isArray(cloud?.lessons)?cloud.lessons:[];
+    const cloudStudentMap=new Map(cloudStudentsBefore.filter(Boolean).map(x=>[x.id?"id:"+x.id:"key:"+mergeKey(x.name,x.course),x]));
+    const cloudLessonMap=new Map(cloudLessonsBefore.filter(x=>x&&x.id).map(x=>[String(x.id),x]));
+    let uploadedStudentsAdded=0,uploadedStudentsUpdated=0,uploadedLessonsAdded=0,uploadedLessonsUpdated=0;
+    if(localDirtyBefore){
+      for(const s of localStudentsBefore){
+        const key=s?.id?"id:"+s.id:"key:"+mergeKey(s?.name,s?.course);
+        const old=cloudStudentMap.get(key);
+        if(!old)uploadedStudentsAdded++;
+        else if(Number(s.updatedAt||0)>Number(old.updatedAt||0))uploadedStudentsUpdated++;
+      }
+      for(const x of localLessonsBefore){
+        if(!x?.id)continue;
+        const old=cloudLessonMap.get(String(x.id));
+        if(!old)uploadedLessonsAdded++;
+        else if(Number(x.updatedAt||x.created||0)>Number(old.updatedAt||old.created||0))uploadedLessonsUpdated++;
+      }
+    }
+    const uploadedStudents=uploadedStudentsAdded+uploadedStudentsUpdated;
+    const uploadedLessons=uploadedLessonsAdded+uploadedLessonsUpdated;
+    const downloadedStudents=added.studentsAdded+added.studentsUpdated;
+    const downloadedLessons=added.lessonsAdded+added.lessonsUpdated;
+    const downloadedDeleted=added.studentsDeleted+added.lessonsDeleted;
+    const lines=["✅ SINCRONIZACIÓN COMPLETADA"];
+    lines.push("☁️ SUBIDO DESDE ESTE EQUIPO:");
+    lines.push(uploadedLessons?"• "+uploadedLessonsAdded+" clase"+(uploadedLessonsAdded===1?"":"s")+" nueva"+(uploadedLessonsAdded===1?"":"s")+(uploadedLessonsUpdated?" · "+uploadedLessonsUpdated+" modificada"+(uploadedLessonsUpdated===1?"":"s"):""):"• Ninguna clase nueva o modificada");
+    lines.push(uploadedStudents?"• "+uploadedStudentsAdded+" alumno"+(uploadedStudentsAdded===1?"":"s")+" nuevo"+(uploadedStudentsAdded===1?"":"s")+(uploadedStudentsUpdated?" · "+uploadedStudentsUpdated+" modificado"+(uploadedStudentsUpdated===1?"":"s"):""):"• Ningún alumno nuevo o modificado");
+    lines.push("⬇️ DESCARGADO DE OTROS EQUIPOS:");
+    lines.push(downloadedLessons?"• "+added.lessonsAdded+" clase"+(added.lessonsAdded===1?"":"s")+" nueva"+(added.lessonsAdded===1?"":"s")+(added.lessonsUpdated?" · "+added.lessonsUpdated+" modificada"+(added.lessonsUpdated===1?"":"s"):""):"• Ninguna clase nueva o modificada");
+    lines.push(downloadedStudents?"• "+added.studentsAdded+" alumno"+(added.studentsAdded===1?"":"s")+" nuevo"+(added.studentsAdded===1?"":"s")+(added.studentsUpdated?" · "+added.studentsUpdated+" modificado"+(added.studentsUpdated===1?"":"s"):""):"• Ningún alumno nuevo o modificado");
+    if(downloadedDeleted)lines.push("• 🗑️ "+downloadedDeleted+" elemento"+(downloadedDeleted===1?"":"s")+" eliminado"+(downloadedDeleted===1?"":"s")+" en este equipo");
+    lines.push("📱💻 Tus datos están actualizados.");
+    syncMsg(lines.join("\n"));
     updateSyncState(now);
   }catch(e){syncMsg("❌ Error de sincronización: "+(e?.message||"desconocido"));await refreshSyncState();}
   finally{btn.disabled=false;}
