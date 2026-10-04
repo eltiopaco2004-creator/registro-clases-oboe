@@ -303,7 +303,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10.3 · Ficha de clases editable</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10.4 · Edición y sincronización de clases</b></div>
   </div>
 
   <div class="config-section-block" id="syncBlock">
@@ -919,7 +919,7 @@ function renderStudentHistory(id){
     </div>`).join(""):'<p class="muted">No hay clases registradas de este alumno en este curso escolar.</p>'}</div>`;
 }
 
-window.editLesson=id=>{const x=lessons.find(v=>v.id===id);if(!x)return;editingLessonId=id;q("student").value=x.studentId;q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=x.obs||"";q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";loadRatings(x.ratings||{});window.scrollTo({top:0,behavior:"smooth"});};
+window.editLesson=id=>{const x=lessons.find(v=>String(v.id)===String(id));if(!x)return;const student=students.find(s=>String(s.id)===String(x.studentId))||students.find(s=>mergeKey(s.name,s.course)===mergeKey(x.student,x.course));if(!student)return alert("No se ha encontrado el alumno asociado a esta clase.");editingLessonId=x.id;renderSelect();q("student").value=student.id;if(q("student").value!==String(student.id)){q("student").value=student.id;}q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=x.obs||"";q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";loadRatings(x.ratings||{});document.querySelector("section.card h2")?.scrollIntoView({behavior:"smooth",block:"start"});};
 q("cancelLessonEdit").onclick=()=>{editingLessonId=null;q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");q("ratingsBox").style.opacity="1";resetRatings();if(scheduleMode==="auto")refreshAutomaticSuggestion();};
 window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){rememberDeletedLesson(id);lessons=lessons.filter(x=>x.id!==id);saveL();markLocalSyncDirty();render();renderStudents()}};
 q("record").onclick=async()=>{try{let st=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];media=new MediaRecorder(st);media.ondataavailable=e=>e.data.size&&chunks.push(e.data);media.onstop=()=>{let b=new Blob(chunks,{type:media.mimeType||"audio/webm"}),r=new FileReader();r.onload=()=>audioData=r.result;r.readAsDataURL(b);st.getTracks().forEach(t=>t.stop())};media.start();q("record").disabled=true;q("stop").disabled=false;q("recText").textContent="🔴 Grabando…"}catch(e){alert("No se ha podido acceder al micrófono.")}};
@@ -1299,6 +1299,8 @@ q("syncBtn").onclick=async()=>{
     const localDirtyBefore=syncDirty();
     const localStudentsBefore=students.slice();
     const localLessonsBefore=lessons.slice();
+    const localDeletedStudentsBefore=[...new Set(deletedStudentKeys)];
+    const localDeletedLessonsBefore=[...new Set(deletedLessonIds)];
     const added=cloud?mergeSyncData(cloud):{studentsAdded:0,lessonsAdded:0,studentsDeleted:0,lessonsDeleted:0,studentsUpdated:0,lessonsUpdated:0};
     const combined=mergedSyncPayload(cloud);
     const now=new Date().toISOString();
@@ -1340,6 +1342,10 @@ q("syncBtn").onclick=async()=>{
         else if(Number(x.updatedAt||x.created||0)>Number(old.updatedAt||old.created||0))uploadedLessonsUpdated++;
       }
     }
+    const cloudDeletedStudentsBefore=new Set(Array.isArray(cloud?.deletedStudentKeys)?cloud.deletedStudentKeys:[]);
+    const cloudDeletedLessonsBefore=new Set((Array.isArray(cloud?.deletedLessonIds)?cloud.deletedLessonIds:[]).map(String));
+    const uploadedStudentsDeleted=localDirtyBefore?localDeletedStudentsBefore.filter(k=>!cloudDeletedStudentsBefore.has(k)).length:0;
+    const uploadedLessonsDeleted=localDirtyBefore?localDeletedLessonsBefore.filter(id=>!cloudDeletedLessonsBefore.has(String(id))).length:0;
     const uploadedStudents=uploadedStudentsAdded+uploadedStudentsUpdated;
     const uploadedLessons=uploadedLessonsAdded+uploadedLessonsUpdated;
     const downloadedStudents=added.studentsAdded+added.studentsUpdated;
@@ -1347,8 +1353,8 @@ q("syncBtn").onclick=async()=>{
     const downloadedDeleted=added.studentsDeleted+added.lessonsDeleted;
     const lines=["✅ SINCRONIZACIÓN COMPLETADA"];
     lines.push("☁️ SUBIDO DESDE ESTE EQUIPO:");
-    lines.push(uploadedLessons?"• "+uploadedLessonsAdded+" clase"+(uploadedLessonsAdded===1?"":"s")+" nueva"+(uploadedLessonsAdded===1?"":"s")+(uploadedLessonsUpdated?" · "+uploadedLessonsUpdated+" modificada"+(uploadedLessonsUpdated===1?"":"s"):""):"• Ninguna clase nueva o modificada");
-    lines.push(uploadedStudents?"• "+uploadedStudentsAdded+" alumno"+(uploadedStudentsAdded===1?"":"s")+" nuevo"+(uploadedStudentsAdded===1?"":"s")+(uploadedStudentsUpdated?" · "+uploadedStudentsUpdated+" modificado"+(uploadedStudentsUpdated===1?"":"s"):""):"• Ningún alumno nuevo o modificado");
+    lines.push(uploadedLessons||uploadedLessonsDeleted?"• "+(uploadedLessonsAdded?uploadedLessonsAdded+" clase"+(uploadedLessonsAdded===1?"":"s")+" nueva"+(uploadedLessonsAdded===1?"":"s"):"")+((uploadedLessonsAdded&&uploadedLessonsUpdated)?" · ":"")+(uploadedLessonsUpdated?uploadedLessonsUpdated+" clase"+(uploadedLessonsUpdated===1?"":"s")+" modificada"+(uploadedLessonsUpdated===1?"":"s"):"")+((uploadedLessonsAdded||uploadedLessonsUpdated)&&uploadedLessonsDeleted?" · ":"")+(uploadedLessonsDeleted?uploadedLessonsDeleted+" clase"+(uploadedLessonsDeleted===1?"":"s")+" eliminada"+(uploadedLessonsDeleted===1?"":"s"):""):"• Ninguna clase nueva, modificada o eliminada");
+    lines.push(uploadedStudents||uploadedStudentsDeleted?"• "+(uploadedStudentsAdded?uploadedStudentsAdded+" alumno"+(uploadedStudentsAdded===1?"":"s")+" nuevo"+(uploadedStudentsAdded===1?"":"s"):"")+((uploadedStudentsAdded&&uploadedStudentsUpdated)?" · ":"")+(uploadedStudentsUpdated?uploadedStudentsUpdated+" alumno"+(uploadedStudentsUpdated===1?"":"s")+" modificado"+(uploadedStudentsUpdated===1?"":"s"):"")+((uploadedStudentsAdded||uploadedStudentsUpdated)&&uploadedStudentsDeleted?" · ":"")+(uploadedStudentsDeleted?uploadedStudentsDeleted+" alumno"+(uploadedStudentsDeleted===1?"":"s")+" eliminado"+(uploadedStudentsDeleted===1?"":"s"):""):"• Ningún alumno nuevo, modificado o eliminado");
     lines.push("⬇️ DESCARGADO DE OTROS EQUIPOS:");
     lines.push(downloadedLessons?"• "+added.lessonsAdded+" clase"+(added.lessonsAdded===1?"":"s")+" nueva"+(added.lessonsAdded===1?"":"s")+(added.lessonsUpdated?" · "+added.lessonsUpdated+" modificada"+(added.lessonsUpdated===1?"":"s"):""):"• Ninguna clase nueva o modificada");
     lines.push(downloadedStudents?"• "+added.studentsAdded+" alumno"+(added.studentsAdded===1?"":"s")+" nuevo"+(added.studentsAdded===1?"":"s")+(added.studentsUpdated?" · "+added.studentsUpdated+" modificado"+(added.studentsUpdated===1?"":"s"):""):"• Ningún alumno nuevo o modificado");
