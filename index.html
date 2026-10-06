@@ -205,7 +205,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 
 
 <section class="card collapsed" id="lessonCard">
-<div class="lesson-card-head"><h2 id="lessonFormTitle">📝 Nueva clase</h2><button type="button" class="secondary" id="toggleLessonCard">📝 Abrir nueva clase</button></div>
+<div class="lesson-card-head"><h2 id="lessonFormTitle">📝 Nueva clase</h2></div>
 <div class="schedule-control" id="scheduleControl">
   <div class="schedule-control-head">
     <div><b>🕒 Modo de selección</b><div class="muted" id="scheduleModeHelp">Automático: propone el alumno de la franja horaria actual.</div></div>
@@ -731,8 +731,7 @@ function applyQuickClassMode(){
 }
 q("quickClassToggle").onclick=()=>{quickClassMode=!quickClassMode;applyQuickClassMode();};
 applyQuickClassMode();
-function setLessonCardOpen(open){const card=q("lessonCard");if(!card)return;card.classList.toggle("collapsed",!open);q("toggleLessonCard").textContent=open?"✖️ Cerrar nueva clase":"📝 Abrir nueva clase"}
-q("toggleLessonCard").onclick=()=>setLessonCardOpen(q("lessonCard").classList.contains("collapsed"));
+function setLessonCardOpen(open){const card=q("lessonCard");if(!card)return;card.classList.toggle("collapsed",!open)}
 setLessonCardOpen(true);
 function setScheduleControlOpen(open){
   const c=q("scheduleControl");
