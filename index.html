@@ -191,11 +191,18 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 <style id="student-profile-v10">
 .student-link{background:none!important;border:0!important;padding:0!important;margin:0!important;color:#2f5d50!important;font:inherit!important;font-weight:800!important;text-align:left!important;cursor:pointer!important;text-decoration:none!important}.student-link:hover{text-decoration:underline!important}.student-profile-modal{position:fixed;inset:0;background:rgba(20,28,24,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}.student-profile-modal.hidden{display:none!important}.student-profile-dialog{background:#fff;border-radius:18px;max-width:760px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 18px 60px rgba(0,0,0,.22)}.student-profile-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 18px 12px;position:sticky;top:0;background:#fff;border-bottom:1px solid #e3e8e5;z-index:2}.student-profile-title{font-size:22px;font-weight:800;color:#25312c}.student-profile-subtitle{font-size:13px;color:#69716d;margin-top:4px}.student-profile-body{padding:16px 18px 22px}.profile-block{border:1px solid #dde4e0;border-radius:13px;padding:13px;margin-bottom:12px;background:#fbfcfb}.profile-block h3{margin:0 0 10px;font-size:15px}.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.profile-contact{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.profile-contact a{color:#2f5d50;font-weight:700;text-decoration:none}.profile-contact a:hover{text-decoration:underline}.profile-readonly{white-space:pre-wrap;line-height:1.45;color:#303936}.profile-history-item{border-top:1px solid #e1e6e3;padding:10px 0}.profile-history-item:first-child{border-top:0;padding-top:0}.profile-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.profile-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.profile-empty{color:#69716d;font-size:13px}@media(max-width:600px){.student-profile-modal{padding:0;align-items:stretch}.student-profile-dialog{max-height:100vh;border-radius:0}.profile-grid,.profile-edit-grid{grid-template-columns:1fr}.student-profile-title{font-size:20px}.student-profile-head{padding-top:14px}}
 </style>
+<style id="lesson-card-collapse-v10_7">
+  #lessonCard.collapsed > :not(.lesson-card-head){display:none!important}
+  #lessonCard.collapsed{padding:12px 16px}
+  .lesson-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .lesson-card-head h2{margin:0}
+</style>
 </head><body><div class="wrap">
 <header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p></header>
 
 
-<section class="card"><h2 id="lessonFormTitle">📝 Nueva clase</h2>
+<section class="card collapsed" id="lessonCard">
+<div class="lesson-card-head"><h2 id="lessonFormTitle">📝 Nueva clase</h2><button type="button" class="secondary" id="toggleLessonCard">📝 Abrir nueva clase</button></div>
 <div class="schedule-control" id="scheduleControl">
   <div class="schedule-control-head">
     <div><b>🕒 Modo de selección</b><div class="muted" id="scheduleModeHelp">Automático: propone el alumno de la franja horaria actual.</div></div>
@@ -303,7 +310,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10.6 · Trabajo rápido</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10.7 · Configuración y nueva clase</b></div>
   </div>
 
   <div class="config-section-block" id="syncBlock">
@@ -401,6 +408,9 @@ const LK="oboeLessonsV2",SK="oboeStudentsV1",YK="oboeSchoolYearV1",SETK="registr
 let lessons=JSON.parse(localStorage.getItem(LK)||"[]"),students=JSON.parse(localStorage.getItem(SK)||"[]"),media=null,chunks=[],audioData=null,dir=null,edit=null,editingLessonId=null;
 const defaultSettings={teacher:"",instrument:"Oboe",otherInstrument:"",school:""};
 let appSettings=(()=>{try{return {...defaultSettings,...(JSON.parse(localStorage.getItem(SETK)||"{}")||{})}}catch(e){return {...defaultSettings}}})();
+const SETTINGS_META_KEY="registroClasesSettingsMetaV1";
+function settingsUpdatedAt(){return Number(localStorage.getItem(SETTINGS_META_KEY)||0)||0}
+function markSettingsUpdated(){localStorage.setItem(SETTINGS_META_KEY,String(Date.now()))}
 function currentInstrument(){return (appSettings.instrument==="Otro"?appSettings.otherInstrument:appSettings.instrument)||"Oboe"}
 function safeFilePart(x){return String(x||"").trim().replace(/[\\/:*?"<>|]+/g,"_").replace(/\s+/g,"_")||"Registro"}
 function hasSettings(){return !!(appSettings.teacher||appSettings.school||appSettings.instrument||appSettings.otherInstrument)}
@@ -414,6 +424,9 @@ function updateConfigView(forceOpen){
 function saveSettings(){
   appSettings={teacher:q("teacherName").value.trim(),instrument:q("instrument").value,otherInstrument:q("otherInstrument").value.trim(),school:q("schoolName").value.trim()};
   localStorage.setItem(SETK,JSON.stringify(appSettings));
+  markSettingsUpdated();
+  if(typeof recordSyncChange==="function")recordSyncChange("settings","updated");
+  if(typeof markLocalSyncDirty==="function")markLocalSyncDirty();
   applySettings();
   q("settingsStatus").textContent="Configuración guardada.";
   updateConfigView(false);q("toggleSettings").textContent="⚙️ Abrir configuración";
@@ -714,6 +727,9 @@ function applyQuickClassMode(){
 }
 q("quickClassToggle").onclick=()=>{quickClassMode=!quickClassMode;applyQuickClassMode();};
 applyQuickClassMode();
+function setLessonCardOpen(open){const card=q("lessonCard");if(!card)return;card.classList.toggle("collapsed",!open);q("toggleLessonCard").textContent=open?"✖️ Cerrar nueva clase":"📝 Abrir nueva clase"}
+q("toggleLessonCard").onclick=()=>setLessonCardOpen(q("lessonCard").classList.contains("collapsed"));
+setLessonCardOpen(false);
 q("toggleWeekly").onclick=()=>{
   const card=q("weeklyCard"),collapsed=card.classList.toggle("collapsed");
   q("toggleWeekly").textContent=collapsed?"Abrir agenda":"Cerrar agenda";
@@ -919,7 +935,7 @@ function renderStudentHistory(id){
     </div>`).join(""):'<p class="muted">No hay clases registradas de este alumno en este curso escolar.</p>'}</div>`;
 }
 
-window.editLesson=id=>{const x=lessons.find(v=>v.id===id);if(!x)return;editingLessonId=id;editingLessonReturnStudentId=x.studentId||null;q("lessonFormTitle").textContent="✏️ Editar clase";q("student").value=x.studentId;q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=stripQuickObservation(x.obs||"");q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";loadRatings(x.ratings||{});window.scrollTo({top:0,behavior:"smooth"});};
+window.editLesson=id=>{const x=lessons.find(v=>v.id===id);if(!x)return;setLessonCardOpen(true);editingLessonId=id;editingLessonReturnStudentId=x.studentId||null;q("lessonFormTitle").textContent="✏️ Editar clase";q("student").value=x.studentId;q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=stripQuickObservation(x.obs||"");q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";loadRatings(x.ratings||{});window.scrollTo({top:0,behavior:"smooth"});};
 q("cancelLessonEdit").onclick=()=>{const returnStudentId=editingLessonReturnStudentId;editingLessonId=null;editingLessonReturnStudentId=null;q("lessonFormTitle").textContent="📝 Nueva clase";q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");q("ratingsBox").style.opacity="1";resetRatings();if(returnStudentId){render();renderStudents();openStudentProfile(returnStudentId);return;}if(scheduleMode==="auto")refreshAutomaticSuggestion();};
 window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){rememberDeletedLesson(id);recordSyncChange("lessons","deleted");lessons=lessons.filter(x=>x.id!==id);saveL();markLocalSyncDirty();render();renderStudents()}};
 q("record").onclick=async()=>{try{let st=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];media=new MediaRecorder(st);media.ondataavailable=e=>e.data.size&&chunks.push(e.data);media.onstop=()=>{let b=new Blob(chunks,{type:media.mimeType||"audio/webm"}),r=new FileReader();r.onload=()=>audioData=r.result;r.readAsDataURL(b);st.getTracks().forEach(t=>t.stop())};media.start();q("record").disabled=true;q("stop").disabled=false;q("recText").textContent="🔴 Grabando…"}catch(e){alert("No se ha podido acceder al micrófono.")}};
@@ -1148,8 +1164,8 @@ function syncMeta(){try{return JSON.parse(localStorage.getItem(SYNC_META_KEY)||"
 function saveSyncMeta(x){localStorage.setItem(SYNC_META_KEY,JSON.stringify(x||{}))}
 function syncDirty(){return !!syncMeta().localDirty}
 const SYNC_CHANGES_KEY="registroSyncChangesV1";
-function pendingSyncChanges(){try{return JSON.parse(localStorage.getItem(SYNC_CHANGES_KEY)||"null")||{students:{added:0,updated:0,deleted:0},lessons:{added:0,updated:0,deleted:0}}}catch(e){return {students:{added:0,updated:0,deleted:0},lessons:{added:0,updated:0,deleted:0}}}}
-function savePendingSyncChanges(v){localStorage.setItem(SYNC_CHANGES_KEY,JSON.stringify(v||{students:{added:0,updated:0,deleted:0},lessons:{added:0,updated:0,deleted:0}}))}
+function pendingSyncChanges(){try{return JSON.parse(localStorage.getItem(SYNC_CHANGES_KEY)||"null")||{students:{added:0,updated:0,deleted:0},lessons:{added:0,updated:0,deleted:0},settings:{updated:0}}}catch(e){return {students:{added:0,updated:0,deleted:0},lessons:{added:0,updated:0,deleted:0},settings:{updated:0}}}}
+function savePendingSyncChanges(v){localStorage.setItem(SYNC_CHANGES_KEY,JSON.stringify(v||{students:{added:0,updated:0,deleted:0},lessons:{added:0,updated:0,deleted:0},settings:{updated:0}}))}
 function recordSyncChange(kind,action){const v=pendingSyncChanges();if(!v[kind])v[kind]={added:0,updated:0,deleted:0};if(v[kind][action]!==undefined)v[kind][action]++;savePendingSyncChanges(v)}
 function clearPendingSyncChanges(){localStorage.removeItem(SYNC_CHANGES_KEY)}
 function markLocalSyncDirty(){const m=syncMeta();m.localDirty=true;saveSyncMeta(m);updateSyncState()}
@@ -1231,7 +1247,25 @@ async function doLogin(email,password,automatic=false){
 q("loginBtn").onclick=()=>doLogin(q("authEmail").value.trim(),q("authPassword").value,false);
 q("logoutBtn").onclick=()=>{clearTokens();updateAuthUI(null);syncMsg("Sesión cerrada.");};
 q("rememberAccess").onchange=()=>{if(!q("rememberAccess").checked)localStorage.removeItem(AUTH_STORAGE);};
-function syncPayload(){return {version:15,schoolYear:year(),deviceId,students,lessons,deletedStudentKeys:[...new Set(deletedStudentKeys)],deletedLessonIds:[...new Set(deletedLessonIds)]};}
+function localSyncSettings(){return {appSettings:{...appSettings},settingsUpdatedAt:settingsUpdatedAt(),schoolYear:year()};}
+function applyCloudSettings(cloud){
+  if(!cloud||typeof cloud!=="object"||!cloud.appSettings||typeof cloud.appSettings!=="object")return false;
+  const localTs=settingsUpdatedAt(),remoteTs=Number(cloud.settingsUpdatedAt||0);
+  const localHas=!!(appSettings.teacher||appSettings.school||appSettings.otherInstrument);
+  const remoteHas=!!(cloud.appSettings.teacher||cloud.appSettings.school||cloud.appSettings.otherInstrument);
+  if(!remoteHas)return false;
+  const shouldApply=(!localHas)||(remoteTs>localTs);
+  if(!shouldApply)return false;
+  appSettings={...defaultSettings,...cloud.appSettings};
+  localStorage.setItem(SETK,JSON.stringify(appSettings));
+  localStorage.setItem(SETTINGS_META_KEY,String(remoteTs||Date.now()));
+  if(cloud.schoolYear){localStorage.setItem(YK,String(cloud.schoolYear));if(q("schoolYear"))q("schoolYear").value=String(cloud.schoolYear);}
+  applySettings();
+  updateConfigView();
+  q("toggleSettings").textContent=q("configCard").classList.contains("collapsed")?"⚙️ Abrir configuración":"⚙️ Cerrar configuración";
+  return true;
+}
+function syncPayload(){const prefs=localSyncSettings();return {version:16,schoolYear:prefs.schoolYear,deviceId,students,lessons,appSettings:prefs.appSettings,settingsUpdatedAt:prefs.settingsUpdatedAt,deletedStudentKeys:[...new Set(deletedStudentKeys)],deletedLessonIds:[...new Set(deletedLessonIds)]};}
 function normalizeLessonForSync(x){
   if(!x||!x.id)return null;
   const y={...x};
@@ -1239,7 +1273,8 @@ function normalizeLessonForSync(x){
   return y;
 }
 function mergeSyncData(cloud){
-  if(!cloud||typeof cloud!=="object")return {studentsAdded:0,lessonsAdded:0,studentsDeleted:0,lessonsDeleted:0,studentsUpdated:0,lessonsUpdated:0};
+  if(!cloud||typeof cloud!=="object")return {studentsAdded:0,lessonsAdded:0,studentsDeleted:0,lessonsDeleted:0,studentsUpdated:0,lessonsUpdated:0,settingsUpdated:0};
+  const settingsUpdated=applyCloudSettings(cloud)?1:0;
   const cs=Array.isArray(cloud.students)?cloud.students:[],cl=Array.isArray(cloud.lessons)?cloud.lessons:[];
   const remoteDeletedStudents=Array.isArray(cloud.deletedStudentKeys)?cloud.deletedStudentKeys:[];
   const remoteDeletedLessons=Array.isArray(cloud.deletedLessonIds)?cloud.deletedLessonIds:[];
@@ -1278,7 +1313,7 @@ function mergeSyncData(cloud){
   }
   lessons=lessons.map(normalizeLessonForSync).filter(Boolean);
   saveDeleted();saveS();saveL();renderStudents();renderSelect();render();updateProfessorUI();
-  return {studentsAdded,lessonsAdded,studentsDeleted,lessonsDeleted,studentsUpdated,lessonsUpdated};
+  return {studentsAdded,lessonsAdded,studentsDeleted,lessonsDeleted,studentsUpdated,lessonsUpdated,settingsUpdated};
 }
 function mergedSyncPayload(cloud){
   const localPayload=syncPayload();
@@ -1298,7 +1333,15 @@ function mergedSyncPayload(cloud){
     const x=normalizeLessonForSync(raw);if(!x||dl.has(String(x.id)))continue;
     const old=lessonMap.get(String(x.id));if(!old||Number(x.updatedAt||x.created||0)>Number(old.updatedAt||old.created||0))lessonMap.set(String(x.id),x);
   }
-  return {version:15,schoolYear:year(),deviceId,students:[...studentMap.values()],lessons:[...lessonMap.values()],deletedStudentKeys:deletedS,deletedLessonIds:deletedL};
+  const localPrefs=localSyncSettings();
+  const remoteSettings=cloud.appSettings&&typeof cloud.appSettings==="object"?cloud.appSettings:null;
+  const remoteSettingsTs=Number(cloud.settingsUpdatedAt||0);
+  const localSettingsTs=Number(localPrefs.settingsUpdatedAt||0);
+  const localHas=!!(localPrefs.appSettings.teacher||localPrefs.appSettings.school||localPrefs.appSettings.otherInstrument);
+  const remoteHas=!!(remoteSettings&&(remoteSettings.teacher||remoteSettings.school||remoteSettings.otherInstrument));
+  let chosenSettings=localPrefs.appSettings,chosenSettingsTs=localSettingsTs,chosenYear=localPrefs.schoolYear;
+  if(remoteSettings&&remoteHas&&(!localHas||remoteSettingsTs>localSettingsTs)){chosenSettings=remoteSettings;chosenSettingsTs=remoteSettingsTs;chosenYear=cloud.schoolYear||chosenYear;}
+  return {version:16,schoolYear:chosenYear,deviceId,students:[...studentMap.values()],lessons:[...lessonMap.values()],appSettings:{...chosenSettings},settingsUpdatedAt:chosenSettingsTs,deletedStudentKeys:deletedS,deletedLessonIds:deletedL};
 }
 async function syncRequest(method,path,body){
   let r=await authFetch(path,{method,body:body===undefined?undefined:JSON.stringify(body)});
@@ -1316,7 +1359,7 @@ q("syncBtn").onclick=async()=>{
     const localDirtyBefore=syncDirty();
     const localStudentsBefore=students.slice();
     const localLessonsBefore=lessons.slice();
-    const added=cloud?mergeSyncData(cloud):{studentsAdded:0,lessonsAdded:0,studentsDeleted:0,lessonsDeleted:0,studentsUpdated:0,lessonsUpdated:0};
+    const added=cloud?mergeSyncData(cloud):{studentsAdded:0,lessonsAdded:0,studentsDeleted:0,lessonsDeleted:0,studentsUpdated:0,lessonsUpdated:0,settingsUpdated:0};
     const combined=mergedSyncPayload(cloud);
     const now=new Date().toISOString();
     const payload={user_id:userId,data:combined,updated_at:now};
@@ -1341,14 +1384,17 @@ q("syncBtn").onclick=async()=>{
     const pending=pendingSyncChanges();
     const uploadedStudentsAdded=Number(pending.students?.added||0),uploadedStudentsUpdated=Number(pending.students?.updated||0),uploadedStudentsDeleted=Number(pending.students?.deleted||0);
     const uploadedLessonsAdded=Number(pending.lessons?.added||0),uploadedLessonsUpdated=Number(pending.lessons?.updated||0),uploadedLessonsDeleted=Number(pending.lessons?.deleted||0);
+    const uploadedSettings=Number(pending.settings?.updated||0);
     const downloadedDeletedStudents=added.studentsDeleted,downloadedDeletedLessons=added.lessonsDeleted;
     const lines=["✅ SINCRONIZACIÓN COMPLETADA"];
     lines.push("☁️ SUBIDO DESDE ESTE EQUIPO:");
     lines.push((uploadedLessonsAdded||uploadedLessonsUpdated||uploadedLessonsDeleted)?"• Clases: "+uploadedLessonsAdded+" nuevas · "+uploadedLessonsUpdated+" modificadas · "+uploadedLessonsDeleted+" eliminadas":"• Clases: ningún cambio");
     lines.push((uploadedStudentsAdded||uploadedStudentsUpdated||uploadedStudentsDeleted)?"• Alumnos: "+uploadedStudentsAdded+" nuevos · "+uploadedStudentsUpdated+" modificados · "+uploadedStudentsDeleted+" eliminados":"• Alumnos: ningún cambio");
+    if(uploadedSettings)lines.push("• Configuración: actualizada");
     lines.push("⬇️ DESCARGADO DE OTROS EQUIPOS:");
     lines.push((added.lessonsAdded||added.lessonsUpdated||downloadedDeletedLessons)?"• Clases: "+added.lessonsAdded+" nuevas · "+added.lessonsUpdated+" modificadas · "+downloadedDeletedLessons+" eliminadas":"• Clases: ningún cambio");
     lines.push((added.studentsAdded||added.studentsUpdated||downloadedDeletedStudents)?"• Alumnos: "+added.studentsAdded+" nuevos · "+added.studentsUpdated+" modificados · "+downloadedDeletedStudents+" eliminados":"• Alumnos: ningún cambio");
+    if(added.settingsUpdated)lines.push("• Configuración: actualizada");
     lines.push("📱💻 Tus datos están actualizados.");
     syncMsg(lines.join("\n"));
     clearPendingSyncChanges();
