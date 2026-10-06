@@ -191,11 +191,14 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 <style id="student-profile-v10">
 .student-link{background:none!important;border:0!important;padding:0!important;margin:0!important;color:#2f5d50!important;font:inherit!important;font-weight:800!important;text-align:left!important;cursor:pointer!important;text-decoration:none!important}.student-link:hover{text-decoration:underline!important}.student-profile-modal{position:fixed;inset:0;background:rgba(20,28,24,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}.student-profile-modal.hidden{display:none!important}.student-profile-dialog{background:#fff;border-radius:18px;max-width:760px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 18px 60px rgba(0,0,0,.22)}.student-profile-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 18px 12px;position:sticky;top:0;background:#fff;border-bottom:1px solid #e3e8e5;z-index:2}.student-profile-title{font-size:22px;font-weight:800;color:#25312c}.student-profile-subtitle{font-size:13px;color:#69716d;margin-top:4px}.student-profile-body{padding:16px 18px 22px}.profile-block{border:1px solid #dde4e0;border-radius:13px;padding:13px;margin-bottom:12px;background:#fbfcfb}.profile-block h3{margin:0 0 10px;font-size:15px}.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.profile-contact{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.profile-contact a{color:#2f5d50;font-weight:700;text-decoration:none}.profile-contact a:hover{text-decoration:underline}.profile-readonly{white-space:pre-wrap;line-height:1.45;color:#303936}.profile-history-item{border-top:1px solid #e1e6e3;padding:10px 0}.profile-history-item:first-child{border-top:0;padding-top:0}.profile-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.profile-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.profile-empty{color:#69716d;font-size:13px}@media(max-width:600px){.student-profile-modal{padding:0;align-items:stretch}.student-profile-dialog{max-height:100vh;border-radius:0}.profile-grid,.profile-edit-grid{grid-template-columns:1fr}.student-profile-title{font-size:20px}.student-profile-head{padding-top:14px}}
 </style>
-<style id="lesson-card-collapse-v10_7">
-  #lessonCard.collapsed > :not(.lesson-card-head){display:none!important}
-  #lessonCard.collapsed{padding:12px 16px}
+<style id="lesson-card-collapse-v10_9">
   .lesson-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .lesson-card-head h2{margin:0}
+  .schedule-control-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .schedule-control-toggle{margin:0;white-space:nowrap}
+  #scheduleControl.collapsed .schedule-mode-buttons,
+  #scheduleControl.collapsed #autoScheduleStatus,
+  #scheduleControl.collapsed .schedule-tools{display:none!important}
 </style>
 </head><body><div class="wrap">
 <header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p></header>
@@ -206,6 +209,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 <div class="schedule-control" id="scheduleControl">
   <div class="schedule-control-head">
     <div><b>🕒 Modo de selección</b><div class="muted" id="scheduleModeHelp">Automático: propone el alumno de la franja horaria actual.</div></div>
+    <button type="button" class="secondary schedule-control-toggle" id="toggleScheduleControl">🕒 Abrir</button>
     <div class="schedule-mode-buttons">
       <button type="button" class="secondary" id="modeAuto">🤖 Automático</button>
       <button type="button" class="secondary" id="modeManual">✋ Manual</button>
@@ -233,10 +237,6 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
     </div>
   </div>
 </div>
-</section>
-
-<section class="card" id="quickClassCard">
-<div class="lesson-card-head"><h2>⚡ Clase rápida (activa)</h2></div>
 <label>Alumno</label><select id="student"><option value="">Selecciona un alumno…</option></select>
 <div class="row"><div><label>Fecha</label><input id="date" type="date"></div><div><label>Estado</label><select id="attendance"><option value="asiste">🟢 Asiste</option><option value="falta">🔴 Falta</option></select></div></div>
 <div id="gradeBox"><label>Nota (0–10)</label><input id="grade" type="number" min="0" max="10" step=".1"></div>
@@ -314,7 +314,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10.8 · Clase rápida y configuración</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10.9 · Clase rápida y configuración</b></div>
   </div>
 
   <div class="config-section-block" id="syncBlock">
@@ -733,7 +733,16 @@ q("quickClassToggle").onclick=()=>{quickClassMode=!quickClassMode;applyQuickClas
 applyQuickClassMode();
 function setLessonCardOpen(open){const card=q("lessonCard");if(!card)return;card.classList.toggle("collapsed",!open);q("toggleLessonCard").textContent=open?"✖️ Cerrar nueva clase":"📝 Abrir nueva clase"}
 q("toggleLessonCard").onclick=()=>setLessonCardOpen(q("lessonCard").classList.contains("collapsed"));
-setLessonCardOpen(false);
+setLessonCardOpen(true);
+function setScheduleControlOpen(open){
+  const c=q("scheduleControl");
+  if(!c)return;
+  c.classList.toggle("collapsed",!open);
+  const b=q("toggleScheduleControl");
+  if(b)b.textContent=open?"✖️ Cerrar":"🕒 Abrir";
+}
+q("toggleScheduleControl").onclick=()=>setScheduleControlOpen(q("scheduleControl").classList.contains("collapsed"));
+setScheduleControlOpen(false);
 q("toggleWeekly").onclick=()=>{
   const card=q("weeklyCard"),collapsed=card.classList.toggle("collapsed");
   q("toggleWeekly").textContent=collapsed?"Abrir agenda":"Cerrar agenda";
@@ -939,7 +948,7 @@ function renderStudentHistory(id){
     </div>`).join(""):'<p class="muted">No hay clases registradas de este alumno en este curso escolar.</p>'}</div>`;
 }
 
-window.editLesson=id=>{const x=lessons.find(v=>v.id===id);if(!x)return;setLessonCardOpen(false);editingLessonId=id;editingLessonReturnStudentId=x.studentId||null;q("lessonFormTitle").textContent="✏️ Editar clase";q("student").value=x.studentId;q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=stripQuickObservation(x.obs||"");q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";loadRatings(x.ratings||{});q("quickClassCard").scrollIntoView({behavior:"smooth",block:"start"});};
+window.editLesson=id=>{const x=lessons.find(v=>v.id===id);if(!x)return;setLessonCardOpen(true);editingLessonId=id;editingLessonReturnStudentId=x.studentId||null;q("lessonFormTitle").textContent="✏️ Editar clase";q("student").value=x.studentId;q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=stripQuickObservation(x.obs||"");q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";loadRatings(x.ratings||{});window.scrollTo({top:0,behavior:"smooth"});};
 q("cancelLessonEdit").onclick=()=>{const returnStudentId=editingLessonReturnStudentId;editingLessonId=null;editingLessonReturnStudentId=null;q("lessonFormTitle").textContent="📝 Nueva clase";q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");q("ratingsBox").style.opacity="1";resetRatings();if(returnStudentId){render();renderStudents();openStudentProfile(returnStudentId);return;}if(scheduleMode==="auto")refreshAutomaticSuggestion();};
 window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){rememberDeletedLesson(id);recordSyncChange("lessons","deleted");lessons=lessons.filter(x=>x.id!==id);saveL();markLocalSyncDirty();render();renderStudents()}};
 q("record").onclick=async()=>{try{let st=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];media=new MediaRecorder(st);media.ondataavailable=e=>e.data.size&&chunks.push(e.data);media.onstop=()=>{let b=new Blob(chunks,{type:media.mimeType||"audio/webm"}),r=new FileReader();r.onload=()=>audioData=r.result;r.readAsDataURL(b);st.getTracks().forEach(t=>t.stop())};media.start();q("record").disabled=true;q("stop").disabled=false;q("recText").textContent="🔴 Grabando…"}catch(e){alert("No se ha podido acceder al micrófono.")}};
