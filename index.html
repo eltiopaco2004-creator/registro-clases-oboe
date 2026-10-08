@@ -314,7 +314,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10.9.1 · Sin botón «Abrir nueva clase»</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10.9.2 · Corrección de sincronización</b></div>
   </div>
 
   <div class="config-section-block" id="syncBlock">
@@ -1375,22 +1375,40 @@ q("syncBtn").onclick=async()=>{
     const combined=mergedSyncPayload(cloud);
     const now=new Date().toISOString();
     const payload={user_id:userId,data:combined,updated_at:now};
-    let up;
-    if(rows.length)up=await syncRequest("PATCH",`/rest/v1/${SYNC_TABLE}?user_id=eq.${encodeURIComponent(userId)}`,{data:payload.data,updated_at:now});
-    else up=await syncRequest("POST",`/rest/v1/${SYNC_TABLE}`,payload);
-    if(!up.ok){const d=await up.text();throw new Error(d||("HTTP "+up.status));}
-    // Verify that the cloud actually contains the lesson IDs we just sent.
+    async function writeSyncRow(row){
+      let up;
+      if(rows.length){
+        up=await syncRequest("PATCH",`/rest/v1/${SYNC_TABLE}?user_id=eq.${encodeURIComponent(userId)}`,{data:row.data,updated_at:row.updated_at});
+        if(!up.ok){
+          up=await syncRequest("POST",`/rest/v1/${SYNC_TABLE}`,row,{headers:{"Prefer":"resolution=merge-duplicates,return=minimal"}});
+        }
+      }else{
+        up=await syncRequest("POST",`/rest/v1/${SYNC_TABLE}`,row,{headers:{"Prefer":"resolution=merge-duplicates,return=minimal"}});
+      }
+      if(!up.ok){const d=await up.text();throw new Error(d||("HTTP "+up.status));}
+      return up;
+    }
+    await writeSyncRow(payload);
+    // Verify the cloud really contains the complete merged dataset. If a write
+    // is lost or another tab/device overwrote it, rebuild and force one more upsert.
     const check=await syncRequest("GET",`/rest/v1/${SYNC_TABLE}?select=data&user_id=eq.${encodeURIComponent(userId)}&limit=1`);
     if(!check.ok)throw new Error("No se ha podido verificar la sincronización.");
-    const checkRows=await check.json();const remoteAfter=checkRows.length&&checkRows[0].data?checkRows[0].data:null;
+    let checkRows=await check.json();
+    let remoteAfter=checkRows.length&&checkRows[0].data?checkRows[0].data:null;
     const expectedLessonIds=new Set((combined.lessons||[]).map(x=>String(x.id)));
-    const remoteLessonIds=new Set((remoteAfter?.lessons||[]).map(x=>String(x.id)));
-    const missing=[...expectedLessonIds].filter(id=>!remoteLessonIds.has(id));
+    let remoteLessonIds=new Set((remoteAfter?.lessons||[]).map(x=>String(x.id)));
+    let missing=[...expectedLessonIds].filter(id=>!remoteLessonIds.has(id));
     if(missing.length){
       const retryNow=new Date().toISOString();
       const retryData=mergedSyncPayload(remoteAfter);
-      const retry=await syncRequest("PATCH",`/rest/v1/${SYNC_TABLE}?user_id=eq.${encodeURIComponent(userId)}`,{data:retryData,updated_at:retryNow});
-      if(!retry.ok){const d=await retry.text();throw new Error(d||("HTTP "+retry.status));}
+      await writeSyncRow({user_id:userId,data:retryData,updated_at:retryNow});
+      const verify=await syncRequest("GET",`/rest/v1/${SYNC_TABLE}?select=data&user_id=eq.${encodeURIComponent(userId)}&limit=1`);
+      if(!verify.ok)throw new Error("No se ha podido verificar la sincronización tras el reintento.");
+      checkRows=await verify.json();
+      remoteAfter=checkRows.length&&checkRows[0].data?checkRows[0].data:null;
+      remoteLessonIds=new Set((remoteAfter?.lessons||[]).map(x=>String(x.id)));
+      missing=[...expectedLessonIds].filter(id=>!remoteLessonIds.has(id));
+      if(missing.length)throw new Error("La nube no ha aceptado la clase. No se ha marcado la sincronización como completada.");
     }
     saveSyncMeta({lastSyncAt:now,localDirty:false});
     const pending=pendingSyncChanges();
