@@ -314,7 +314,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10.9.2 · Corrección de sincronización</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10.9.3 · Corrección de sincronización de clases</b></div>
   </div>
 
   <div class="config-section-block" id="syncBlock">
@@ -1302,21 +1302,30 @@ function mergeSyncData(cloud){
   lessonsDeleted=beforeLessons-lessons.length;
   const sm=new Map(students.map(s=>[mergeKey(s.name,s.course),s]));
   const smById=new Map(students.filter(s=>s&&s.id).map(s=>[String(s.id),s]));
+  // Relaciona los IDs de alumno de otros dispositivos con los IDs locales.
+  // Es importante porque cada dispositivo puede haber creado el mismo alumno con un UUID distinto.
+  const studentIdMap=new Map();
+  for(const s of students)if(s&&s.id)studentIdMap.set(String(s.id),s.id);
   const lm=new Map(lessons.map(x=>[String(x.id),x]));
   let studentsAdded=0,lessonsAdded=0;
   for(const s of cs){
     if(!s||!s.name)continue;
     const k=mergeKey(s.name,s.course);if(deletedStudentSet.has(k))continue;
     const local=smById.get(String(s.id))||sm.get(k);
-    if(!local){students.push(s);sm.set(k,s);if(s.id)smById.set(String(s.id),s);studentsAdded++;continue;}
+    if(!local){students.push(s);sm.set(k,s);if(s.id)smById.set(String(s.id),s);if(s.id)studentIdMap.set(String(s.id),s.id);studentsAdded++;continue;}
     const rt=Number(s.updatedAt||0),lt=Number(local.updatedAt||0);
     if(rt>lt){
       const keepId=local.id||s.id;Object.assign(local,s);local.id=keepId;
       sm.set(mergeKey(local.name,local.course),local);if(local.id)smById.set(String(local.id),local);studentsUpdated++;
     }else if(!local.updatedAt&&s.updatedAt)local.updatedAt=s.updatedAt;
+    if(s.id&&local.id)studentIdMap.set(String(s.id),local.id);
   }
   for(const raw of cl){
     const x=normalizeLessonForSync(raw);if(!x||deletedLessonSet.has(String(x.id)))continue;
+    const remoteStudentId=String(x.studentId||"");
+    if(remoteStudentId&&studentIdMap.has(remoteStudentId))x.studentId=studentIdMap.get(remoteStudentId);
+    const mappedStudent=students.find(s=>String(s.id)===String(x.studentId));
+    if(mappedStudent){x.student=mappedStudent.name;x.course=mappedStudent.course;}
     const local=lm.get(String(x.id));
     if(!local){lessons.push(x);lm.set(String(x.id),x);lessonsAdded++;continue;}
     const rt=Number(x.updatedAt||x.created||0),lt=Number(local.updatedAt||local.created||0);
