@@ -201,7 +201,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
   #scheduleControl.collapsed .schedule-tools{display:none!important}
 </style>
 </head><body><div class="wrap">
-<header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p></header>
+<header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V10.9.5 · Sincronización visible</p></header>
 
 
 <section class="card collapsed" id="lessonCard">
@@ -291,6 +291,23 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
   <p class="muted" id="configHelp">Opciones de configuración y mantenimiento. Normalmente no necesitas abrir este apartado durante las clases.</p>
   <p class="config-summary" id="configSummary"></p>
 
+  <div class="config-section-block" id="syncBlock">
+    <h3>☁️ Sincronización</h3>
+    <div class="muted" style="margin-bottom:10px">La sincronización comprueba la nube, incorpora los cambios y después guarda el resultado actualizado.</div>
+    <div id="syncState" style="background:#f7f7f4;border-radius:10px;padding:10px;margin-bottom:10px">☁️ Comprobando estado…</div>
+    <div id="syncDetails" class="muted" style="margin-bottom:8px"></div>
+    <div id="authStatus" class="muted">Comprobando sesión…</div>
+    <div id="authBox">
+      <label>Correo electrónico</label><input id="authEmail" type="email" autocomplete="off" inputmode="email" placeholder="correo@ejemplo.com">
+      <label>Contraseña</label><input id="authPassword" type="password" autocomplete="new-password" placeholder="Contraseña">
+      <label style="font-weight:400"><input id="rememberAccess" type="checkbox" style="width:auto;margin-right:6px" checked> Recordar datos de acceso en este dispositivo</label>
+      <div><button class="primary" id="loginBtn" type="button">🔐 Iniciar sesión</button><button class="secondary" id="logoutBtn" type="button">Cerrar sesión</button></div>
+    </div>
+    <div id="syncActions" style="display:none;margin-top:8px"><button class="primary" id="syncBtn" type="button">🔄 Sincronizar ahora</button><div id="syncMsg" class="muted" style="margin-top:8px"></div></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Puedes sincronizar manualmente cuando quieras. Si has cambiado algo en otro dispositivo, aquí se incorporará al sincronizar.</div>
+  </div>
+
+
   <div class="config-section-block">
     <h3>📅 Curso académico</h3>
     <label>Curso escolar</label>
@@ -314,24 +331,9 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión de prueba: <b>V10.9.4 · Corrección de sincronización de clases</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V10.9.5 · Sincronización visible</b></div>
   </div>
 
-  <div class="config-section-block" id="syncBlock">
-    <h3>☁️ Sincronización</h3>
-    <div class="muted" style="margin-bottom:10px">La sincronización comprueba la nube, incorpora los cambios y después guarda el resultado actualizado.</div>
-    <div id="syncState" style="background:#f7f7f4;border-radius:10px;padding:10px;margin-bottom:10px">☁️ Comprobando estado…</div>
-    <div id="syncDetails" class="muted" style="margin-bottom:8px"></div>
-    <div id="authStatus" class="muted">Comprobando sesión…</div>
-    <div id="authBox">
-      <label>Correo electrónico</label><input id="authEmail" type="email" autocomplete="off" inputmode="email" placeholder="correo@ejemplo.com">
-      <label>Contraseña</label><input id="authPassword" type="password" autocomplete="new-password" placeholder="Contraseña">
-      <label style="font-weight:400"><input id="rememberAccess" type="checkbox" style="width:auto;margin-right:6px" checked> Recordar datos de acceso en este dispositivo</label>
-      <div><button class="primary" id="loginBtn" type="button">🔐 Iniciar sesión</button><button class="secondary" id="logoutBtn" type="button">Cerrar sesión</button></div>
-    </div>
-    <div id="syncActions" style="display:none;margin-top:8px"><button class="primary" id="syncBtn" type="button">🔄 Sincronizar ahora</button><div id="syncMsg" class="muted" style="margin-top:8px"></div></div>
-    <div class="muted" style="margin-top:8px;font-size:11px">Puedes sincronizar manualmente cuando quieras. Si has cambiado algo en otro dispositivo, aquí se incorporará al sincronizar.</div>
-  </div>
 
   <div class="config-section-block">
     <h3>🎙️ Grabaciones</h3>
