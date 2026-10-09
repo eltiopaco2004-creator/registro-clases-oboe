@@ -200,8 +200,18 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
   #scheduleControl.collapsed #autoScheduleStatus,
   #scheduleControl.collapsed .schedule-tools{display:none!important}
 </style>
+
+<style id="compact-lesson-fields-v10_9_6">
+.lesson-meta-row{display:grid;grid-template-columns:.72fr 1fr 1fr;gap:10px;align-items:end}
+.lesson-meta-row>div{min-width:0}
+.lesson-meta-row label{white-space:nowrap;font-size:12px}
+.lesson-meta-row input,.lesson-meta-row select{min-width:0;padding:10px 8px}
+#gradeBox{min-width:0}
+@media(max-width:600px){.lesson-meta-row{grid-template-columns:.78fr 1fr 1fr;gap:7px}.lesson-meta-row label{font-size:11px}.lesson-meta-row input,.lesson-meta-row select{font-size:13px;padding:10px 6px}}
+@media(max-width:360px){.lesson-meta-row{grid-template-columns:1fr 1fr}.lesson-meta-row #gradeBox{grid-column:1/-1}}
+</style>
 </head><body><div class="wrap">
-<header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V10.9.5 · Sincronización visible</p></header>
+<header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V10.9.7 · Nota primero</p></header>
 
 
 <section class="card collapsed" id="lessonCard">
@@ -238,8 +248,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
   </div>
 </div>
 <label>Alumno</label><select id="student"><option value="">Selecciona un alumno…</option></select>
-<div class="row"><div><label>Fecha</label><input id="date" type="date"></div><div><label>Estado</label><select id="attendance"><option value="asiste">🟢 Asiste</option><option value="falta">🔴 Falta</option></select></div></div>
-<div id="gradeBox"><label>Nota (0–10)</label><input id="grade" type="number" min="0" max="10" step=".1"></div>
+<div class="lesson-meta-row"><div id="gradeBox"><label for="grade">Nota (0–10)</label><input id="grade" type="number" min="0" max="10" step=".1" inputmode="decimal"></div><div><label for="date">Fecha</label><input id="date" type="date"></div><div><label for="attendance">Estado</label><select id="attendance"><option value="asiste">🟢 Asiste</option><option value="falta">🔴 Falta</option></select></div></div>
 
 <button type="button" class="secondary quick-class-toggle" id="quickClassToggle"><span>⚡ Clase rápida</span><span id="quickClassArrow">▾</span></button>
 <div id="ratingsBox">
@@ -331,7 +340,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V10.9.5 · Sincronización visible</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V10.9.7 · Nota primero</b></div>
   </div>
 
 
