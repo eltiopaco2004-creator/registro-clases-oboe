@@ -210,8 +210,121 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
 @media(max-width:600px){.lesson-meta-row{grid-template-columns:.78fr 1fr 1fr;gap:7px}.lesson-meta-row label{font-size:11px}.lesson-meta-row input,.lesson-meta-row select{font-size:13px;padding:10px 6px}}
 @media(max-width:360px){.lesson-meta-row{grid-template-columns:1fr 1fr}.lesson-meta-row #gradeBox{grid-column:1/-1}}
 </style>
+
+<style id="redesign-v10-9-8">
+.agenda-short-name{display:none}
+@media(max-width:600px){.agenda-full-name{display:none}.agenda-short-name{display:block}.agenda-short-name small{display:block;font-size:9px;line-height:1.1;margin-top:2px}}
+/* Cambios de presentación, con navegación por anclas */
+html{scroll-behavior:smooth}
+.card{box-shadow:0 2px 10px rgba(30,50,40,.035)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #2f5d50;outline-offset:2px}
+.student-schedule-grid{display:grid;grid-template-columns:1fr 2fr;gap:10px;align-items:end}
+.student-schedule-grid>.row{grid-template-columns:1fr 1fr}
+#studentsList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:10px}
+#studentsList>.item{border:1px solid #e0e6e1;border-radius:12px;padding:11px;min-width:0}
+#studentsList>.item .muted{line-height:1.5;overflow-wrap:anywhere}
+#studentsList>.item button{font-size:12px}
+#history .student-card{min-width:0;margin:0}
+#history:has(.history-student){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#history .course-summary,#history .history-toolbar,#history>p{grid-column:1/-1}
+.mobile-bottom-nav{display:none}
+@media(max-width:600px){
+ body{overflow-x:hidden}
+ .wrap{padding:8px 8px 78px;max-width:100%;box-sizing:border-box}
+ .card{padding:11px;margin:8px 0;border-radius:13px}
+ .card h2{font-size:17px}
+ .card p.muted{margin:5px 0}
+ .student-schedule-grid{display:block}
+ .student-schedule-grid>.row{grid-template-columns:1fr 1fr}
+ #studentsList,#history:has(.history-student){grid-template-columns:minmax(0,1fr)}
+ #weeklyAgenda{width:100%;min-width:0;overflow:hidden}
+ .weekly-table{width:100%;max-width:100%;table-layout:fixed;font-size:10px}
+ .weekly-table th,.weekly-table td{padding:4px 2px;text-align:center;overflow-wrap:anywhere;word-break:normal}
+ .weekly-table th:first-child,.weekly-table td:first-child{width:40px;padding:4px 1px;font-size:9px}
+ .weekly-table .slot-student{padding:3px 0}
+ .weekly-table .student-link{display:block;width:100%;font-size:10px!important;line-height:1.22;overflow-wrap:anywhere;hyphens:auto;text-align:center!important}
+ .weekly-table .week-empty{font-size:10px}
+ .weekly-head{gap:5px}
+ .weekly-head button{font-size:12px;padding:8px}
+ .mobile-bottom-nav{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;bottom:0;left:0;right:0;z-index:990;background:#fff;border-top:1px solid #dbe4de;padding:7px 4px max(7px,env(safe-area-inset-bottom));box-shadow:0 -3px 16px rgba(0,0,0,.06)}
+ .mobile-bottom-nav a{text-decoration:none;text-align:center;color:#2f5d50;font-size:11px;font-weight:700;padding:5px 1px}
+ .mobile-bottom-nav a span{display:block;font-size:19px}
+ section.card{scroll-margin-top:12px}
+}
+@media(max-width:375px){
+ .weekly-table .student-link{font-size:9px!important}
+ .weekly-table th:first-child,.weekly-table td:first-child{width:35px}
+}
+</style>
+
+<style id="design-system-v10-9-9">
+:root{--brand:#236653;--brand-deep:#153f35;--brand-soft:#e5f0eb;--canvas:#f3f6f4;--surface:#fff;--ink:#1d302a;--muted:#667a70;--line:#e1e9e4;--radius:17px;--shadow:0 4px 20px rgba(21,63,53,.055)}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--canvas);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.48;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;padding:20px 22px 96px}
+header{padding:24px 26px 22px;background:linear-gradient(115deg,#153f35 0%,#236653 100%);border-radius:21px;color:white;margin:0 0 19px;position:relative;overflow:hidden;box-shadow:0 9px 30px rgba(21,63,53,.14)}
+header:after{content:'♫';position:absolute;right:26px;top:-30px;font-size:145px;line-height:1;color:rgba(255,255,255,.07);pointer-events:none}
+header h1{font-size:clamp(22px,3vw,30px);letter-spacing:-.75px;line-height:1.2;margin:0 0 6px;font-weight:750;position:relative;z-index:1}
+header .muted,header #appVersion{color:#d8ebe3!important;position:relative;z-index:1}
+header p{margin:4px 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px;margin:14px 0;transition:box-shadow .2s ease}
+.card h2{color:var(--brand-deep);font-size:19px;font-weight:750;letter-spacing:-.4px;margin-top:0}
+h3{color:var(--brand-deep);font-size:15px;letter-spacing:-.2px}
+.muted{color:var(--muted)}
+label{color:#39584d;font-size:12px;letter-spacing:.01em;font-weight:700;margin:12px 0 6px}
+input,select,textarea{background:#fbfcfb;border:1px solid #d7e2db;border-radius:11px;color:var(--ink);transition:border-color .16s,box-shadow .16s;font-size:14px}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--brand);box-shadow:0 0 0 3px rgba(35,102,83,.12);background:#fff}
+input::placeholder,textarea::placeholder{color:#899a91}
+button{font-family:inherit;border-radius:10px;font-size:13px;letter-spacing:.005em;cursor:pointer;transition:background .16s,transform .13s,box-shadow .16s}
+button:active{transform:translateY(1px)}
+button:disabled{opacity:.55;cursor:not-allowed}
+.primary{background:var(--brand);color:#fff;box-shadow:0 3px 9px rgba(35,102,83,.13)}
+.primary:hover{background:#174c3e}
+.secondary{background:var(--brand-soft);color:var(--brand-deep)}
+.secondary:hover{background:#d4e8dd}
+.danger{background:#f9e9e8;color:#9d3d3d}
+.item{border-color:var(--line)}
+#studentsList>.item{background:#fff;border-color:var(--line);border-radius:14px;box-shadow:0 2px 10px rgba(21,63,53,.025);padding:15px}
+#studentsList>.item:hover{border-color:#b8d2c3}
+.today-panel{border-radius:14px!important}
+.today-name{letter-spacing:-.3px}
+#save.class-main-action{min-height:47px;padding:12px 22px;font-size:15px;border-radius:12px}
+.rating-buttons button{border-radius:9px;transition:background .15s,transform .12s}
+.rating-buttons button.selected{background:var(--brand);border-color:var(--brand)}
+.auto-comment,.rec{background:#f5f8f6;border:1px solid #e9eeea;border-radius:12px}
+.weekly-table{border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.weekly-table th{background:#eaf2ed;color:var(--brand-deep);font-weight:750}
+.weekly-table th,.weekly-table td{border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.weekly-table th:last-child,.weekly-table td:last-child{border-right:0}
+.weekly-table tr:last-child td{border-bottom:0}
+.weekly-table tr:nth-child(even) td{background:#fbfcfb}
+.weekly-table td.week-now{background:#e4f3e9!important;box-shadow:inset 0 0 0 2px #5caa7c}
+.weekly-table .student-link{color:var(--brand-deep);font-weight:650}
+.mobile-bottom-nav a{border-radius:11px;transition:background .15s}
+.mobile-bottom-nav a:active,.mobile-bottom-nav a:focus-visible{background:var(--brand-soft)}
+@media(min-width:780px){.wrap{padding:26px 28px 100px}header{margin-bottom:22px}}
+@media(max-width:600px){
+ .wrap{padding:10px 10px calc(100px + env(safe-area-inset-bottom));max-width:100%}
+ header{border-radius:16px;padding:18px 18px 17px;margin:0 0 12px}
+ header h1{font-size:23px;letter-spacing:-.5px}
+ header:after{font-size:112px;right:8px;top:-12px}
+ .card{border-radius:15px;padding:15px 13px;margin:10px 0;box-shadow:0 2px 12px rgba(21,63,53,.045)}
+ .card h2{font-size:17px}
+ input,select,textarea{font-size:16px;min-height:43px}
+ .lesson-meta-row input,.lesson-meta-row select{font-size:13px;min-height:43px}
+ button{min-height:40px}
+ #save.class-main-action{min-height:49px;width:100%;margin-left:0;margin-right:0}
+ .weekly-table{border-radius:9px}
+ .weekly-table th,.weekly-table td{padding:5px 1px}
+ .weekly-table .student-link{font-size:10px!important;line-height:1.2;white-space:normal}
+ .mobile-bottom-nav{background:rgba(255,255,255,.97);border-color:var(--line);backdrop-filter:blur(14px);padding:8px 7px max(8px,env(safe-area-inset-bottom));box-shadow:0 -4px 22px rgba(21,63,53,.09)}
+ .mobile-bottom-nav a{color:#4b6b5d;font-size:11px;line-height:1.2;padding:7px 2px;min-height:48px}
+ .mobile-bottom-nav a span{font-size:19px;margin-bottom:3px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+</style>
 </head><body><div class="wrap">
-<header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V10.9.7 · Nota primero</p></header>
+<header><h1 id="appTitle">🎵 Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V10.9.9 · Diseño profesional</p></header>
 
 
 <section class="card collapsed" id="lessonCard">
@@ -340,7 +453,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V10.9.7 · Nota primero</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V10.9.9 · Diseño profesional</b></div>
   </div>
 
 
@@ -399,7 +512,7 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
   <div id="studentFormWrap" class="student-form-wrap">
     <label>Nombre y apellidos</label>
     <input id="studentName" placeholder="Ej.: María García López">
-    <label>Curso</label>
+    <div class="student-schedule-grid"><div><label>Curso</label>
     <select id="studentCourse">
       <option value="">Selecciona el curso…</option>
       <optgroup label="Enseñanzas Elementales">
@@ -408,11 +521,11 @@ body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-w
       <optgroup label="Enseñanzas Profesionales">
         <option>1.º Profesional</option><option>2.º Profesional</option><option>3.º Profesional</option><option>4.º Profesional</option><option>5.º Profesional</option><option>6.º Profesional</option>
       </optgroup>
-    </select>
+    </select></div>
     <div class="row">
       <div><label>Día de clase</label><select id="studentDay"><option value="">Selecciona el día…</option><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option></select></div>
       <div><label>Hora de clase</label><select id="studentTime"><option value="">Selecciona la hora…</option></select></div>
-    </div>
+    </div></div>
     <button class="primary" id="addStudent">➕ Añadir alumno</button>
     <button class="secondary hidden" id="cancelEdit">Cancelar</button>
   </div>
@@ -714,6 +827,13 @@ function applyNextScheduleToForm(){
     setScheduleStatus(`${ctx.simulated?"🧪 Simulación":"🤖 Automático"}: siguiente alumno · ${ctx.day} ${next.scheduleTime} · ${displayName(next.name)}`,"ok");
   }else setScheduleStatus(`${ctx.day}: no quedan más alumnos programados después de las ${ctx.time}.`,"warn");
 }
+function agendaMobileName(name){
+  const parts=String(name||"").trim().split(/\s+/).filter(Boolean);
+  if(!parts.length)return {first:"",initial:""};
+  // Los nombres compuestos se conservan; solo se reduce el apellido.
+  const first=parts[0];
+  return {first,initial:parts.length>1?parts[1].charAt(0)+".":""};
+}
 function renderWeeklyAgenda(){
   const box=q("weeklyAgenda");if(!box)return;
   const days=TEACHING_DAYS;
@@ -726,7 +846,7 @@ function renderWeeklyAgenda(){
     const cells=days.map(d=>{
       const ss=students.filter(s=>s.scheduleDay===d&&s.scheduleTime===t);
       const nowClass=ctx.day===d&&ctx.time===t?" class=\"week-now\"":"";
-      return `<td${nowClass}>${ss.length?ss.map(st=>`<span class="slot-student"><button type="button" class="student-link" onclick="openStudentProfile('${esc(st.id)}')">${esc(displayName(st.name))}</button></span>`).join(""):"<span class=\"week-empty\">—</span>"}</td>`;
+      return `<td${nowClass}>${ss.length?ss.map(st=>`<span class="slot-student"><button type="button" class="student-link" onclick="openStudentProfile('${esc(st.id)}')"><span class="agenda-full-name">${esc(displayName(st.name))}</span><span class="agenda-short-name">${esc(agendaMobileName(st.name).first)}<small>${esc(agendaMobileName(st.name).initial)}</small></span></button></span>`).join(""):"<span class=\"week-empty\">—</span>"}</td>`;
     }).join("");
     rows.push(`<tr><td class="slot-time">${esc(t)}</td>${cells}</tr>`);
   }
@@ -1506,4 +1626,4 @@ window.saveStudentProfile=function(id){const s=students.find(x=>x.id===id);if(!s
 q("studentProfileModal").addEventListener("click",function(e){if(e.target===this)closeStudentProfile()});document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!q("studentProfileModal").classList.contains("hidden"))closeStudentProfile()});
 })();
 </script>
-</body></html>
+<nav class="mobile-bottom-nav" aria-label="Navegación móvil"><a href="#lessonCard"><span>📝</span>Clase</a><a href="#weeklyCard"><span>📅</span>Agenda</a><a href="#studentsCard"><span>👥</span>Alumnos</a><a href="#configCard"><span>⚙️</span>Ajustes</a></nav></body></html>
