@@ -359,8 +359,18 @@ header{min-height:0!important;margin:0!important}header #appSubtitle{color:#647c
 @media(max-width:760px){header{padding-bottom:14px!important}.schedule-control.collapsed #scheduleModeHelp{max-width:225px;font-size:11px}#appTitle{font-size:27px!important}.today-main{display:flex;flex-direction:row!important}.today-actions{flex-direction:column}.today-name{font-size:18px!important}.today-panel{padding:13px!important}.today-next{font-size:11px!important}.schedule-control{margin-bottom:10px!important}.lesson-meta-row label{font-size:10px!important;letter-spacing:-.15px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 .schedule-control.collapsed .schedule-control-head{flex-direction:row!important;justify-content:space-between!important}.schedule-control.collapsed .schedule-control-head>div:first-child{min-width:0;flex:1}.schedule-control.collapsed #scheduleModeHelp{max-width:100%!important}.schedule-control.collapsed .schedule-control-toggle{flex:none!important}.today-next:empty{display:none}
+/* V11.1.1 — corrections from the user's mobile and desktop review. */
+.header-actions button{display:inline-flex!important;align-items:center!important;justify-content:center!important;line-height:1!important;flex:none}
+.header-actions button svg{display:block;flex:none}
+#syncActions{margin:0 0 12px!important}
+#syncActions #syncBtn{width:100%;margin-top:0}
+#syncMsg{white-space:pre-line;line-height:1.5;overflow-wrap:anywhere}
+@media(min-width:761px){.wrap,.wrap:has(#lessonCard:not(.view-hidden)){max-width:1060px}#lessonCard{max-width:none;width:100%;margin:0}.mobile-bottom-nav{max-width:none}}
+@media(max-width:760px){.lesson-meta-row{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px 10px}.lesson-meta-row #gradeBox{grid-column:1/-1;display:flex;align-items:center;gap:10px;margin-top:12px}.lesson-meta-row #gradeBox label{margin:0;font-size:12px!important}.lesson-meta-row #grade{width:90px}.lesson-meta-row label{font-size:12px!important;letter-spacing:normal}.lesson-meta-row #date,.lesson-meta-row #attendance{font-size:16px!important;min-height:48px;padding:10px 8px!important;width:100%}.lesson-meta-row #gradeBox~div label{margin-top:3px}}
+/* V11.1.2 — single mobile row, with most space reserved for date and attendance. */
+@media(max-width:760px){.lesson-meta-row{grid-template-columns:46px minmax(0,1.2fr) minmax(0,1fr)!important;gap:6px;align-items:end}.lesson-meta-row #gradeBox{grid-column:auto;display:block;margin-top:0}.lesson-meta-row #gradeBox label,.lesson-meta-row #gradeBox~div label{margin:14px 0 5px;font-size:11px!important;white-space:nowrap}.lesson-meta-row #grade{width:100%;height:46px;min-height:46px;padding:8px 3px!important;font-size:16px!important;text-align:center;appearance:textfield;-moz-appearance:textfield}.lesson-meta-row #grade::-webkit-inner-spin-button,.lesson-meta-row #grade::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}.lesson-meta-row #date,.lesson-meta-row #attendance{height:46px;min-height:46px;font-size:14px!important;padding:8px 5px!important;min-width:0}.lesson-meta-row #date::-webkit-calendar-picker-indicator{margin:0;padding:0;width:16px}.lesson-meta-row #date::-webkit-date-and-time-value{text-align:left}}
 </style></head><body><div class="wrap">
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.1.0 · Pruebas integradas</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.1.2 · Pruebas integradas</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -489,7 +499,7 @@ header{min-height:0!important;margin:0!important}header #appSubtitle{color:#647c
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V11.1.0 · Pruebas integradas</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V11.1.2 · Pruebas integradas</b></div>
   </div>
 
 
@@ -1681,10 +1691,14 @@ function updateRubricSummary(){
 function rubricComment(){const keys=['sonido','afinacion','tecnica','ritmo','musicalidad','estudio'];const values=keys.filter(k=>ratings[k]!=null).map(k=>Number(ratings[k]));if(!values.length)return ratings.general?ratingComment(ratings.general,currentRatingScale):'';const avg=values.reduce((a,b)=>a+b,0)/values.length;return ratingComment(avg,currentRatingScale)+' '+keys.filter(k=>ratings[k]!=null).map(k=>ratingLabels[k].replace(/^\S+\s/, '')+': '+ratings[k]+'/'+currentRatingScale).join(' · ');}
 function showView(id){
  const admin=id==='configCard'||id==='studentsCard';
+ if(!admin)window.__mainView=id;
+ q('openAdmin').setAttribute('aria-expanded',String(admin));
+ q('openAdmin').setAttribute('aria-label',admin?'Cerrar ajustes':'Abrir ajustes');
  for(const key of ['lessonCard','weeklyCard','historyCard','studentsCard','configCard'])q(key).classList.toggle('view-hidden',admin?!['studentsCard','configCard'].includes(key):key!==id);
  if(id==='lessonCard')setLessonCardOpen(true);
  if(id==='weeklyCard'){q(id).classList.remove('collapsed');renderWeeklyAgenda();}
  if(id==='weeklyCard')q('toggleWeekly').textContent='Cerrar agenda';
+ if(id==='historyCard')q('toggleHistory').textContent='Cerrar historial';
  if(id==='historyCard'){q(id).classList.remove('collapsed');renderHistoryStudents();}
  document.querySelectorAll('.mobile-bottom-nav a').forEach(a=>{const active=a.hash==='#'+id;a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
  window.scrollTo({top:0,behavior:'instant'});
@@ -1704,6 +1718,7 @@ function updateForToday(){
  const paths={lessonCard:'M3 10 12 3l9 7v11h-6v-7H9v7H3Z',weeklyCard:'M5 5h14a2 2 0 0 1 2 2v13H3V7a2 2 0 0 1 2-2ZM7 3v4m10-4v4M3 10h18m-13 4h1m6 0h1m-8 3h1m6 0h1',historyCard:'M5 3h14v18H5ZM8 7h8M8 11h8M8 15h5'};
  document.querySelectorAll('.mobile-bottom-nav a').forEach(a=>a.querySelector('span').innerHTML=icon(paths[a.hash.slice(1)]));
  q('openSync').innerHTML=icon('M7 18a5 5 0 0 1-1-10 6 6 0 0 1 11-1 5 5 0 0 1 1 11H7Zm5-8v6m-3-3 3-3 3 3');
+ q('openAdmin').innerHTML=icon('M9 3h6l1 3 3 1 2 5-2 5-3 1-1 3H9l-1-3-3-1-2-5 2-5 3-1 1-3Zm3 5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z');
  q('appTitle').textContent=currentInstrument();document.querySelector('.eyebrow').textContent='REGISTRO DE CLASES';q('appSubtitle').textContent=appSettings.teacher||'Tu cuaderno docente';
  const oldApplySettings=applySettings;applySettings=function(){oldApplySettings();q('appTitle').textContent=currentInstrument();q('appSubtitle').textContent=appSettings.teacher||'Tu cuaderno docente';};
  document.querySelector('.page-intro').hidden=true;
@@ -1712,11 +1727,14 @@ function updateForToday(){
  bar.after(document.querySelector('.mobile-bottom-nav'));
  const drawer=document.createElement('aside');drawer.className='sync-drawer';drawer.id='syncDrawer';drawer.hidden=true;drawer.setAttribute('aria-label','Sincronización');drawer.innerHTML='<button type="button" class="secondary sync-close" id="closeSync" aria-label="Cerrar sincronización">×</button>';
  drawer.appendChild(q('syncBlock'));document.body.appendChild(drawer);
+ const syncHeading=q('syncBlock').querySelector('h3');
+ syncHeading.after(q('syncActions'));
+ q('syncActions').after(q('syncState'),q('syncDetails'));
  q('openSync').onclick=()=>{drawer.hidden=!drawer.hidden;q('openSync').setAttribute('aria-expanded',String(!drawer.hidden));if(!drawer.hidden)q('closeSync').focus();};
  q('closeSync').onclick=()=>{drawer.hidden=true;q('openSync').setAttribute('aria-expanded','false');q('openSync').focus();};
  document.addEventListener('keydown',e=>{if(e.key==='Escape'){drawer.hidden=true;closeStudentProfile();}});
  document.addEventListener('click',e=>{if(!drawer.hidden&&!drawer.contains(e.target)&&!q('openSync').contains(e.target))drawer.hidden=true;});
- q('openAdmin').onclick=()=>showView('configCard');
+ q('openAdmin').onclick=()=>showView(q('configCard').classList.contains('view-hidden')?'configCard':window.__mainView||'lessonCard');
  const openProfile=window.openStudentProfile;
  window.openStudentProfile=function(id){if(students.some(s=>s.id===id))return openProfile(id);selectedStudentHistory=id;showView('historyCard');};
  const openLesson=window.editLesson;
@@ -1729,7 +1747,10 @@ function updateForToday(){
  updateTodayPanel=function(){today();updateForToday();};
  document.querySelectorAll('.mobile-bottom-nav a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();showView(a.hash.slice(1));}));
  const extra=q('classExtras'),next=extra.querySelector('.next-class');q('toggleClassExtras').before(next);
- const quick=q('quickWork').closest('.next-class');extra.prepend(quick);
+ const quick=q('quickWork').closest('.next-class');next.before(quick);
+ q('gradeBox').querySelector('label').textContent='Nota';
+ q('attendance').previousElementSibling.textContent='Asistencia';
+ for(const option of q('attendance').options)option.textContent=option.value==='asiste'?'Asiste':'Falta';
  q('configCard').classList.add('collapsed');
  q('studentFormWrap').classList.add('collapsed');
  q('studentsCard').classList.remove('collapsed');
@@ -1758,7 +1779,7 @@ function updateForToday(){
  q('lessonCard').addEventListener('change',e=>{if(!['student','scheduleSimulation','simulationDay','simulationTime'].includes(e.target.id))window.__lessonDirty=true;});
  q('cancelLessonEdit').addEventListener('click',()=>{window.__lessonDirty=false;});
  window.addEventListener('beforeunload',e=>{if(window.__lessonDirty){e.preventDefault();e.returnValue='';}});
- const note=document.createElement('div');note.className='test-note';note.textContent='V11.1.0 de pruebas · Audio experimental. Matrículas anuales, festivos de calendario y sincronización real pendientes de validación.';q('configCard').appendChild(note);
+ const note=document.createElement('div');note.className='test-note';note.textContent='V11.1.2 de pruebas · Audio experimental. Matrículas anuales, festivos de calendario y sincronización real pendientes de validación.';q('configCard').appendChild(note);
  // All persistence errors leave the entered class available for recovery.
  q('save').onclick=async function(){
    if(this.disabled)return;
