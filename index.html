@@ -382,7 +382,7 @@ header{min-height:0!important;margin:0!important}header #appSubtitle{color:#647c
 
 @media(max-width:760px){.lesson-meta-row>.lesson-date-field{grid-column:1;grid-row:1}.lesson-meta-row>.lesson-attendance-field{grid-column:2;grid-row:1}}
 </style></head><body><div class="wrap">
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.1.9 · Pruebas integradas</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.4 · Pruebas integradas</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -511,7 +511,7 @@ header{min-height:0!important;margin:0!important}header #appSubtitle{color:#647c
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V11.1.9 · Pruebas integradas</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V11.2.4 · Pruebas integradas</b></div>
   </div>
 
 
@@ -1572,6 +1572,16 @@ function mergedSyncPayload(cloud){
   for(const raw of [...(Array.isArray(cloud.students)?cloud.students:[]),...(Array.isArray(localPayload.students)?localPayload.students:[])]){
     if(!raw||!raw.name)continue;const k=mergeKey(raw.name,raw.course);if(ds.has(k))continue;
     const old=studentMap.get(k);if(!old||Number(raw.updatedAt||0)>Number(old.updatedAt||0))studentMap.set(k,raw);
+    else if(old&&Number(raw.updatedAt||0)===Number(old.updatedAt||0)){
+      const merged={...old};let conflict=false;
+      for(const [field,value] of Object.entries(raw)){
+        if(field==='id'||field==='updatedAt')continue;
+        if(merged[field]===undefined||merged[field]===null||merged[field]==='')merged[field]=value;
+        else if(value!==undefined&&value!==null&&value!==''&&JSON.stringify(merged[field])!==JSON.stringify(value))conflict=true;
+      }
+      if(conflict)throw new Error('Dos fichas de alumno tienen la misma fecha y valores incompatibles. No se sobrescriben.');
+      studentMap.set(k,merged);
+    }
   }
   const lessonMap=new Map();
   for(const raw of [...(Array.isArray(cloud.lessons)?cloud.lessons:[]),...(Array.isArray(localPayload.lessons)?localPayload.lessons:[])]){
@@ -1811,7 +1821,7 @@ function updateForToday(){
  q('lessonCard').addEventListener('change',e=>{if(!['student','scheduleSimulation','simulationDay','simulationTime'].includes(e.target.id))window.__lessonDirty=true;});
  q('cancelLessonEdit').addEventListener('click',()=>{window.__lessonDirty=false;renderSelect();});
  window.addEventListener('beforeunload',e=>{if(window.__lessonDirty){e.preventDefault();e.returnValue='';}});
- const note=document.createElement('div');note.className='test-note';note.textContent='V11.1.9 de pruebas · Audio experimental. Matrículas anuales, festivos de calendario y sincronización real pendientes de validación.';q('configCard').appendChild(note);
+ const note=document.createElement('div');note.className='test-note';note.textContent='V11.2.4 de pruebas · Sincronización revisada (pendiente de prueba entre dispositivos). Audio experimental. Matrículas anuales, festivos de calendario y sincronización real pendientes de validación.';q('configCard').appendChild(note);
  // All persistence errors leave the entered class available for recovery.
  q('save').onclick=async function(){
    if(this.disabled)return;
@@ -1903,14 +1913,35 @@ function updateForToday(){
     const reviewed=window.__reviewedConflictDecision?.(group,x,r);if(reviewed){decisions.set(keyReview,{key:keyReview,group,local:x,remote:r,chosen:reviewed,stamp:Math.max(Date.now(),timestamp(x)+1,timestamp(r)+1)});continue;}
     const addConflict=()=>conflicts.push({key:keyReview,group,local:x,remote:r});
     if(group==='lessons'&&(wireId(x.studentId)===wireId(r.studentId)||x.student===r.student)){
-     if(x.course&&r.course&&x.course!==r.course){addConflict();continue;}
-     if(x.schoolYear&&r.schoolYear&&x.schoolYear!==r.schoolYear){addConflict();continue;}
+     // A stale copy with an older timestamp is not a simultaneous edit.
+     // A conflict is only necessary for equal timestamps or changes on both
+     // sides since the same known base (checked immediately below).
+     const ambiguous=!b&&timestamp(x)===timestamp(r);
+     if(ambiguous&&x.course&&r.course&&x.course!==r.course){addConflict();continue;}
+     if(ambiguous&&x.schoolYear&&r.schoolYear&&x.schoolYear!==r.schoolYear){addConflict();continue;}
     }
     if(b&&changed&&semantic(r)!==semantic(b)){addConflict();continue;}
-    if(!b&&syncDirty()){addConflict();continue;}
+    // Without a common ancestor, do not turn every benign difference into a blocking conflict.
+    // Distinct timestamps allow the existing deterministic newest-record merge.
+    // Equal timestamps with divergent content are genuinely ambiguous and require review.
+    if(!b&&syncDirty()&&timestamp(x)===timestamp(r)&&!compatibleEqualStamp(x,r)){addConflict();continue;}
    }
   }
   if(conflicts.length){const error=new Error('Hay diferencias pendientes de revisar. Elige una versión para cada registro en el panel inferior.');error.conflicts=conflicts;throw error;}
+ }
+ function compatibleEqualStamp(a,b){
+  // Preserve optional fields (including legacy audio) if present on only one side.
+  // Different substantive values must never be silently overwritten.
+  const result={...a};
+  for(const [k,v] of Object.entries(b)){
+   if(k==='studentId' && String(a.student||'')===String(b.student||''))continue;
+   if(k==='id'||k==='updatedAt')continue;
+   const old=result[k];
+   if(old===undefined||old===null||old===''){if(v!==undefined&&v!==null&&v!=='')result[k]=v;continue;}
+   if(v===undefined||v===null||v==='')continue;
+   if(encode(old)!==encode(v))return null;
+  }
+  return result;
  }
  function mergeIdentityAliases(payload,cloud){
   const byId=new Map();
@@ -1932,7 +1963,9 @@ function updateForToday(){
    const item=normalize(x),old=mergedLessons.get(String(item.id));
    if(!old||timestamp(item)>timestamp(old))mergedLessons.set(String(item.id),item);
    else if(timestamp(item)===timestamp(old)&&semantic(item)!==semantic(old)){
-    throw new Error('Hay dos contenidos distintos de una clase con la misma marca de modificación. Se conserva la copia local; es necesaria una revisión del conflicto.');
+    const compatible=compatibleEqualStamp(old,item);
+    if(!compatible)throw new Error('Hay cambios incompatibles en una misma clase con la misma fecha de modificación. No se sobrescriben.');
+    mergedLessons.set(String(item.id),compatible);
    }
   }
   payload.lessons=[...mergedLessons.values()];return payload;
@@ -1953,6 +1986,8 @@ function updateForToday(){
   return {ok:true};
  }
  window.__verifySyncIntegrity=verify;
+ window.__validateSyncCollections=validateCollections;
+ window.__syncDryRun=(remote)=>{validateCollections(syncPayload());if(remote)validateCollections(remote);checkConflicts(remote);const payload=mergedSyncPayload(remote);validateCollections(payload);return {students:payload.students.length,lessons:payload.lessons.length,deletedStudents:payload.deletedStudentKeys.length,deletedLessons:payload.deletedLessonIds.length};};
  function localFingerprint(){return encode(syncPayload());}
  function backupBeforeSync(){
   const snapshot={at:new Date().toISOString(),students,lessons,settings:appSettings,schoolYear:year(),deletedStudentKeys,deletedLessonIds};
