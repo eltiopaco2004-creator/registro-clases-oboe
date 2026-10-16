@@ -370,7 +370,7 @@ header{min-height:0!important;margin:0!important}header #appSubtitle{color:#647c
 /* V11.1.2 — single mobile row, with most space reserved for date and attendance. */
 @media(max-width:760px){.lesson-meta-row{grid-template-columns:46px minmax(0,1.2fr) minmax(0,1fr)!important;gap:6px;align-items:end}.lesson-meta-row #gradeBox{grid-column:auto;display:block;margin-top:0}.lesson-meta-row #gradeBox label,.lesson-meta-row #gradeBox~div label{margin:14px 0 5px;font-size:11px!important;white-space:nowrap}.lesson-meta-row #grade{width:100%;height:46px;min-height:46px;padding:8px 3px!important;font-size:16px!important;text-align:center;appearance:textfield;-moz-appearance:textfield}.lesson-meta-row #grade::-webkit-inner-spin-button,.lesson-meta-row #grade::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}.lesson-meta-row #date,.lesson-meta-row #attendance{height:46px;min-height:46px;font-size:14px!important;padding:8px 5px!important;min-width:0}.lesson-meta-row #date::-webkit-calendar-picker-indicator{margin:0;padding:0;width:16px}.lesson-meta-row #date::-webkit-date-and-time-value{text-align:left}}
 /* V11.1.3 — equal date/attendance fields, grade beneath on the left. */
-@media(max-width:760px){.lesson-meta-row{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px 10px}.lesson-meta-row>div:nth-child(2){grid-column:1;grid-row:1}.lesson-meta-row>div:nth-child(3){grid-column:2;grid-row:1}.lesson-meta-row #gradeBox{grid-column:1;grid-row:2;width:46px;justify-self:start}}
+@media(max-width:760px){.lesson-meta-row{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px 10px}.lesson-meta-row>div.lesson-date-field{grid-column:1;grid-row:1}.lesson-meta-row>div.lesson-attendance-field{grid-column:2;grid-row:1}.lesson-meta-row #gradeBox{grid-column:1;grid-row:2;width:46px;justify-self:start}}
 #history>button:first-child{display:block;margin:0 0 14px auto}#toggleHistory{margin-right:0}#historyCard .section-head-compact{margin-bottom:12px}
 /* V11.1.4 — archived students are explicitly separated from active history. */
 .history-scopes{display:flex;gap:6px;margin:0 0 14px}.history-scopes button{margin:0;padding:8px 12px;font-size:12px}.history-scopes button.selected{background:#127967!important;color:white!important;border-color:#127967}.archived-label{font-size:11px;background:#edf2ec;color:#647c75;border-radius:20px;padding:6px 10px}#historyCard.collapsed .history-scopes{display:none}
@@ -382,7 +382,7 @@ header{min-height:0!important;margin:0!important}header #appSubtitle{color:#647c
 
 @media(max-width:760px){.lesson-meta-row>.lesson-date-field{grid-column:1;grid-row:1}.lesson-meta-row>.lesson-attendance-field{grid-column:2;grid-row:1}}
 </style></head><body><div class="wrap">
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.1.7 · Pruebas integradas</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.1.9 · Pruebas integradas</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -511,7 +511,7 @@ header{min-height:0!important;margin:0!important}header #appSubtitle{color:#647c
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V11.1.7 · Pruebas integradas</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V11.1.9 · Pruebas integradas</b></div>
   </div>
 
 
@@ -1811,7 +1811,7 @@ function updateForToday(){
  q('lessonCard').addEventListener('change',e=>{if(!['student','scheduleSimulation','simulationDay','simulationTime'].includes(e.target.id))window.__lessonDirty=true;});
  q('cancelLessonEdit').addEventListener('click',()=>{window.__lessonDirty=false;renderSelect();});
  window.addEventListener('beforeunload',e=>{if(window.__lessonDirty){e.preventDefault();e.returnValue='';}});
- const note=document.createElement('div');note.className='test-note';note.textContent='V11.1.7 de pruebas · Audio experimental. Matrículas anuales, festivos de calendario y sincronización real pendientes de validación.';q('configCard').appendChild(note);
+ const note=document.createElement('div');note.className='test-note';note.textContent='V11.1.9 de pruebas · Audio experimental. Matrículas anuales, festivos de calendario y sincronización real pendientes de validación.';q('configCard').appendChild(note);
  // All persistence errors leave the entered class available for recovery.
  q('save').onclick=async function(){
    if(this.disabled)return;
@@ -1855,8 +1855,10 @@ function updateForToday(){
  function semantic(record){
   function compact(v){if(Array.isArray(v)){const a=v.map(compact).filter(x=>x!==undefined);return a.length?a:undefined;}if(v&&typeof v==='object'){const o={};for(const [k,x] of Object.entries(v)){const c=compact(x);if(c!==undefined)o[k]=c;}return Object.keys(o).length?o:undefined;}return v===undefined||v===null||v===''?undefined:v;}
   const copy={...record};delete copy.id;delete copy.studentId;delete copy.updatedAt;
+  if(copy.name&&[copy.firstName,copy.lastName].filter(Boolean).join(' ').trim()===copy.name.trim()){delete copy.firstName;delete copy.lastName;}
   return encode(compact(copy)||{});
  }
+ window.__syncSemantic=semantic;
  const decisions=new Map();
  function conflictKey(group,x,r){return group+':'+encode([x,r]);}
  function reviewConflicts(items){
@@ -1871,7 +1873,7 @@ function updateForToday(){
    const legend=document.createElement('legend');legend.textContent=(item.group==='students'?'Alumno: ':'Clase: ')+(item.local.name||item.local.student||'')+' '+(item.local.date||'');field.append(legend);
    const select=document.createElement('select');select.setAttribute('aria-label','Versión a conservar '+(i+1));
    for(const [value,label] of [['','Selecciona una versión'],['local','Conservar la de este dispositivo'],['remote','Conservar la de la nube']]){const o=document.createElement('option');o.value=value;o.textContent=label;select.append(o);}
-   for(const [label,data] of [['Este dispositivo',item.local],['Nube',item.remote]]){const details=document.createElement('details');const summary=document.createElement('summary');summary.textContent=label;const pre=document.createElement('pre');pre.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px';const labels={name:'Nombre',student:'Alumno',course:'Nivel',schoolYear:'Curso académico',date:'Fecha',attendance:'Asistencia',grade:'Nota',obs:'Observaciones',ratings:'Rúbrica',ratingScale:'Escala',scheduleDay:'Día',scheduleTime:'Hora',phone:'Teléfono',email:'Correo',updatedAt:'Última modificación',created:'Creación'};pre.textContent=Object.entries(data).filter(([k])=>!['id','studentId'].includes(k)).map(([k,v])=>(labels[k]||k)+': '+(['updatedAt','created'].includes(k)&&Number(v)>100000000000?new Date(Number(v)).toLocaleString('es-ES'):typeof v==='object'?JSON.stringify(v):String(v))).join('\n');details.append(summary,pre);field.append(details);}
+   for(const [label,data] of [['Este dispositivo',item.local],['Nube',item.remote]]){const details=document.createElement('details');const summary=document.createElement('summary');summary.textContent=label;const pre=document.createElement('pre');pre.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px';const labels={name:'Nombre',student:'Alumno',course:'Nivel',schoolYear:'Curso académico',date:'Fecha',attendance:'Asistencia',grade:'Nota',obs:'Observaciones',ratings:'Rúbrica',ratingScale:'Escala',scheduleDay:'Día',scheduleTime:'Hora',phone:'Teléfono',email:'Correo',updatedAt:'Última modificación',created:'Creación'};pre.textContent=Object.entries(data).filter(([k,v])=>!['id','studentId','updatedAt','created'].includes(k)&&encode(v)!==encode((data===item.local?item.remote:item.local)[k])).map(([k,v])=>(labels[k]||k)+': '+(['updatedAt','created'].includes(k)&&Number(v)>100000000000?new Date(Number(v)).toLocaleString('es-ES'):typeof v==='object'?JSON.stringify(v):String(v))).join('\n');details.append(summary,pre);field.append(details);}
    field.append(select);box.append(field);selections.push({item,select});
   }
   const apply=document.createElement('button');apply.type='button';apply.textContent='Aplicar selección y sincronizar';apply.onclick=(event)=>{event.stopPropagation();if(selections.some(x=>!x.select.value)){syncMsg('Selecciona una versión para cada diferencia antes de continuar.');return;}try{localStorage.setItem('registroSyncReviewRecoveryV11',JSON.stringify({at:new Date().toISOString(),local:syncPayload(),remote:window.__syncReviewCloud}));}catch(e){syncMsg('No hay espacio para guardar las dos copias antes de resolver. Descárgalas y libera espacio antes de continuar.');return;}for(const {item,select} of selections)decisions.set(item.key,{...item,chosen:select.value,stamp:Math.max(Date.now(),timestamp(item.local)+1,timestamp(item.remote)+1)});box.remove();q('syncBtn').click();};
@@ -1898,6 +1900,7 @@ function updateForToday(){
     if(deletions.has(key)&&changed)throw new Error('Una baja de otro dispositivo coincide con una modificación local. Se conservan ambas copias para revisar el conflicto.');
     if(!r||semantic(x)===semantic(r))continue;
     const keyReview=conflictKey(group,x,r);if(decisions.has(keyReview))continue;
+    const reviewed=window.__reviewedConflictDecision?.(group,x,r);if(reviewed){decisions.set(keyReview,{key:keyReview,group,local:x,remote:r,chosen:reviewed,stamp:Math.max(Date.now(),timestamp(x)+1,timestamp(r)+1)});continue;}
     const addConflict=()=>conflicts.push({key:keyReview,group,local:x,remote:r});
     if(group==='lessons'&&(wireId(x.studentId)===wireId(r.studentId)||x.student===r.student)){
      if(x.course&&r.course&&x.course!==r.course){addConflict();continue;}
@@ -1913,6 +1916,8 @@ function updateForToday(){
   const byId=new Map();
   for(const raw of payload.students||[]){const s={...raw,id:wireId(raw.id)};const old=byId.get(s.id);if(!old||timestamp(s)>timestamp(old))byId.set(s.id,s);}
   payload.students=[...byId.values()];
+  for(const target of payload.students)for(const source of [...(cloud?.students||[]),...students])if(wireId(source.id)===String(target.id)||mergeKey(source.name,source.course)===mergeKey(target.name,target.course))for(const [key,value] of Object.entries(source))if(key!=='id'&&(target[key]===undefined||target[key]===null||target[key]==='')&&value!==undefined&&value!==null&&value!=='')target[key]=value;
+
   const byKey=new Map(payload.students.map(s=>[mergeKey(s.name,s.course),s]));
   const alias=new Map(Object.keys(aliases()).map(id=>[id,wireId(id)]));for(const s of payload.students)alias.set(String(s.id),String(s.id));
   for(const s of [...(cloud?.students||[]),...students]){
@@ -1926,7 +1931,7 @@ function updateForToday(){
    const x=normalizeLessonForSync(raw);if(!x||deleted.has(String(x.id)))continue;
    const item=normalize(x),old=mergedLessons.get(String(item.id));
    if(!old||timestamp(item)>timestamp(old))mergedLessons.set(String(item.id),item);
-   else if(timestamp(item)===timestamp(old)&&encode(item)!==encode(old)){
+   else if(timestamp(item)===timestamp(old)&&semantic(item)!==semantic(old)){
     throw new Error('Hay dos contenidos distintos de una clase con la misma marca de modificación. Se conserva la copia local; es necesaria una revisión del conflicto.');
    }
   }
@@ -2017,6 +2022,70 @@ function updateForToday(){
    syncMsg('❌ '+(e?.message||'No se ha podido verificar la sincronización.')+'\nSe conservan los datos locales y la copia previa.');
    updateSyncState();
   }finally{busy=false;q('syncBtn').disabled=false;}
+ };
+})();
+</script><script>// Reviewed offline recovery: no account credentials, no network writes on import.
+(function(){
+ const PLAN='registroReviewedRecoveryV11';
+ const clone=x=>JSON.parse(JSON.stringify(x));
+ const semantic=x=>window.__syncSemantic(x);
+ function plan(){try{return JSON.parse(localStorage.getItem(PLAN)||'null');}catch(e){return null;}}
+ window.__reviewedConflictDecision=function(group,local,remote){
+  if(group!=='lessons')return null;
+  for(const change of plan()?.corrections||[]){
+   if(String(change.selected.id)!==String(local.id)||String(local.id)!==String(remote.id))continue;
+   if(semantic(local)!==semantic(change.selected))continue;
+   if(change.variants.some(x=>semantic(x)===semantic(remote)))return 'local';
+  }
+  return null;
+ };
+ const button=document.createElement('button');button.id='reviewedRecoveryBtn';button.type='button';button.className='secondary';button.textContent='Incorporar copia revisada';button.style.marginTop='12px';
+ const input=document.createElement('input');input.id='reviewedRecoveryFile';input.type='file';input.accept='.json,application/json';input.hidden=true;
+ const status=document.createElement('p');status.id='reviewedRecoveryStatus';status.setAttribute('role','status');
+ q('syncDetails').after(button,input,status);
+ button.onclick=()=>input.click();
+ input.onchange=async()=>{
+  button.disabled=true;
+  try{
+   if(q('syncBtn').disabled)throw new Error('Espera a que termine la sincronización antes de incorporar la copia.');
+   const file=input.files[0];if(!file)return;const data=JSON.parse(await file.text()),review=data.reconciliation;
+   if(review?.format!=='oboe-reviewed-v1'||!Array.isArray(review.sources)||!Array.isArray(review.corrections))throw new Error('Selecciona el archivo combinado revisado que acompaña a esta versión.');
+   for(const payload of [data,...review.sources])for(const group of ['students','lessons']){if(!Array.isArray(payload[group]))throw new Error('Faltan datos en la copia revisada.');const ids=payload[group].map(x=>String(x.id||''));if(ids.some(x=>!x)||new Set(ids).size!==ids.length)throw new Error('La copia contiene identificadores vacíos o repetidos.');}
+   const targetLessons=new Map(data.lessons.map(x=>[String(x.id),x]));
+   for(const change of review.corrections){if(!change.selected||!Array.isArray(change.variants)||!targetLessons.has(String(change.selected.id))||semantic(targetLessons.get(String(change.selected.id)))!==semantic(change.selected))throw new Error('La corrección revisada no coincide con el contenido del archivo.');}
+   const localBefore={students:clone(students),lessons:clone(lessons)};
+   // A more recent edit of an existing record must never be replaced silently.
+   for(const group of ['students','lessons'])for(const current of localBefore[group]){
+    const target=group==='lessons'?targetLessons.get(String(current.id)):data.students.find(x=>mergeKey(x.name,x.course)===mergeKey(current.name,current.course));
+    if(!target)continue;
+    const known=[target,...review.sources.flatMap(x=>x[group])].filter(x=>group==='lessons'?String(x.id)===String(current.id):mergeKey(x.name,x.course)===mergeKey(current.name,current.course));
+    if(!known.some(x=>semantic(x)===semantic(current)))throw new Error('Hay una modificación posterior a las copias revisadas. Exporta de nuevo ese dispositivo antes de recuperar; sus datos se conservan.');
+   }
+   const nextStudents=clone(students),studentMap=new Map(nextStudents.map(x=>[mergeKey(x.name,x.course),x]));
+   for(const source of data.students){const key=mergeKey(source.name,source.course);if(deletedStudentKeys.includes(key))throw new Error('Una baja local afecta a un alumno de la copia revisada. Se necesita revisar esa baja antes de continuar.');let target=studentMap.get(key);if(!target){target=clone(source);nextStudents.push(target);studentMap.set(key,target);}else for(const [k,v] of Object.entries(source))if(k!=='id'&&(target[k]===undefined||target[k]===null||target[k]===''))target[k]=v;}
+   const sourcePeople=new Map(data.students.map(x=>[String(x.id),x]));
+   const localMap=new Map(lessons.map(x=>[String(x.id),x])),nextLessons=clone(lessons),index=new Map(nextLessons.map((x,i)=>[String(x.id),i]));
+   for(const source of data.lessons){
+    if(deletedLessonIds.includes(String(source.id)))throw new Error('Una clase de la copia se eliminó en este dispositivo. Se necesita revisar esa baja antes de continuar.');
+    const previous=localMap.get(String(source.id)),item=clone(source),person=sourcePeople.get(String(item.studentId));
+    // Match active identities only from the explicit exported student ID.
+    if(person)item.studentId=studentMap.get(mergeKey(person.name,person.course)).id;
+    else if(previous&&previous.student===item.student)item.studentId=previous.studentId;
+    if(review.corrections.some(x=>String(x.selected.id)===String(item.id)))item.updatedAt=Math.max(Date.now(),Number(previous?.updatedAt||previous?.created||0)+1,Number(item.updatedAt||item.created||0)+1);
+    if(index.has(String(item.id)))nextLessons[index.get(String(item.id))]=item;else{index.set(String(item.id),nextLessons.length);nextLessons.push(item);}
+   }
+   for(const rows of [nextStudents,nextLessons])if(new Set(rows.map(x=>String(x.id))).size!==rows.length)throw new Error('Hay identificadores que coinciden con registros distintos. No se ha cambiado nada.');
+   if(!confirm(`La copia revisada dejará ${nextStudents.length} alumnos y ${nextLessons.length} clases en este dispositivo. Se conservan las clases nuevas que no estaban en las copias y se guarda una copia previa. No se envía nada a la nube todavía. ¿Incorporar?`))return;
+   const oldS=localStorage.getItem(SK),oldL=localStorage.getItem(LK),oldPlan=localStorage.getItem(PLAN);
+   localStorage.setItem('registroReviewedRecoveryBeforeV11',JSON.stringify({at:new Date().toISOString(),...localBefore,deletedStudentKeys,deletedLessonIds,settings:appSettings}));
+   try{
+    localStorage.setItem(PLAN,JSON.stringify({corrections:review.corrections}));localStorage.setItem(SK,JSON.stringify(nextStudents));localStorage.setItem(LK,JSON.stringify(nextLessons));
+    if(localStorage.getItem(SK)!==JSON.stringify(nextStudents)||localStorage.getItem(LK)!==JSON.stringify(nextLessons))throw new Error('El navegador no ha guardado la copia completa.');
+   }catch(e){let rollbackFailed=false;for(const [key,value] of [[SK,oldS],[LK,oldL],[PLAN,oldPlan]]){try{if(localStorage.getItem(key)===value)continue;if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}catch(ignore){rollbackFailed=true;}}if(rollbackFailed)throw new Error('El almacenamiento falló y no se pudo restaurar toda la copia previa. Conserva esta pestaña y exporta sus datos antes de continuar.');throw e;}
+   students=nextStudents;lessons=nextLessons;markLocalSyncDirty();document.getElementById('syncConflictReview')?.remove();renderStudents();renderSelect();render();updateProfessorUI();updateSyncState();
+   status.textContent=`Copia revisada incorporada: ${students.length} alumnos y ${lessons.length} clases. Ya puedes pulsar «Sincronizar ahora».`;syncMsg('Copia revisada incorporada. Pendiente de sincronizar.');
+  }catch(e){status.textContent='No se ha incorporado la copia: '+e.message;}
+  finally{button.disabled=false;input.value='';}
  };
 })();
 </script></body></html>
