@@ -375,8 +375,14 @@ header{min-height:0!important;margin:0!important}header #appSubtitle{color:#647c
 /* V11.1.4 — archived students are explicitly separated from active history. */
 .history-scopes{display:flex;gap:6px;margin:0 0 14px}.history-scopes button{margin:0;padding:8px 12px;font-size:12px}.history-scopes button.selected{background:#127967!important;color:white!important;border-color:#127967}.archived-label{font-size:11px;background:#edf2ec;color:#647c75;border-radius:20px;padding:6px 10px}#historyCard.collapsed .history-scopes{display:none}
 .history-scopes[hidden]{display:none}
+
+/* V11.1.7 — mobile note beside the class valuation control. */
+.mobile-valuation-row:empty{display:none}
+@media(max-width:760px){.mobile-valuation-row{display:flex;align-items:flex-end;gap:10px;margin-top:14px}.mobile-valuation-row #gradeBox{flex:0 0 46px;width:46px;margin:0}.mobile-valuation-row #gradeBox label{display:block;margin:0 0 4px}.mobile-valuation-row #grade{width:46px;height:46px;padding:8px 3px!important;text-align:center;font-size:16px!important;appearance:textfield}.mobile-valuation-row #grade::-webkit-inner-spin-button,.mobile-valuation-row #grade::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}.mobile-valuation-row #quickClassToggle{flex:1;min-width:0;height:46px;margin:0!important;padding:8px 10px!important;gap:6px}.mobile-valuation-row .rubric-count{display:none}}
+
+@media(max-width:760px){.lesson-meta-row>.lesson-date-field{grid-column:1;grid-row:1}.lesson-meta-row>.lesson-attendance-field{grid-column:2;grid-row:1}}
 </style></head><body><div class="wrap">
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.1.5 · Pruebas integradas</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.1.7 · Pruebas integradas</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -505,7 +511,7 @@ header{min-height:0!important;margin:0!important}header #appSubtitle{color:#647c
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V11.1.5 · Pruebas integradas</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V11.1.7 · Pruebas integradas</b></div>
   </div>
 
 
@@ -1692,7 +1698,8 @@ function updateHistoryScope(){const panel=document.querySelector('.history-scope
 function updateRubricSummary(){
  const keys=['sonido','afinacion','tecnica','ritmo','musicalidad','estudio'];
  const n=keys.filter(k=>ratings[k]!=null).length;
- q('quickClassToggle').firstElementChild.textContent=`Valoración de la clase · ${n}/6`;
+ q('quickClassToggle').firstElementChild.textContent='Valoración de la clase';
+ const count=document.createElement('span');count.className='rubric-count';count.textContent=` · ${n}/6`;q('quickClassToggle').firstElementChild.append(count);
  q('rubricScaleHelp').textContent=currentRatingScale===5?'Clase histórica · Se conserva su escala original 1–5.':'Escala 1–10 · Valora solo los criterios que necesites.';
  document.querySelectorAll('.rating-buttons button').forEach(b=>b.setAttribute('aria-pressed',String(b.classList.contains('selected'))));
  const values=keys.filter(k=>ratings[k]!=null).map(k=>Number(ratings[k]));
@@ -1766,6 +1773,14 @@ function updateForToday(){
  const extra=q('classExtras'),next=extra.querySelector('.next-class');q('toggleClassExtras').before(next);
  const quick=q('quickWork').closest('.next-class');next.before(quick);
  q('gradeBox').querySelector('label').textContent='Nota';
+ q('date').parentElement.classList.add('lesson-date-field');q('attendance').parentElement.classList.add('lesson-attendance-field');
+ const gradeHome=document.createComment('grade position'),valuationHome=document.createComment('valuation position');
+ q('gradeBox').before(gradeHome);q('quickClassToggle').before(valuationHome);
+ const valuationRow=document.createElement('div');valuationRow.className='mobile-valuation-row';valuationHome.after(valuationRow);
+ const mobileFields=matchMedia('(max-width:760px)');
+ function arrangeGradeAndValuation(){if(mobileFields.matches){valuationRow.append(q('gradeBox'),q('quickClassToggle'));}else{gradeHome.after(q('gradeBox'));valuationHome.after(q('quickClassToggle'));}}
+ mobileFields.addEventListener('change',arrangeGradeAndValuation);arrangeGradeAndValuation();
+
  q('attendance').previousElementSibling.textContent='Asistencia';
  for(const option of q('attendance').options)option.textContent=option.value==='asiste'?'Asiste':'Falta';
  q('configCard').classList.add('collapsed');
@@ -1796,7 +1811,7 @@ function updateForToday(){
  q('lessonCard').addEventListener('change',e=>{if(!['student','scheduleSimulation','simulationDay','simulationTime'].includes(e.target.id))window.__lessonDirty=true;});
  q('cancelLessonEdit').addEventListener('click',()=>{window.__lessonDirty=false;renderSelect();});
  window.addEventListener('beforeunload',e=>{if(window.__lessonDirty){e.preventDefault();e.returnValue='';}});
- const note=document.createElement('div');note.className='test-note';note.textContent='V11.1.5 de pruebas · Audio experimental. Matrículas anuales, festivos de calendario y sincronización real pendientes de validación.';q('configCard').appendChild(note);
+ const note=document.createElement('div');note.className='test-note';note.textContent='V11.1.7 de pruebas · Audio experimental. Matrículas anuales, festivos de calendario y sincronización real pendientes de validación.';q('configCard').appendChild(note);
  // All persistence errors leave the entered class available for recovery.
  q('save').onclick=async function(){
    if(this.disabled)return;
@@ -1828,7 +1843,7 @@ function updateForToday(){
  };
  applyQuickClassMode();updateStudentsPanel(false);updateForToday();showView('lessonCard');
 })();
-</script><script>// V11.1.5: preserve v16 wire format, canonicalize aliases, and verify full writes.
+</script><script>// V11.1.6: preserve v16 wire format, canonicalize aliases, and verify full writes.
 (function(){
  const previousMergedPayload=mergedSyncPayload;
  function stable(value){if(Array.isArray(value))return value.map(stable);if(value&&typeof value==='object')return Object.fromEntries(Object.keys(value).sort().filter(k=>value[k]!==undefined).map(k=>[k,stable(value[k])]));return value;}
@@ -1842,9 +1857,32 @@ function updateForToday(){
   const copy={...record};delete copy.id;delete copy.studentId;delete copy.updatedAt;
   return encode(compact(copy)||{});
  }
+ const decisions=new Map();
+ function conflictKey(group,x,r){return group+':'+encode([x,r]);}
+ function reviewConflicts(items){
+  document.getElementById('syncConflictReview')?.remove();
+  const box=document.createElement('section');box.id='syncConflictReview';box.style.cssText='padding:16px;background:#fff;border:2px solid #9d651d;border-radius:16px;margin:12px 0;color:#173b35';
+  const title=document.createElement('h3');title.textContent='Revisar diferencias antes de sincronizar';box.append(title);
+  const intro=document.createElement('p');intro.textContent='Elige qué versión conservar en cada diferencia. Todavía no se ha enviado ningún cambio. Puedes descargar las dos copias antes de decidir.';box.append(intro);
+  const download=document.createElement('button');download.type='button';download.textContent='Descargar ambas copias';download.onclick=()=>{const blob=new Blob([JSON.stringify({at:new Date().toISOString(),local:syncPayload(),remote:window.__syncReviewCloud},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Revision_sincronizacion_Oboe.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};box.append(download);
+  const selections=[];
+  for(const [i,item] of items.entries()){
+   const field=document.createElement('fieldset');field.style.cssText='min-width:0;margin:16px 0';
+   const legend=document.createElement('legend');legend.textContent=(item.group==='students'?'Alumno: ':'Clase: ')+(item.local.name||item.local.student||'')+' '+(item.local.date||'');field.append(legend);
+   const select=document.createElement('select');select.setAttribute('aria-label','Versión a conservar '+(i+1));
+   for(const [value,label] of [['','Selecciona una versión'],['local','Conservar la de este dispositivo'],['remote','Conservar la de la nube']]){const o=document.createElement('option');o.value=value;o.textContent=label;select.append(o);}
+   for(const [label,data] of [['Este dispositivo',item.local],['Nube',item.remote]]){const details=document.createElement('details');const summary=document.createElement('summary');summary.textContent=label;const pre=document.createElement('pre');pre.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px';const labels={name:'Nombre',student:'Alumno',course:'Nivel',schoolYear:'Curso académico',date:'Fecha',attendance:'Asistencia',grade:'Nota',obs:'Observaciones',ratings:'Rúbrica',ratingScale:'Escala',scheduleDay:'Día',scheduleTime:'Hora',phone:'Teléfono',email:'Correo',updatedAt:'Última modificación',created:'Creación'};pre.textContent=Object.entries(data).filter(([k])=>!['id','studentId'].includes(k)).map(([k,v])=>(labels[k]||k)+': '+(['updatedAt','created'].includes(k)&&Number(v)>100000000000?new Date(Number(v)).toLocaleString('es-ES'):typeof v==='object'?JSON.stringify(v):String(v))).join('\n');details.append(summary,pre);field.append(details);}
+   field.append(select);box.append(field);selections.push({item,select});
+  }
+  const apply=document.createElement('button');apply.type='button';apply.textContent='Aplicar selección y sincronizar';apply.onclick=(event)=>{event.stopPropagation();if(selections.some(x=>!x.select.value)){syncMsg('Selecciona una versión para cada diferencia antes de continuar.');return;}try{localStorage.setItem('registroSyncReviewRecoveryV11',JSON.stringify({at:new Date().toISOString(),local:syncPayload(),remote:window.__syncReviewCloud}));}catch(e){syncMsg('No hay espacio para guardar las dos copias antes de resolver. Descárgalas y libera espacio antes de continuar.');return;}for(const {item,select} of selections)decisions.set(item.key,{...item,chosen:select.value,stamp:Math.max(Date.now(),timestamp(item.local)+1,timestamp(item.remote)+1)});box.remove();q('syncBtn').click();};
+  const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Cancelar revisión';cancel.onclick=(event)=>{event.stopPropagation();box.remove();decisions.clear();syncMsg('Revisión cancelada. No se ha enviado ningún cambio; los cambios siguen pendientes.');};box.append(apply,cancel);
+  q('syncMsg').after(box);
+ }
+ function resolveRecord(group,x){for(const d of decisions.values()){if(d.group!==group)continue;const source=encode(x);if(source!==encode(d.local)&&source!==encode(d.remote))continue;const selected=d.chosen==='local'?d.local:d.remote;return {...selected,id:x.id,...(group==='lessons'?{studentId:x.studentId}:{}),updatedAt:d.stamp};}return x;}
  function checkConflicts(cloud){
   if(!cloud)return;
   let base=null;try{base=JSON.parse(localStorage.getItem('registroSyncBaseV11')||'null');}catch(ignore){}
+  const conflicts=[];
   for(const group of ['students','lessons']){
    const local=group==='students'?students:lessons;
    const remoteMap=new Map((cloud[group]||[]).map(x=>[String(x.id),x]));
@@ -1859,14 +1897,17 @@ function updateForToday(){
     const changed=b&&semantic(x)!==semantic(b);
     if(deletions.has(key)&&changed)throw new Error('Una baja de otro dispositivo coincide con una modificación local. Se conservan ambas copias para revisar el conflicto.');
     if(!r||semantic(x)===semantic(r))continue;
+    const keyReview=conflictKey(group,x,r);if(decisions.has(keyReview))continue;
+    const addConflict=()=>conflicts.push({key:keyReview,group,local:x,remote:r});
     if(group==='lessons'&&(wireId(x.studentId)===wireId(r.studentId)||x.student===r.student)){
-     if(x.course&&r.course&&x.course!==r.course)throw new Error('Otro cliente intenta cambiar el nivel histórico de una clase del mismo alumno. Se conserva la clase local y es necesaria una revisión.');
-     if(x.schoolYear&&r.schoolYear&&x.schoolYear!==r.schoolYear)throw new Error('Otro cliente intenta cambiar el curso académico histórico de una clase. Se conserva la clase local y es necesaria una revisión.');
+     if(x.course&&r.course&&x.course!==r.course){addConflict();continue;}
+     if(x.schoolYear&&r.schoolYear&&x.schoolYear!==r.schoolYear){addConflict();continue;}
     }
-    if(b&&changed&&semantic(r)!==semantic(b))throw new Error('La misma ficha o clase ha cambiado en ambos dispositivos. Se conservan las dos versiones; revisa el conflicto antes de continuar.');
-    if(!b&&syncDirty())throw new Error('Hay cambios distintos sin una copia común verificada. Se conservan los datos; es necesaria una revisión antes de combinarlos.');
+    if(b&&changed&&semantic(r)!==semantic(b)){addConflict();continue;}
+    if(!b&&syncDirty()){addConflict();continue;}
    }
   }
+  if(conflicts.length){const error=new Error('Hay diferencias pendientes de revisar. Elige una versión para cada registro en el panel inferior.');error.conflicts=conflicts;throw error;}
  }
  function mergeIdentityAliases(payload,cloud){
   const byId=new Map();
@@ -1936,8 +1977,10 @@ function updateForToday(){
      const localLessons=new Map(lessons.map(x=>[String(x.id),x]));
      cloud.lessons=cloud.lessons.map(x=>{const local=localLessons.get(String(x.id));if(!knownIds.has(String(x.studentId))&&local&&knownIds.has(String(local.studentId))&&String(x.student||'')===String(local.student||''))return {...x,studentId:local.studentId};return x;});
     }
-    checkConflicts(cloud);
-    const combined=mergedSyncPayload(cloud),fingerprint=localFingerprint();
+    window.__syncReviewCloud=cloud;checkConflicts(cloud);
+    const fingerprint=localFingerprint();
+    const savedStudents=students,savedLessons=lessons;let combined;
+    try{students=students.map(x=>resolveRecord('students',x));lessons=lessons.map(x=>resolveRecord('lessons',x));const resolvedCloud=cloud?{...cloud,students:cloud.students.map(x=>resolveRecord('students',x)),lessons:cloud.lessons.map(x=>resolveRecord('lessons',x))}:null;combined=mergedSyncPayload(resolvedCloud);}finally{students=savedStudents;lessons=savedLessons;}
     const nextStamp=new Date(Math.max(Date.now(),(Date.parse(remote?.updated_at)||0)+1)).toISOString();
     const filter=remote?(remote.updated_at?'&updated_at=eq.'+encodeURIComponent(remote.updated_at):'&updated_at=is.null'):'';
     const response=remote
@@ -1961,6 +2004,7 @@ function updateForToday(){
     if(localStorage.getItem(SK)!==JSON.stringify(students)||localStorage.getItem(LK)!==JSON.stringify(lessons))throw new Error('La copia remota se ha verificado, pero el navegador no ha podido guardar toda la copia local. No cierres esta pestaña hasta exportarla o volver a sincronizar.');
     const identityAliases=aliases();for(const s of students){const remoteStudent=after.data.students.find(r=>String(r.id)===wireId(s.id)||mergeKey(r.name,r.course)===mergeKey(s.name,s.course));if(remoteStudent)identityAliases[String(s.id)]=String(remoteStudent.id);}localStorage.setItem('registroSyncAliasesV11',JSON.stringify(identityAliases));
     localStorage.setItem('registroSyncBaseV11',JSON.stringify(after.data));
+    decisions.clear();document.getElementById('syncConflictReview')?.remove();
     saveSyncMeta({lastSyncAt:after.updated_at||nextStamp,localDirty:false});clearPendingSyncChanges();verified=after;
     const legacy=lessons.filter(x=>!x.schoolYear).length;
     syncMsg('✅ SINCRONIZACIÓN COMPLETADA\nContenido de alumnos, clases, bajas y configuración comprobado tras guardar.'+(legacy?'\nHay '+legacy+' clases sin curso académico explícito. Revisa su clasificación por fechas.':''));
@@ -1968,6 +2012,7 @@ function updateForToday(){
    }
    if(!verified)throw new Error('No se ha podido confirmar una escritura sin conflictos.');
   }catch(e){
+   if(e.conflicts)reviewConflicts(e.conflicts);
    try{markLocalSyncDirty();}catch(ignore){}
    syncMsg('❌ '+(e?.message||'No se ha podido verificar la sincronización.')+'\nSe conservan los datos locales y la copia previa.');
    updateSyncState();
