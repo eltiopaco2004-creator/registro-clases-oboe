@@ -382,7 +382,7 @@ header{min-height:0!important;margin:0!important}header #appSubtitle{color:#647c
 
 @media(max-width:760px){.lesson-meta-row>.lesson-date-field{grid-column:1;grid-row:1}.lesson-meta-row>.lesson-attendance-field{grid-column:2;grid-row:1}}
 </style></head><body><div class="wrap">
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.4 · Pruebas integradas</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.5 · Pruebas integradas</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -511,7 +511,7 @@ header{min-height:0!important;margin:0!important}header #appSubtitle{color:#647c
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V11.2.4 · Pruebas integradas</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V11.2.5 · Pruebas integradas</b></div>
   </div>
 
 
@@ -1821,7 +1821,7 @@ function updateForToday(){
  q('lessonCard').addEventListener('change',e=>{if(!['student','scheduleSimulation','simulationDay','simulationTime'].includes(e.target.id))window.__lessonDirty=true;});
  q('cancelLessonEdit').addEventListener('click',()=>{window.__lessonDirty=false;renderSelect();});
  window.addEventListener('beforeunload',e=>{if(window.__lessonDirty){e.preventDefault();e.returnValue='';}});
- const note=document.createElement('div');note.className='test-note';note.textContent='V11.2.4 de pruebas · Sincronización revisada (pendiente de prueba entre dispositivos). Audio experimental. Matrículas anuales, festivos de calendario y sincronización real pendientes de validación.';q('configCard').appendChild(note);
+ const note=document.createElement('div');note.className='test-note';note.textContent='V11.2.5 de pruebas · Sincronización revisada (pendiente de prueba entre dispositivos). Audio experimental. Matrículas anuales, festivos de calendario y sincronización real pendientes de validación.';q('configCard').appendChild(note);
  // All persistence errors leave the entered class available for recovery.
  q('save').onclick=async function(){
    if(this.disabled)return;
@@ -2123,4 +2123,52 @@ function updateForToday(){
   finally{button.disabled=false;input.value='';}
  };
 })();
-</script></body></html>
+</script>
+<script>
+/* V11.2.5: inspección y eliminación segura de clases sin ficha activa.
+   No elimina automáticamente registros históricos. */
+(()=>{
+ const host=document.createElement('section');host.id='orphanManager';host.style.cssText='margin-top:14px;padding:12px;border:1px solid #d9e5db;border-radius:12px;background:#f9fbf8';
+ host.innerHTML='<b>🧹 Clases sin ficha activa</b><p style="font-size:12px;margin:6px 0">Consulta registros que no aparecen en el historial de alumnos activos. No se elimina nada automáticamente.</p><button type="button" class="secondary" id="orphanRefresh">Buscar clases</button><div id="orphanResults" style="margin-top:10px;font-size:12px"></div>';
+ const anchor=document.getElementById('syncDetails')||document.getElementById('syncBlock');
+ if(!anchor)return;anchor.after(host);
+ const result=host.querySelector('#orphanResults');
+ function missing(){
+  const ids=new Set(students.map(s=>String(s.id)));
+  return lessons.filter(x=>!ids.has(String(x.studentId||'')));
+ }
+ function draw(){
+  const arr=missing();result.replaceChildren();
+  const heading=document.createElement('p');heading.textContent=arr.length?`${arr.length} clases sin ficha activa. Revisa cada una antes de eliminarla.`:'No se han encontrado clases sin ficha activa.';result.append(heading);
+  for(const x of arr){
+   const item=document.createElement('div');item.style.cssText='padding:9px;margin:8px 0;border:1px solid #e0e9e0;border-radius:9px;background:white';
+   const title=document.createElement('div');title.textContent=`${x.student||'(sin nombre)'} · ${x.date||'sin fecha'} · ${x.course||'sin curso'} · Curso escolar: ${x.schoolYear||'sin indicar'} · Nota: ${x.grade??'—'}`;
+   const meta=document.createElement('div');meta.style.cssText='font-size:10px;color:#65776e;overflow-wrap:anywhere';meta.textContent=`ID de clase: ${x.id}`;
+   const btn=document.createElement('button');btn.type='button';btn.className='danger';btn.style.marginTop='7px';btn.textContent='Eliminar esta clase';
+   btn.onclick=()=>{
+    if(document.getElementById('syncBtn')?.disabled){alert('Espera a que termine la sincronización.');return;}
+    const found=lessons.find(v=>String(v.id)===String(x.id));if(!found){draw();return;}
+    if(!confirm(`¿Eliminar SOLO esta clase?\n\n${found.student||'(sin nombre)'} — ${found.date||'sin fecha'}\n\nSe guardará primero una copia completa. Después tendrás que sincronizar en ambos dispositivos.`))return;
+    // Exportación previa, independiente del almacenamiento local.
+    const backup={at:new Date().toISOString(),reason:'Antes de eliminar clase sin ficha activa',students,lessons,deletedStudentKeys,deletedLessonIds,settings:appSettings};
+    try{downloadFile(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}),'Respaldo_antes_de_limpiar_huerfanos_'+new Date().toISOString().slice(0,10)+'.json');}
+    catch(e){alert('No se pudo preparar la copia. No se ha eliminado nada.');return;}
+    const oldL=localStorage.getItem(LK),oldD=localStorage.getItem(DEL_LESSONS_KEY);
+    const prior=lessons;
+    try{
+     lessons=lessons.filter(v=>String(v.id)!==String(x.id));
+     if(!saveL())throw Error('No se pudo guardar la nueva lista de clases.');
+     rememberDeletedLesson(String(x.id));
+     if(localStorage.getItem(LK)!==JSON.stringify(lessons)||!JSON.parse(localStorage.getItem(DEL_LESSONS_KEY)||'[]').includes(String(x.id)))throw Error('No se pudo verificar el guardado.');
+     recordSyncChange('lessons','deleted');markLocalSyncDirty();render();renderStudents();draw();
+     alert('Clase eliminada de este dispositivo. Sincroniza aquí y después en el otro dispositivo. Conserva el respaldo descargado.');
+    }catch(e){lessons=prior;try{if(oldL===null)localStorage.removeItem(LK);else localStorage.setItem(LK,oldL);if(oldD===null)localStorage.removeItem(DEL_LESSONS_KEY);else localStorage.setItem(DEL_LESSONS_KEY,oldD);deletedLessonIds=JSON.parse(oldD||'[]');}catch(ignore){}alert('No se ha completado la eliminación: '+e.message);draw();}
+   };
+   item.append(title,meta,btn);result.append(item);
+  }
+ }
+ host.querySelector('#orphanRefresh').onclick=draw;
+ draw();
+})();
+</script>
+</body></html>
