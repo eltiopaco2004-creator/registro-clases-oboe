@@ -381,6 +381,7 @@ header{min-height:0!important;margin:0!important}header #appSubtitle{color:#647c
 @media(max-width:760px){.mobile-valuation-row{display:flex;align-items:flex-end;gap:10px;margin-top:14px}.mobile-valuation-row #gradeBox{flex:0 0 46px;width:46px;margin:0}.mobile-valuation-row #gradeBox label{display:block;margin:0 0 4px}.mobile-valuation-row #grade{width:46px;height:46px;padding:8px 3px!important;text-align:center;font-size:16px!important;appearance:textfield}.mobile-valuation-row #grade::-webkit-inner-spin-button,.mobile-valuation-row #grade::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}.mobile-valuation-row #quickClassToggle{flex:1;min-width:0;height:46px;margin:0!important;padding:8px 10px!important;gap:6px}.mobile-valuation-row .rubric-count{display:none}}
 
 @media(max-width:760px){.lesson-meta-row>.lesson-date-field{grid-column:1;grid-row:1}.lesson-meta-row>.lesson-attendance-field{grid-column:2;grid-row:1}}
+.holiday-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.holiday-result{margin:12px 0;color:#263b4f;font-size:13px}.holiday-result .holiday-line{padding:8px 10px;background:#f1f5fa;border:1px solid #b9c8da;border-radius:8px;margin:5px 0}.holiday-result button{margin-left:8px}.holiday-result .holiday-warning{color:#8c3b13;font-weight:650}.holiday-result .holiday-ok{color:#17614a;font-weight:650}#nonTeachingCalendar h3{color:#173e70}#holidayApply{margin-top:8px}#nonTeachingCalendar input{background:#fff;border-color:#9caec2!important}@media(max-width:600px){.holiday-grid{grid-template-columns:1fr}#holidayPreview,#holidayApply,#breakAdd{width:100%}}
 </style><style id="v1126-contraste-real">
 /* Cambio exclusivamente visual: no sustituir las rutinas de guardado ni sincronizacion */
 :root {--brand:#124c8a;--brand-deep:#0b3265;--brand-soft:#dceaf9;--canvas:#ebf1f8;--ink:#152b42;--muted:#3e5268;--line:#aebed0;--green:#13549a;--soft:#e4effa;--cream:#f7f9fc}
@@ -410,7 +411,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
 @media(max-width:600px){.wrap{padding:12px 11px 105px!important}.card{padding:15px!important;border-radius:16px!important}header{padding-bottom:10px!important}header h1{font-size:24px!important}.year-bar{margin-bottom:9px!important}.today-panel{padding:12px!important;margin:8px 0 10px!important}.header-actions #openSync{padding:6px 8px!important;max-width:178px!important}#openSync .sync-summary-text{font-size:10px;max-width:112px}}
 @media(max-width:365px){#openSync .sync-summary-text{max-width:87px}}
 </style></head><body><div class="wrap">
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Prueba visual de contraste</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Festivos + contraste mejorado</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -447,7 +448,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
   </div>
 </div>
 <label>Alumno</label><select id="student"><option value="">Selecciona un alumno…</option></select>
-<div class="lesson-meta-row"><div id="gradeBox"><label for="grade">Nota (0–10)</label><input id="grade" type="number" min="0" max="10" step=".1" inputmode="decimal"></div><div><label for="date">Fecha</label><input id="date" type="date"></div><div><label for="attendance">Estado</label><select id="attendance"><option value="asiste">🟢 Asiste</option><option value="falta">🔴 Falta</option></select></div></div>
+<div class="lesson-meta-row"><div id="gradeBox"><label for="grade">Nota (0–10)</label><input id="grade" type="number" min="0" max="10" step=".1" inputmode="decimal"></div><div><label for="date">Fecha</label><input id="date" type="date"></div><div><label for="attendance">Estado</label><select id="attendance"><option value="asiste">🟢 Asiste</option><option value="falta">🔴 Falta</option><option value="festivo">📅 Festivo</option></select></div></div>
 
 <button type="button" class="secondary quick-class-toggle" id="quickClassToggle"><span>Valoración de la clase</span><span id="quickClassArrow">▾</span></button>
 <div id="ratingsBox">
@@ -523,6 +524,28 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
     <p class="muted">Las clases e historial corresponden al curso seleccionado.</p>
   </div>
 
+  <div class="config-section-block" id="nonTeachingCalendar">
+    <h3>📅 Calendario no lectivo</h3>
+    <p class="muted">Los festivos puntuales generan un registro por alumno con clase ese día, solo tras confirmarlo. Las vacaciones nunca generan clases.</p>
+    <div class="holiday-grid">
+      <div><label for="holidayDate">Fecha del festivo</label><input type="date" id="holidayDate"></div>
+      <div><label for="holidayTitle">Motivo (opcional)</label><input id="holidayTitle" placeholder="Ej.: Fiesta local" maxlength="100"></div>
+    </div>
+    <button type="button" class="secondary" id="holidayPreview">Consultar alumnos afectados</button>
+    <div id="holidayPreviewResult" class="holiday-result" role="status" aria-live="polite"></div>
+    <button type="button" class="primary" id="holidayApply" hidden>Registrar festivo para alumnos pendientes</button>
+    <hr style="border:0;border-top:1px solid #d8e0e9;margin:20px 0">
+    <h4 style="margin:0">Vacaciones y periodos sin clase</h4>
+    <p class="muted">Solo bloquean las propuestas automáticas de la agenda durante el intervalo. No añaden registros al historial.</p>
+    <div class="holiday-grid">
+      <div><label for="breakStart">Desde</label><input type="date" id="breakStart"></div>
+      <div><label for="breakEnd">Hasta (incluido)</label><input type="date" id="breakEnd"></div>
+    </div>
+    <div><label for="breakTitle">Descripción</label><input id="breakTitle" placeholder="Ej.: Vacaciones de Navidad" maxlength="100"></div>
+    <button type="button" class="secondary" id="breakAdd">Añadir periodo no lectivo</button>
+    <div id="breakList" class="holiday-result" aria-live="polite"></div>
+  </div>
+
   <div class="config-section-block">
     <h3>👨‍🏫 Datos del profesor y centro</h3>
     <div class="row">
@@ -539,7 +562,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V11.2.6 · Prueba visual de contraste</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V11.2.5 · Pruebas integradas</b></div>
   </div>
 
 
@@ -639,7 +662,7 @@ function updateConfigView(forceOpen){
   card.classList.toggle("collapsed",configured);
 }
 function saveSettings(){
-  appSettings={teacher:q("teacherName").value.trim(),instrument:q("instrument").value,otherInstrument:q("otherInstrument").value.trim(),school:q("schoolName").value.trim()};
+  appSettings={...appSettings,teacher:q("teacherName").value.trim(),instrument:q("instrument").value,otherInstrument:q("otherInstrument").value.trim(),school:q("schoolName").value.trim()};
   localStorage.setItem(SETK,JSON.stringify(appSettings));
   markSettingsUpdated();
   if(typeof recordSyncChange==="function")recordSyncChange("settings","updated");
@@ -926,7 +949,7 @@ function agendaMobileName(name){
 }
 function renderWeeklyAgenda(){
   const box=q("weeklyAgenda");if(!box)return;
-  const days=TEACHING_DAYS;
+  const days=TEACHING_DAYS.filter(d=>d!=="Viernes");
   const rows=[];
   const times=[...new Set(students.filter(s=>s.scheduleTime).map(s=>s.scheduleTime))].sort();
   if(!times.length){box.innerHTML='<p class="week-empty">Todavía no hay horarios asignados a los alumnos.</p>';return;}
@@ -1025,7 +1048,7 @@ function renderStudents(){
     let n=lessons.filter(x=>lessonYear(x)===year()&&x.studentId===s.id).length,
         f=lessons.filter(x=>lessonYear(x)===year()&&x.studentId===s.id&&x.attendance==="falta").length,
         hor=s.scheduleDay&&s.scheduleTime?` · ${esc(s.scheduleDay)} ${esc(s.scheduleTime)}`:"";
-    return `<div class="item"><button type="button" class="student-link" onclick="openStudentProfile('${esc(s.id)}')">${esc(displayName(s.name))}</button><div class="muted">${esc(s.course)}${hor} · ${n} clases · ${f} faltas</div><button class="secondary" onclick="editStudentProfile('${s.id}')">✏️ Editar</button><button class="danger" onclick="deleteStudent('${s.id}')">🗑️</button></div>`
+    return `<div class="item"><button type="button" class="student-link" onclick="openStudentProfile('${esc(s.id)}')">${esc(displayName(s.name))}</button><div class="muted">${esc(s.course)}${hor} · ${lessons.filter(x=>lessonYear(x)===year()&&x.studentId===s.id&&x.attendance!=="festivo").length} clases · ${f} faltas</div><button class="secondary" onclick="editStudentProfile('${s.id}')">✏️ Editar</button><button class="danger" onclick="deleteStudent('${s.id}')">🗑️</button></div>`
   }).join("");
   updateStudentsPanel();
 }
@@ -1047,7 +1070,7 @@ q("addStudent").onclick=()=>{let n=q("studentName").value.trim(),c=q("studentCou
 q("cancelEdit").onclick=()=>{edit=null;resetStudentForm();q("addStudent").textContent="➕ Añadir alumno";q("cancelEdit").classList.add("hidden");updateStudentsPanel()};
 window.editStudent=id=>{if(students.some(x=>x.id===id))editStudentProfile(id)};
 window.deleteStudent=id=>{let s=students.find(x=>x.id===id),n=lessons.filter(x=>x.studentId===id).length;if(!s)return;if(confirm(`¿Eliminar a ${s.name}?${n?`\nSus ${n} clases NO se borrarán.`:""}`)){rememberDeletedStudent(mergeKey(s.name,s.course));recordSyncChange("students","deleted");students=students.filter(x=>x.id!==id);saveS();markLocalSyncDirty();renderStudents();renderSelect()}};
-q("attendance").onchange=()=>{let f=q("attendance").value==="falta";q("grade").disabled=f;q("ratingsBox").style.opacity=f?".55":"1";if(f)q("grade").value=""};
+q("attendance").onchange=()=>{let f=q("attendance").value!=="asiste";q("grade").disabled=f;q("ratingsBox").style.opacity=f?".55":"1";if(f)q("grade").value=""};
 
 q("toggleClassExtras").onclick=()=>{
   const p=q("classExtras"), open=!p.classList.contains("collapsed");
@@ -1079,14 +1102,14 @@ function renderHistoryStudents(){
 
   const scopeStudents=historyList(),scopeIds=new Set(scopeStudents.map(s=>s.id));
   const a=lessons.filter(x=>lessonYear(x)===y&&scopeIds.has(x.studentId));
-  const notes=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
+  const notes=a.filter(x=>x.attendance==="asiste"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
   const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(1):"—";
   const abs=a.filter(x=>x.attendance==="falta").length;
 
   const list=sortStudents(historyList()).filter(s=>!term||s.name.toLowerCase().includes(term));
   const summary=`<div class="course-summary">
     <div class="summary-stat"><b>${scopeStudents.length}</b><span>Alumnos</span></div>
-    <div class="summary-stat"><b>${a.length}</b><span>Clases</span></div>
+    <div class="summary-stat"><b>${a.filter(x=>x.attendance!=="festivo").length}</b><span>Clases</span></div>
     <div class="summary-stat"><b>${abs}</b><span>Faltas</span></div>
     <div class="summary-stat"><b>${avg}</b><span>Media</span></div>
   </div>`;
@@ -1094,14 +1117,14 @@ function renderHistoryStudents(){
   const cards=list.length?list.map(s=>{
     const ls=a.filter(x=>x.studentId===s.id).sort((u,v)=>(v.date||"").localeCompare(u.date||"")||((v.created||0)-(u.created||0)));
     const f=ls.filter(x=>x.attendance==="falta").length;
-    const notes=ls.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
+    const notes=ls.filter(x=>x.attendance==="asiste"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
     const av=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(1):"—";
-    const last=ls[0];
-    const lastText=last?`Última: ${new Date(last.date+"T12:00:00").toLocaleDateString("es-ES")} · ${last.attendance==="falta"?"Falta":"Nota "+last.grade}`:"Sin clases registradas";
+    const last=ls.find(x=>x.attendance!=="festivo")||ls[0];
+    const lastText=last?`Última: ${new Date(last.date+"T12:00:00").toLocaleDateString("es-ES")} · ${last.attendance==="falta"?"Falta":last.attendance==="festivo"?"Festivo":"Nota "+last.grade}`:"Sin clases registradas";
     const next=ls.find(x=>x.nextClass);
     return `<div class="item student-card history-student" data-student-id="${esc(s.id)}" style="cursor:pointer">
       <div class="student-top">
-        <div><button type="button" class="student-link" onclick="openStudentProfile('${esc(s.id)}');event.stopPropagation()">${esc(displayName(s.name))}</button><div class="student-last">${esc(s.course)} · ${ls.length} clases · ${f} faltas · media ${av}</div><div class="student-last">${esc(lastText)}</div>${next?`<div class="student-last">➡️ ${esc(next.nextClass)}</div>`:""}</div>
+        <div><button type="button" class="student-link" onclick="openStudentProfile('${esc(s.id)}');event.stopPropagation()">${esc(displayName(s.name))}</button><div class="student-last">${esc(s.course)} · ${ls.filter(x=>x.attendance!=="festivo").length} clases · ${f} faltas · media ${av}</div><div class="student-last">${esc(lastText)}</div>${next?`<div class="student-last">➡️ ${esc(next.nextClass)}</div>`:""}</div>
         <button type="button" class="secondary history-open" data-student-id="${esc(s.id)}">📚 Ver ficha</button>
       </div>
     </div>`;
@@ -1128,11 +1151,11 @@ function renderStudentHistory(id){
   const y=year();
   const a=lessons.filter(x=>lessonYear(x)===y&&x.studentId===id).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||((b.created||0)-(a.created||0)));
   const f=a.filter(x=>x.attendance==="falta").length;
-  const notes=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
+  const notes=a.filter(x=>x.attendance==="asiste"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
   const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(1):"—";
-  const last=a[0];
+  const last=a.find(x=>x.attendance!=="festivo")||a[0];
   const next=a.find(x=>x.nextClass);
-  const evolution=a.filter(x=>x.attendance!=="falta"&&x.ratings?.general).slice().reverse().slice(-10);
+  const evolution=a.filter(x=>x.attendance==="asiste"&&x.ratings?.general).slice().reverse().slice(-10);
 
   const bars=evolution.length?evolution.map(x=>{
     const v=Number(x.ratings.general)||0;
@@ -1145,7 +1168,7 @@ function renderStudentHistory(id){
     <div class="profile-header"><div><div class="profile-name">${esc(displayName(s.name))}</div><div class="profile-course">${esc(s.course)} · Curso ${esc(y)}</div></div>
       ${s.archived?'<span class="archived-label">Alumno archivado</span>':`<button class="secondary" onclick="editStudentProfile('${esc(s.id)}')">✏️ Editar alumno</button>`}</div>
     <div class="profile-stats">
-      <div class="profile-stat"><b>${a.length}</b><span>Clases</span></div>
+      <div class="profile-stat"><b>${a.filter(x=>x.attendance!=="festivo").length}</b><span>Clases</span></div>
       <div class="profile-stat"><b>${f}</b><span>Faltas</span></div>
       <div class="profile-stat"><b>${avg}</b><span>Media</span></div>
       <div class="profile-stat"><b>${last?new Date(last.date+"T12:00:00").toLocaleDateString("es-ES",{day:"2-digit",month:"2-digit"}):"—"}</b><span>Última clase</span></div>
@@ -1156,9 +1179,9 @@ function renderStudentHistory(id){
     ${recentNotes.length?`<div class="profile-section-title">📝 Últimas observaciones y tareas</div>${recentNotes.map(x=>`<div class="profile-note"><b>${new Date(x.date+"T12:00:00").toLocaleDateString("es-ES")}</b>${x.obs?`<br>${esc(x.obs)}`:""}${x.nextClass?`<br><span class="muted">➡️ ${esc(x.nextClass)}</span>`:""}</div>`).join("")}`:""}
     <div class="profile-section-title">📚 Historial de clases</div>
     <div>${a.length?a.map(x=>`<div class="item">
-      <span class="grade">${x.attendance==="falta"?"—":x.grade}</span>
+      <span class="grade">${x.attendance!=="asiste"?"—":x.grade}</span>
       <b>${new Date(x.date+"T12:00:00").toLocaleDateString("es-ES")}</b>
-      <div class="muted">${x.attendance==="falta"?"🔴 Falta":"🟢 Asiste"}</div>
+      <div class="muted">${x.attendance==="falta"?"🔴 Falta":x.attendance==="festivo"?"📅 Festivo":"🟢 Asiste"}</div>
       ${x.ratings&&Object.keys(x.ratings).length?`<div class="muted"><b>Valoración:</b> ${Object.entries(x.ratings).map(([k,v])=>`${esc(ratingLabels[k]||k)} ${v}/${x.ratingScale||5}`).join(" · ")}</div>`:""}
       ${x.autoComment?`<p class="muted"><b>Valoración general:</b> ${esc(x.autoComment)}</p>`:""}
       ${x.obs?`<p>${esc(x.obs)}</p>`:""}
@@ -1169,7 +1192,7 @@ function renderStudentHistory(id){
     </div>`).join(""):'<p class="muted">No hay clases registradas de este alumno en este curso escolar.</p>'}</div>`;
 }
 
-window.editLesson=id=>{const x=lessons.find(v=>v.id===id);if(!x)return;setLessonCardOpen(true);editingLessonId=id;editingLessonReturnStudentId=x.studentId||null;q("lessonFormTitle").textContent="✏️ Editar clase";q("student").value=x.studentId;q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance==="falta";q("obs").value=stripQuickObservation(x.obs||"");q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance==="falta"?".55":"1";currentRatingScale=x.ratingScale||5;loadRatings(x.ratings||{});updateRubricSummary();showView("lessonCard");window.scrollTo({top:0,behavior:"smooth"});};
+window.editLesson=id=>{const x=lessons.find(v=>v.id===id);if(!x)return;setLessonCardOpen(true);editingLessonId=id;editingLessonReturnStudentId=x.studentId||null;q("lessonFormTitle").textContent="✏️ Editar clase";q("student").value=x.studentId;q("date").value=x.date||"";q("attendance").value=x.attendance||"asiste";q("grade").value=x.grade??"";q("grade").disabled=x.attendance!=="asiste";q("obs").value=stripQuickObservation(x.obs||"");q("nextClass").value=x.nextClass||"";if(window.__setQuickWork)window.__setQuickWork(x.quickWork||[]);audioData=null;q("recText").textContent=x.audioData?"Grabación existente (se conserva si no grabas una nueva)":"Sin grabación";q("save").textContent="💾 Guardar cambios";q("cancelLessonEdit").classList.remove("hidden");q("ratingsBox").style.opacity=x.attendance!=="asiste"?".55":"1";currentRatingScale=x.ratingScale||5;loadRatings(x.ratings||{});updateRubricSummary();showView("lessonCard");window.scrollTo({top:0,behavior:"smooth"});};
 q("cancelLessonEdit").onclick=()=>{const returnStudentId=editingLessonReturnStudentId;editingLessonId=null;editingLessonReturnStudentId=null;q("lessonFormTitle").textContent="📝 Nueva clase";q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");q("ratingsBox").style.opacity="1";resetRatings();if(returnStudentId){render();renderStudents();openStudentProfile(returnStudentId);return;}if(scheduleMode==="auto")refreshAutomaticSuggestion();};
 window.removeLesson=id=>{if(confirm("¿Eliminar esta clase?")){rememberDeletedLesson(id);recordSyncChange("lessons","deleted");lessons=lessons.filter(x=>x.id!==id);saveL();markLocalSyncDirty();render();renderStudents()}};
 q("record").onclick=async()=>{try{let st=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];media=new MediaRecorder(st);media.ondataavailable=e=>e.data.size&&chunks.push(e.data);media.onstop=()=>{let b=new Blob(chunks,{type:media.mimeType||"audio/webm"}),r=new FileReader();r.onload=()=>audioData=r.result;r.readAsDataURL(b);st.getTracks().forEach(t=>t.stop())};media.start();q("record").disabled=true;q("stop").disabled=false;q("recText").textContent="🔴 Grabando…"}catch(e){alert("No se ha podido acceder al micrófono.")}};
@@ -1192,7 +1215,7 @@ function composeLessonObservation(baseObs, quickWork){
 function stripQuickObservation(text){
   return String(text||"").replace(/^Hoy hemos trabajado:\s*[^\n.]+\.?\s*(?:\n|$)/i,"").trim();
 }
-q("save").onclick=async()=>{const wasEditing=!!editingLessonId;const returnStudentId=editingLessonReturnStudentId;let sid=q("student").value,att=q("attendance").value,g=q("grade").value;if(!sid)return alert("Selecciona un alumno.");if(att==="asiste"&&g==="")return alert("Indica la nota o marca falta.");let s=students.find(x=>x.id===sid);if(!s)return alert('El alumno seleccionado no existe.');const date=q('date').value;if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date+'T12:00:00')))return alert('Indica una fecha válida.');if(att==='asiste'&&(!Number.isFinite(Number(g))||Number(g)<0||Number(g)>10))return alert('La nota debe estar entre 0 y 10.');if(editingLessonId){let item=lessons.find(x=>x.id===editingLessonId);if(!item)return alert("No se ha encontrado la clase.");const sameStudent=item.studentId===sid;item.studentId=sid;item.student=s.name;if(!sameStudent)item.course=s.course;item.date=q("date").value;item.attendance=att;item.grade=att==="falta"?null:Number(g);const extras=getLessonExtras();item.obs=composeLessonObservation(q("obs").value,extras.quickWork);item.quickWork=extras.quickWork;item.nextClass=extras.nextClass;item.ratingScale=currentRatingScale;item.ratings=att==="falta"?{}:{...ratings};item.autoComment=att==="falta"?"":(ratings.general?ratingComment(ratings.general,currentRatingScale):"");/* Historical schoolYear is immutable during editing. */item.updatedAt=Date.now();if(audioData){item.audioData=audioData;if(dir)await saveFile(item)}editingLessonId=null;editingLessonReturnStudentId=null;q("lessonFormTitle").textContent="📝 Nueva clase";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");recordSyncChange("lessons","updated");/* announce after persistence */}else{let item={id:crypto.randomUUID(),studentId:sid,student:s.name,course:s.course,date:q("date").value,attendance:att,grade:att==="falta"?null:Number(g),obs:composeLessonObservation(q("obs").value,getLessonExtras().quickWork),quickWork:getLessonExtras().quickWork,nextClass:getLessonExtras().nextClass,ratingScale:currentRatingScale,ratings:att==="falta"?{}:{...ratings},autoComment:att==="falta"?"":(ratings.general?ratingComment(ratings.general,currentRatingScale):""),schoolYear:year(),audioData:audioData||null,created:Date.now(),updatedAt:Date.now()};lessons.push(item);if(dir&&audioData)await saveFile(item);recordSyncChange("lessons","added");/* announce after persistence */}if(!saveL())return;notifySaved(wasEditing?"Cambios guardados":"Clase guardada");markLocalSyncDirty();q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";resetRatings();render();renderStudents();if(wasEditing&&returnStudentId)openStudentProfile(returnStudentId);
+q("save").onclick=async()=>{const wasEditing=!!editingLessonId;const returnStudentId=editingLessonReturnStudentId;let sid=q("student").value,att=q("attendance").value,g=q("grade").value;if(!sid)return alert("Selecciona un alumno.");if(att==="asiste"&&g==="")return alert("Indica la nota o marca falta.");let s=students.find(x=>x.id===sid);if(!s)return alert('El alumno seleccionado no existe.');const date=q('date').value;if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date+'T12:00:00')))return alert('Indica una fecha válida.');if(att==='asiste'&&(!Number.isFinite(Number(g))||Number(g)<0||Number(g)>10))return alert('La nota debe estar entre 0 y 10.');if(editingLessonId){let item=lessons.find(x=>x.id===editingLessonId);if(!item)return alert("No se ha encontrado la clase.");const sameStudent=item.studentId===sid;item.studentId=sid;item.student=s.name;if(!sameStudent)item.course=s.course;item.date=q("date").value;item.attendance=att;item.grade=att!=="asiste"?null:Number(g);const extras=getLessonExtras();item.obs=composeLessonObservation(q("obs").value,extras.quickWork);item.quickWork=extras.quickWork;item.nextClass=extras.nextClass;item.ratingScale=currentRatingScale;item.ratings=att!=="asiste"?{}:{...ratings};item.autoComment=att!=="asiste"?"":(ratings.general?ratingComment(ratings.general,currentRatingScale):"");/* Historical schoolYear is immutable during editing. */item.updatedAt=Date.now();if(audioData){item.audioData=audioData;if(dir)await saveFile(item)}editingLessonId=null;editingLessonReturnStudentId=null;q("lessonFormTitle").textContent="📝 Nueva clase";q("save").textContent="💾 Guardar clase";q("cancelLessonEdit").classList.add("hidden");recordSyncChange("lessons","updated");/* announce after persistence */}else{let item={id:crypto.randomUUID(),studentId:sid,student:s.name,course:s.course,date:q("date").value,attendance:att,grade:att!=="asiste"?null:Number(g),obs:composeLessonObservation(q("obs").value,getLessonExtras().quickWork),quickWork:getLessonExtras().quickWork,nextClass:getLessonExtras().nextClass,ratingScale:currentRatingScale,ratings:att!=="asiste"?{}:{...ratings},autoComment:att!=="asiste"?"":(ratings.general?ratingComment(ratings.general,currentRatingScale):""),schoolYear:year(),audioData:audioData||null,created:Date.now(),updatedAt:Date.now()};lessons.push(item);if(dir&&audioData)await saveFile(item);recordSyncChange("lessons","added");/* announce after persistence */}if(!saveL())return;notifySaved(wasEditing?"Cambios guardados":"Clase guardada");markLocalSyncDirty();q("student").value="";q("grade").value="";q("obs").value="";clearLessonExtras();q("attendance").value="asiste";q("grade").disabled=false;audioData=null;q("recText").textContent="Sin grabación";resetRatings();render();renderStudents();if(wasEditing&&returnStudentId)openStudentProfile(returnStudentId);
   if(scheduleMode==="auto"&&!wasEditing){
     if(manualJumpStudentId){
       const jumped=students.find(st=>st.id===manualJumpStudentId);
@@ -1229,9 +1252,9 @@ function downloadFile(blob,name){const url=URL.createObjectURL(blob);const a=doc
 function csvEscape(v){return `"${String(v??"").replace(/"/g,'""')}"`}
 function makeCSV(rows){return "\ufeff"+rows.map(r=>r.map(csvEscape).join(";")).join("\n")}
 q("csv").onclick=()=>{const y=year(),ls=lessons.filter(x=>lessonYear(x)===y);
- const studentRows=[["ID alumno","Clave unificación","Nombre y apellidos","Curso","Curso escolar","Dispositivo","Nº clases","Nº faltas","Nº asistencias","Media notas","Última clase","Clases con observación","Clases con grabación"],...students.map(s=>{const a=ls.filter(x=>x.studentId===s.id),f=a.filter(x=>x.attendance==="falta").length,n=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade)),obs=a.filter(x=>x.obs).length,aud=a.filter(x=>x.audioData).length;return [s.id,mergeKey(s.name,s.course),s.name,s.course,y,deviceId,a.length,f,a.length-f,n.length?(n.reduce((p,v)=>p+v,0)/n.length).toFixed(2):"",a.length?a.slice().sort((u,v)=>(v.date||"").localeCompare(u.date||""))[0].date:"",obs,aud]})];
- const classRows=[["Alumno","Curso","Curso escolar","Fecha","Estado","Nota","Sonido","Afinación","Técnica","Ritmo","Musicalidad","Estudio","Actitud","Progreso","Valoración general","Comentario automático","Observación","Trabajo rápido","Para la próxima clase","Grabación","Nombre archivo grabación","Dispositivo","Fecha/hora creación","ID clase","ID alumno","Clave alumno","Escala valoración"],...ls.map(x=>{const s=students.find(z=>z.id===x.studentId);return [x.student,x.course,x.schoolYear||y,x.date,x.attendance==="falta"?"Falta":"Asiste",x.grade??"",x.ratings?.sonido??"",x.ratings?.afinacion??"",x.ratings?.tecnica??"",x.ratings?.ritmo??"",x.ratings?.musicalidad??"",x.ratings?.estudio??"",x.ratings?.actitud??"",x.ratings?.progreso??"",x.ratings?.general??"",x.autoComment||"",x.obs,(x.quickWork||[]).join(" · "),x.nextClass||"",x.audioData?"Sí":"No",x.audioData?filename(x.student,x.date):"",deviceId,x.created?new Date(x.created).toISOString():"",x.id,x.studentId,s?mergeKey(s.name,s.course):mergeKey(x.student,x.course),x.ratingScale||5]})];
- const summary=[ ["Alumno","Curso","Curso escolar","Clases","Asistencias","Faltas","Media","Última clase","Observaciones","Grabaciones"], ...students.map(s=>{const a=ls.filter(x=>x.studentId===s.id),f=a.filter(x=>x.attendance==="falta").length,n=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));return [s.name,s.course,y,a.length,a.length-f,f,n.length?(n.reduce((p,v)=>p+v,0)/n.length).toFixed(2):"",a.length?a.slice().sort((u,v)=>(v.date||"").localeCompare(u.date||""))[0].date:"",a.filter(x=>x.obs).length,a.filter(x=>x.audioData).length]}) ];
+ const studentRows=[["ID alumno","Clave unificación","Nombre y apellidos","Curso","Curso escolar","Dispositivo","Nº clases","Nº faltas","Nº asistencias","Media notas","Última clase","Clases con observación","Clases con grabación"],...students.map(s=>{const a=ls.filter(x=>x.studentId===s.id),f=a.filter(x=>x.attendance==="falta").length,n=a.filter(x=>x.attendance==="asiste"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade)),obs=a.filter(x=>x.obs).length,aud=a.filter(x=>x.audioData).length;return [s.id,mergeKey(s.name,s.course),s.name,s.course,y,deviceId,a.filter(x=>x.attendance!=="festivo").length,f,a.filter(x=>x.attendance==="asiste").length,n.length?(n.reduce((p,v)=>p+v,0)/n.length).toFixed(2):"",a.some(x=>x.attendance!=="festivo")?a.filter(x=>x.attendance!=="festivo").slice().sort((u,v)=>(v.date||"").localeCompare(u.date||""))[0].date:"",obs,aud]})];
+ const classRows=[["Alumno","Curso","Curso escolar","Fecha","Estado","Nota","Sonido","Afinación","Técnica","Ritmo","Musicalidad","Estudio","Actitud","Progreso","Valoración general","Comentario automático","Observación","Trabajo rápido","Para la próxima clase","Grabación","Nombre archivo grabación","Dispositivo","Fecha/hora creación","ID clase","ID alumno","Clave alumno","Escala valoración"],...ls.map(x=>{const s=students.find(z=>z.id===x.studentId);return [x.student,x.course,x.schoolYear||y,x.date,x.attendance==="falta"?"Falta":x.attendance==="festivo"?"Festivo":"Asiste",x.grade??"",x.ratings?.sonido??"",x.ratings?.afinacion??"",x.ratings?.tecnica??"",x.ratings?.ritmo??"",x.ratings?.musicalidad??"",x.ratings?.estudio??"",x.ratings?.actitud??"",x.ratings?.progreso??"",x.ratings?.general??"",x.autoComment||"",x.obs,(x.quickWork||[]).join(" · "),x.nextClass||"",x.audioData?"Sí":"No",x.audioData?filename(x.student,x.date):"",deviceId,x.created?new Date(x.created).toISOString():"",x.id,x.studentId,s?mergeKey(s.name,s.course):mergeKey(x.student,x.course),x.ratingScale||5]})];
+ const summary=[ ["Alumno","Curso","Curso escolar","Clases","Asistencias","Faltas","Media","Última clase","Observaciones","Grabaciones"], ...students.map(s=>{const a=ls.filter(x=>x.studentId===s.id),f=a.filter(x=>x.attendance==="falta").length,n=a.filter(x=>x.attendance==="asiste"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));return [s.name,s.course,y,a.filter(x=>x.attendance!=="festivo").length,a.filter(x=>x.attendance==="asiste").length,f,n.length?(n.reduce((p,v)=>p+v,0)/n.length).toFixed(2):"",a.some(x=>x.attendance!=="festivo")?a.filter(x=>x.attendance!=="festivo").slice().sort((u,v)=>(v.date||"").localeCompare(u.date||""))[0].date:"",a.filter(x=>x.obs).length,a.filter(x=>x.audioData).length]}) ];
  writeDataFile(new Blob([makeCSV(classRows)],{type:"text/csv;charset=utf-8"}),`Clases_${safeFilePart(currentInstrument())}_${y}.csv`).then(()=>setTimeout(()=>writeDataFile(new Blob([makeCSV(summary)],{type:"text/csv;charset=utf-8"}),`Resumen_${safeFilePart(currentInstrument())}_${y}.csv`),250));};
 // Carpeta independiente para el REGISTRO (las grabaciones usan su propia carpeta).
 const DATA_DB="registroClasesArchivosV1", DATA_STORE="handles";
@@ -1715,10 +1738,10 @@ function syncStudentName(s){const first=String(s.firstName||"").trim(),last=Stri
 function normalizeStudentContact(s){if(s.phone==null)s.phone="";if(s.email==null)s.email="";if(s.generalNotes==null)s.generalNotes="";if(s.objectives==null)s.objectives="";if(s.repertoire==null)s.repertoire="";if(!s.firstName&&!s.lastName){const p=studentParts(s);s.firstName=p.first;s.lastName=p.last}}
 function phoneHref(v){return String(v||"").replace(/[^0-9+]/g,"")}
 function historyFor(s){const y=year();return lessons.filter(x=>lessonYear(x)===y&&x.studentId===s.id).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||((b.created||0)-(a.created||0)))}
-function renderHistoryItems(s){const a=historyFor(s);if(!a.length)return '<div class="profile-empty">No hay clases registradas de este alumno en el curso seleccionado.</div>';return a.map(x=>`<div class="profile-history-item"><div><b>${new Date(x.date+"T12:00:00").toLocaleDateString("es-ES")}</b> · ${x.attendance==="falta"?"🔴 Falta":"🟢 Asiste"}${x.attendance!=="falta"&&x.grade!==null&&x.grade!==""?` · <b>Nota ${esc(x.grade)}</b>`:""}</div>${x.autoComment?`<div class="muted" style="margin-top:4px"><b>Valoración:</b> ${esc(x.autoComment)}</div>`:""}${x.obs?`<div style="margin-top:4px">${esc(x.obs)}</div>`:""}${x.nextClass?`<div class="muted" style="margin-top:4px">➡️ ${esc(x.nextClass)}</div>`:""}<div class="profile-actions"><button type="button" class="secondary" onclick="closeStudentProfile();editLesson('${esc(x.id)}')">✏️ Editar clase</button><button type="button" class="danger" onclick="deleteLessonFromProfile('${esc(x.id)}','${esc(s.id)}')">🗑️ Eliminar clase</button></div></div>`).join("")}
+function renderHistoryItems(s){const a=historyFor(s);if(!a.length)return '<div class="profile-empty">No hay clases registradas de este alumno en el curso seleccionado.</div>';return a.map(x=>`<div class="profile-history-item"><div><b>${new Date(x.date+"T12:00:00").toLocaleDateString("es-ES")}</b> · ${x.attendance==="falta"?"🔴 Falta":x.attendance==="festivo"?"📅 Festivo":"🟢 Asiste"}${x.attendance==="asiste"&&x.grade!==null&&x.grade!==""?` · <b>Nota ${esc(x.grade)}</b>`:""}</div>${x.autoComment?`<div class="muted" style="margin-top:4px"><b>Valoración:</b> ${esc(x.autoComment)}</div>`:""}${x.obs?`<div style="margin-top:4px">${esc(x.obs)}</div>`:""}${x.nextClass?`<div class="muted" style="margin-top:4px">➡️ ${esc(x.nextClass)}</div>`:""}<div class="profile-actions"><button type="button" class="secondary" onclick="closeStudentProfile();editLesson('${esc(x.id)}')">✏️ Editar clase</button><button type="button" class="danger" onclick="deleteLessonFromProfile('${esc(x.id)}','${esc(s.id)}')">🗑️ Eliminar clase</button></div></div>`).join("")}
 window.deleteLessonFromProfile=function(id,studentId){if(!confirm("¿Eliminar esta clase?"))return;rememberDeletedLesson(id);recordSyncChange("lessons","deleted");lessons=lessons.filter(x=>String(x.id)!==String(id));saveL();markLocalSyncDirty();render();renderStudents();renderProfile(studentId)}
 function contactHTML(s){const ph=phoneHref(s.phone),em=String(s.email||"").trim();const parts=[];if(ph)parts.push(`<span>📱 <a href="tel:${esc(ph)}">${esc(s.phone)}</a></span>`);if(em)parts.push(`<span>✉️ <a href="mailto:${esc(em)}">${esc(em)}</a></span>`);return parts.length?`<div class="profile-contact">${parts.join("<span class=\"muted\">·</span>")}</div>`:'<div class="profile-empty">Sin datos de contacto.</div>'}
-function profileHTML(s){normalizeStudentContact(s);const a=historyFor(s);const notes=a.filter(x=>x.attendance!=="falta"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(1):"—";return `<div class="profile-block"><h3>👤 Datos personales</h3>${contactHTML(s)}</div><div class="profile-block"><h3>🎓 Datos académicos</h3><div class="profile-grid"><div><div class="muted">Curso</div><b>${esc(s.course||"—")}</b></div><div><div class="muted">Horario</div><b>${s.scheduleDay&&s.scheduleTime?esc(s.scheduleDay+" · "+s.scheduleTime):"Sin horario asignado"}</b></div></div></div><div class="profile-block"><h3>🎯 Seguimiento</h3><div class="muted">Objetivos</div><div class="profile-readonly">${esc(s.objectives||"Sin objetivos registrados.")}</div><div class="muted" style="margin-top:10px">Repertorio</div><div class="profile-readonly">${esc(s.repertoire||"Sin repertorio registrado.")}</div><div class="muted" style="margin-top:10px">Observaciones generales</div><div class="profile-readonly">${esc(s.generalNotes||"Sin observaciones generales.")}</div></div><div class="profile-block"><h3>📊 Resumen del curso ${esc(year())}</h3><div class="profile-grid"><div><div class="muted">Clases</div><b>${a.length}</b></div><div><div class="muted">Media</div><b>${avg}</b></div></div></div><div class="profile-block"><h3>📚 Historial de clases</h3>${renderHistoryItems(s)}</div><div class="profile-actions"><button type="button" class="primary" onclick="editStudentProfile('${esc(s.id)}')">✏️ Editar ficha</button></div>`}
+function profileHTML(s){normalizeStudentContact(s);const a=historyFor(s);const notes=a.filter(x=>x.attendance==="asiste"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(1):"—";return `<div class="profile-block"><h3>👤 Datos personales</h3>${contactHTML(s)}</div><div class="profile-block"><h3>🎓 Datos académicos</h3><div class="profile-grid"><div><div class="muted">Curso</div><b>${esc(s.course||"—")}</b></div><div><div class="muted">Horario</div><b>${s.scheduleDay&&s.scheduleTime?esc(s.scheduleDay+" · "+s.scheduleTime):"Sin horario asignado"}</b></div></div></div><div class="profile-block"><h3>🎯 Seguimiento</h3><div class="muted">Objetivos</div><div class="profile-readonly">${esc(s.objectives||"Sin objetivos registrados.")}</div><div class="muted" style="margin-top:10px">Repertorio</div><div class="profile-readonly">${esc(s.repertoire||"Sin repertorio registrado.")}</div><div class="muted" style="margin-top:10px">Observaciones generales</div><div class="profile-readonly">${esc(s.generalNotes||"Sin observaciones generales.")}</div></div><div class="profile-block"><h3>📊 Resumen del curso ${esc(year())}</h3><div class="profile-grid"><div><div class="muted">Clases</div><b>${a.length}</b></div><div><div class="muted">Media</div><b>${avg}</b></div></div></div><div class="profile-block"><h3>📚 Historial de clases</h3>${renderHistoryItems(s)}</div><div class="profile-actions"><button type="button" class="primary" onclick="editStudentProfile('${esc(s.id)}')">✏️ Editar ficha</button></div>`}
 function renderProfile(id){const s=students.find(x=>x.id===id);if(!s)return;normalizeStudentContact(s);q("studentProfileTitle").textContent=displayName(s.name)||"Ficha del alumno";q("studentProfileSubtitle").textContent=[s.course,s.scheduleDay&&s.scheduleTime?s.scheduleDay+" · "+s.scheduleTime:""] .filter(Boolean).join(" · ");q("studentProfileBody").innerHTML=profileHTML(s)}
 window.openStudentProfile=function(id){if(!students.some(s=>s.id===id))return;renderProfile(id);q("studentProfileModal").classList.remove("hidden");document.body.style.overflow="hidden"}
 window.closeStudentProfile=function(){q("studentProfileModal").classList.add("hidden");document.body.style.overflow=""}
@@ -1804,7 +1827,7 @@ function updateForToday(){
  const saveProfile=window.saveStudentProfile;
  window.saveStudentProfile=function(id){if(!q('profileFirstName').value.trim()||!q('profileCourse').value)return alert('Indica el nombre y el curso del alumno.');saveProfile(id);updateForToday();};
  const weekly=renderWeeklyAgenda;
- renderWeeklyAgenda=function(){weekly();const ctx=scheduleDisplayContext();q('weeklyAgenda').querySelectorAll('th').forEach((th,i)=>th.classList.toggle('week-day-today',i>0&&TEACHING_DAYS[i-1]===ctx.day));};
+ renderWeeklyAgenda=function(){weekly();const ctx=scheduleDisplayContext();const visibleDays=TEACHING_DAYS.filter(d=>d!=="Viernes");q('weeklyAgenda').querySelectorAll('th').forEach((th,i)=>th.classList.toggle('week-day-today',i>0&&visibleDays[i-1]===ctx.day));};
  const today=updateTodayPanel;
  updateTodayPanel=function(){today();updateForToday();};
  document.querySelectorAll('.mobile-bottom-nav a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();if(a.hash==='#historyCard'){window.historyScope='active';selectedStudentHistory=null;}showView(a.hash.slice(1));}));
@@ -1820,7 +1843,7 @@ function updateForToday(){
  mobileFields.addEventListener('change',arrangeGradeAndValuation);arrangeGradeAndValuation();
 
  q('attendance').previousElementSibling.textContent='Asistencia';
- for(const option of q('attendance').options)option.textContent=option.value==='asiste'?'Asiste':'Falta';
+ for(const option of q('attendance').options)option.textContent=option.value==='asiste'?'Asiste':option.value==='festivo'?'Festivo':'Falta';
  q('configCard').classList.add('collapsed');
  q('studentFormWrap').classList.add('collapsed');
  q('studentsCard').classList.remove('collapsed');
@@ -2197,6 +2220,89 @@ function updateForToday(){
  }
  host.querySelector('#orphanRefresh').onclick=draw;
  draw();
+})();
+</script>
+
+<script>
+/* V11.2.6: calendario no lectivo. Reusa el modelo de clases y la sincronización ya existentes. */
+(function(){
+  const dayName=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const validDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(Date.parse(s+'T12:00:00'));
+  const weekday=s=>dayName[new Date(s+'T12:00:00').getDay()];
+  const periods=()=>Array.isArray(appSettings.nonTeachingPeriods)?appSettings.nonTeachingPeriods:[];
+  const onBreak=s=>validDate(s)?periods().find(p=>p.start<=s&&s<=p.end):null;
+  const dateCourse=s=>{const d=new Date(s+'T12:00:00');const y=d.getFullYear()-(d.getMonth()<8?1:0);return y+'-'+String(y+1).slice(-2);};
+  const result=q('holidayPreviewResult'),apply=q('holidayApply');
+  let pending=null;
+  const escText=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const lessonKey=(id,date)=>String(id)+'|'+date;
+  function clearPreview(){pending=null;result.textContent='';apply.hidden=true;}
+  q('holidayDate').addEventListener('change',clearPreview);
+  q('holidayTitle').addEventListener('input',clearPreview);
+  function preview(){
+    clearPreview();const date=q('holidayDate').value;
+    if(!validDate(date)){result.textContent='Selecciona una fecha válida.';return;}
+    if(dateCourse(date)!==year()){result.textContent='La fecha no pertenece al curso '+year()+'. Cambia primero el curso académico si procede.';return;}
+    if(onBreak(date)){result.textContent='Esta fecha pertenece a un periodo de vacaciones. No se crearán clases.';return;}
+    const day=weekday(date),ss=students.filter(x=>x.scheduleDay===day).sort((a,b)=>String(a.scheduleTime||'').localeCompare(String(b.scheduleTime||'')));
+    if(!ss.length){result.textContent=day+': no hay alumnos programados ese día.';return;}
+    const existing=new Set(lessons.filter(x=>x.date===date).map(x=>lessonKey(x.studentId,x.date)));
+    const free=ss.filter(x=>!existing.has(lessonKey(x.id,date)));
+    const blocked=ss.filter(x=>existing.has(lessonKey(x.id,date)));
+    result.innerHTML='<p><strong>'+escText(day)+' '+escText(date)+'</strong> · '+ss.length+' alumno(s) con horario.</p>'+
+      ss.map(x=>'<div class="holiday-line">'+escText(displayName(x.name))+' · '+escText(x.scheduleTime||'Sin hora')+' — '+(blocked.includes(x)?'<span class="holiday-warning">Ya tiene registro. No se modifica.</span>':'<span class="holiday-ok">Se registrará como festivo</span>')+'</div>').join('')+
+      '<p>'+free.length+' nuevo(s); '+blocked.length+' existente(s) respetado(s).</p>';
+    if(free.length){pending={date,year:year(),studentIds:free.map(s=>s.id),title:q('holidayTitle').value.trim()};apply.hidden=false;}
+  }
+  q('holidayPreview').addEventListener('click',preview);
+  apply.addEventListener('click',()=>{
+    if(!pending)return;
+    const p=pending;
+    if(p.year!==year()||p.date!==q('holidayDate').value){clearPreview();return alert('Han cambiado la fecha o el curso. Revisa de nuevo.');}
+    if(onBreak(p.date))return alert('La fecha está incluida en vacaciones.');
+    const active=students.filter(s=>p.studentIds.includes(s.id)&&s.scheduleDay===weekday(p.date));
+    const ids=new Set(lessons.filter(x=>x.date===p.date).map(x=>lessonKey(x.studentId,x.date)));
+    const free=active.filter(s=>!ids.has(lessonKey(s.id,p.date)));
+    if(!free.length){preview();return;}
+    if(!confirm('Registrar '+free.length+' festivo(s) en '+weekday(p.date)+' '+p.date+'? Las clases ya existentes se conservarán.'))return;
+    const snapshot=lessons.slice(),now=Date.now();
+    const made=free.map(s=>({id:crypto.randomUUID(),studentId:s.id,student:s.name,course:s.course,date:p.date,attendance:'festivo',grade:null,obs:p.title?('Festivo: '+p.title):'',quickWork:[],nextClass:'',ratingScale:5,ratings:{},autoComment:'',schoolYear:p.year,audioData:null,created:now,updatedAt:now}));
+    lessons.push(...made);
+    if(!saveL()){lessons=snapshot;return;}
+    made.forEach(()=>recordSyncChange('lessons','added'));
+    markLocalSyncDirty();render();renderStudents();
+    clearPreview();result.innerHTML='<p class="holiday-ok">'+made.length+' registro(s) de festivo guardados. Sincroniza con el otro dispositivo cuando quieras.</p>';
+  });
+  function savePeriods(next){
+    const before={...appSettings},oldMeta=localStorage.getItem(SETTINGS_META_KEY);
+    try{
+      appSettings={...appSettings,nonTeachingPeriods:next};
+      localStorage.setItem(SETK,JSON.stringify(appSettings));markSettingsUpdated();markLocalSyncDirty();
+      renderPeriods();refreshAutomaticSuggestion();updateProfessorUI();return true;
+    }catch(e){appSettings=before;try{localStorage.setItem(SETK,JSON.stringify(before));if(oldMeta!==null)localStorage.setItem(SETTINGS_META_KEY,oldMeta);}catch(_){}alert('No se ha podido guardar el calendario.');return false;}
+  }
+  function renderPeriods(){
+    const entries=periods().slice().sort((a,b)=>a.start.localeCompare(b.start));
+    q('breakList').innerHTML=entries.length?entries.map(p=>'<div class="holiday-line"><strong>'+escText(p.title||'Periodo no lectivo')+'</strong> · '+escText(p.start)+' → '+escText(p.end)+' <button class="secondary" type="button" data-break-remove="'+escText(p.id)+'">Eliminar</button></div>').join(''):'<p class="muted">No hay periodos de vacaciones definidos.</p>';
+  }
+  q('breakAdd').addEventListener('click',()=>{
+    const start=q('breakStart').value,end=q('breakEnd').value,title=q('breakTitle').value.trim();
+    if(!validDate(start)||!validDate(end)||end<start)return alert('Introduce un intervalo de fechas válido.');
+    if(!title)return alert('Indica el nombre del periodo no lectivo.');
+    if(dateCourse(start)!==year()||dateCourse(end)!==year())return alert('El periodo debe pertenecer al curso académico seleccionado.');
+    const updated=[...periods(),{id:crypto.randomUUID(),start,end,title}];
+    if(savePeriods(updated)){q('breakStart').value='';q('breakEnd').value='';q('breakTitle').value='';clearPreview();}
+  });
+  q('breakList').addEventListener('click',e=>{const b=e.target.closest('[data-break-remove]');if(!b)return;const item=periods().find(p=>p.id===b.dataset.breakRemove);if(item&&confirm('¿Eliminar el periodo «'+item.title+'»?')){savePeriods(periods().filter(p=>p.id!==item.id));clearPreview();}});
+  // Impide que el modo automático proponga alumnos en vacaciones.
+  const originalReset=resetNewLessonFormForAutomatic;
+  resetNewLessonFormForAutomatic=function(ctx){if(onBreak(ctx.date)){q('student').value='';q('date').value=ctx.date;setScheduleStatus('📅 '+(onBreak(ctx.date).title||'Vacaciones')+': día no lectivo; no se propone clase.','warn');return;}originalReset(ctx);};
+  const originalNext=findNextScheduledAfter;
+  findNextScheduledAfter=function(ctx,includeCurrent){if(onBreak(ctx.date))return null;return originalNext(ctx,includeCurrent);};
+  renderPeriods();
+  // No recarga la app al sincronizar: se refresca la lista al abrir calendario o al recibir foco.
+  q('nonTeachingCalendar').addEventListener('click',renderPeriods);
+  window.addEventListener('focus',renderPeriods);
 })();
 </script>
 <script id="v1126-sync-button-status">
