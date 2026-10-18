@@ -410,8 +410,14 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
 .sync-drawer #syncState{background:#e7f0fb!important;color:#163b64!important;border:1px solid #a8c0df!important}
 @media(max-width:600px){.wrap{padding:12px 11px 105px!important}.card{padding:15px!important;border-radius:16px!important}header{padding-bottom:10px!important}header h1{font-size:24px!important}.year-bar{margin-bottom:9px!important}.today-panel{padding:12px!important;margin:8px 0 10px!important}.header-actions #openSync{padding:6px 8px!important;max-width:178px!important}#openSync .sync-summary-text{font-size:10px;max-width:112px}}
 @media(max-width:365px){#openSync .sync-summary-text{max-width:87px}}
+</style><style id="holiday-undo-icons-style">
+.holiday-undo-section{margin-top:20px;padding:14px;border:1px solid #94afcf;background:#eef5ff;border-radius:12px}
+.holiday-undo-section h4{margin:0 0 6px;color:#143f73}
+.holiday-undo-line{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.holiday-undo-line button{white-space:nowrap;background:#fff!important;border-color:#7a9ec3!important;color:#143f73!important;font-weight:700}
+#attendance{font-weight:650;color:#163a65!important}
 </style></head><body><div class="wrap">
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Festivos + contraste mejorado</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Festivos reversibles + iconos</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -534,6 +540,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
     <button type="button" class="secondary" id="holidayPreview">Consultar alumnos afectados</button>
     <div id="holidayPreviewResult" class="holiday-result" role="status" aria-live="polite"></div>
     <button type="button" class="primary" id="holidayApply" hidden>Registrar festivo para alumnos pendientes</button>
+    <div class="holiday-undo-section"><h4>↩️ Festivos registrados · Deshacer</h4><p class="muted">Puedes deshacer en bloque los festivos generados desde este calendario. Se respetan las clases editadas después.</p><div id="holidayUndoList" class="holiday-result" aria-live="polite"></div></div>
     <hr style="border:0;border-top:1px solid #d8e0e9;margin:20px 0">
     <h4 style="margin:0">Vacaciones y periodos sin clase</h4>
     <p class="muted">Solo bloquean las propuestas automáticas de la agenda durante el intervalo. No añaden registros al historial.</p>
@@ -1843,7 +1850,7 @@ function updateForToday(){
  mobileFields.addEventListener('change',arrangeGradeAndValuation);arrangeGradeAndValuation();
 
  q('attendance').previousElementSibling.textContent='Asistencia';
- for(const option of q('attendance').options)option.textContent=option.value==='asiste'?'Asiste':option.value==='festivo'?'Festivo':'Falta';
+ for(const option of q('attendance').options)option.textContent=option.value==='asiste'?'🟢 Asiste':option.value==='festivo'?'📅 Festivo':'🔴 Falta';
  q('configCard').classList.add('collapsed');
  q('studentFormWrap').classList.add('collapsed');
  q('studentsCard').classList.remove('collapsed');
@@ -2266,12 +2273,68 @@ function updateForToday(){
     if(!free.length){preview();return;}
     if(!confirm('Registrar '+free.length+' festivo(s) en '+weekday(p.date)+' '+p.date+'? Las clases ya existentes se conservarán.'))return;
     const snapshot=lessons.slice(),now=Date.now();
-    const made=free.map(s=>({id:crypto.randomUUID(),studentId:s.id,student:s.name,course:s.course,date:p.date,attendance:'festivo',grade:null,obs:p.title?('Festivo: '+p.title):'',quickWork:[],nextClass:'',ratingScale:5,ratings:{},autoComment:'',schoolYear:p.year,audioData:null,created:now,updatedAt:now}));
+    const batchId=crypto.randomUUID();
+    const made=free.map(s=>({holidayBatchId:batchId,holidayBatchCreated:now,id:crypto.randomUUID(),studentId:s.id,student:s.name,course:s.course,date:p.date,attendance:'festivo',grade:null,obs:p.title?('Festivo: '+p.title):'',quickWork:[],nextClass:'',ratingScale:5,ratings:{},autoComment:'',schoolYear:p.year,audioData:null,created:now,updatedAt:now}));
     lessons.push(...made);
     if(!saveL()){lessons=snapshot;return;}
     made.forEach(()=>recordSyncChange('lessons','added'));
-    markLocalSyncDirty();render();renderStudents();
+    markLocalSyncDirty();render();renderStudents();renderUndo();
     clearPreview();result.innerHTML='<p class="holiday-ok">'+made.length+' registro(s) de festivo guardados. Sincroniza con el otro dispositivo cuando quieras.</p>';
+  });
+  // Reversión selectiva: solo los registros de esta herramienta, sin modificaciones posteriores.
+  function undoGroups(){
+    const all=new Map();
+    for(const l of lessons){
+      if(!l.holidayBatchId || !l.date)continue;
+      const k=String(l.holidayBatchId);
+      if(!all.has(k))all.set(k,[]);
+      all.get(k).push(l);
+    }
+    return [...all.entries()].sort((a,b)=>String(b[1][0]?.date||'').localeCompare(String(a[1][0]?.date||'')));
+  }
+  function safeUndoLesson(l){
+    return l.attendance==='festivo' && l.holidayBatchId && Number(l.updatedAt)===Number(l.holidayBatchCreated)
+      && l.grade==null && !(l.audioData) && !(l.nextClass) && !(l.quickWork||[]).length;
+  }
+  function renderUndo(){
+    const root=q('holidayUndoList');if(!root)return;
+    const groups=undoGroups().filter(([,arr])=>arr.some(l=>lessonYear(l)===year()));
+    root.innerHTML=groups.length?groups.map(([id,arr])=>{
+      const possible=arr.filter(safeUndoLesson).length;
+      const protectedCount=arr.length-possible;
+      const title=arr[0].obs?.startsWith('Festivo: ')?arr[0].obs.slice(9):'Festivo';
+      return '<div class="holiday-line holiday-undo-line"><div><strong>📅 '+escText(arr[0].date)+' · '+escText(title)+'</strong><div class="muted">'+possible+' registro(s) reversibles'+(protectedCount?' · '+protectedCount+' editado(s) o protegido(s)':'')+'</div></div><button type="button" class="secondary" data-holiday-undo="'+escText(id)+'" '+(possible?'':'disabled')+'>↩️ Deshacer</button></div>';
+    }).join(''):'<p class="muted">No hay grupos de festivos reversibles de esta versión. Los registros anteriores sin identificador se conservan.</p>';
+  }
+  q('holidayUndoList').addEventListener('click',e=>{
+    const btn=e.target.closest('[data-holiday-undo]');if(!btn)return;
+    const id=btn.dataset.holidayUndo;
+    const group=lessons.filter(l=>l.holidayBatchId===id);
+    const removable=group.filter(safeUndoLesson);
+    if(!removable.length){renderUndo();return;}
+    const protectedCount=group.length-removable.length;
+    const prompt='Deshacer el festivo del '+group[0].date+' para '+removable.length+' alumno(s)?'+(protectedCount?' Se respetarán '+protectedCount+' registro(s) modificados o protegidos.':'')+'\nSe preparará una copia de seguridad antes de borrar.';
+    if(!confirm(prompt))return;
+    const backup={at:new Date().toISOString(),reason:'Antes de deshacer festivo',students,lessons,deletedStudentKeys,deletedLessonIds,settings:appSettings};
+    try{downloadFile(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}),'Respaldo_antes_de_deshacer_festivo_'+group[0].date+'.json');}
+    catch(e){alert('No se ha podido preparar la copia. No se elimina nada.');return;}
+    const prev=lessons,oldL=localStorage.getItem(LK),oldD=localStorage.getItem(DEL_LESSONS_KEY),oldDeleted=[...deletedLessonIds];
+    const removedIds=new Set(removable.map(l=>String(l.id)));
+    try{
+      lessons=lessons.filter(l=>!removedIds.has(String(l.id)));
+      if(!saveL())throw Error('No se pudieron guardar las clases.');
+      for(const rid of removedIds)rememberDeletedLesson(rid);
+      if(localStorage.getItem(LK)!==JSON.stringify(lessons))throw Error('Error de verificación de registros.');
+      const persisted=new Set(JSON.parse(localStorage.getItem(DEL_LESSONS_KEY)||'[]').map(String));
+      if([...removedIds].some(rid=>!persisted.has(rid)))throw Error('No se pudieron guardar las eliminaciones para sincronizar.');
+      for(const rid of removedIds)recordSyncChange('lessons','deleted');
+      markLocalSyncDirty();render();renderStudents();renderUndo();clearPreview();
+      alert('Festivo deshecho para '+removedIds.size+' alumno(s). Sincroniza este dispositivo y después el otro. Conserva el respaldo.');
+    }catch(err){
+      lessons=prev;deletedLessonIds=oldDeleted;
+      try{if(oldL===null)localStorage.removeItem(LK);else localStorage.setItem(LK,oldL);if(oldD===null)localStorage.removeItem(DEL_LESSONS_KEY);else localStorage.setItem(DEL_LESSONS_KEY,oldD);}catch(ignore){}
+      renderUndo();alert('No se ha completado la reversión: '+err.message);
+    }
   });
   function savePeriods(next){
     const before={...appSettings},oldMeta=localStorage.getItem(SETTINGS_META_KEY);
@@ -2299,10 +2362,10 @@ function updateForToday(){
   resetNewLessonFormForAutomatic=function(ctx){if(onBreak(ctx.date)){q('student').value='';q('date').value=ctx.date;setScheduleStatus('📅 '+(onBreak(ctx.date).title||'Vacaciones')+': día no lectivo; no se propone clase.','warn');return;}originalReset(ctx);};
   const originalNext=findNextScheduledAfter;
   findNextScheduledAfter=function(ctx,includeCurrent){if(onBreak(ctx.date))return null;return originalNext(ctx,includeCurrent);};
-  renderPeriods();
+  renderPeriods();renderUndo();
   // No recarga la app al sincronizar: se refresca la lista al abrir calendario o al recibir foco.
-  q('nonTeachingCalendar').addEventListener('click',renderPeriods);
-  window.addEventListener('focus',renderPeriods);
+  q('nonTeachingCalendar').addEventListener('click',()=>{renderPeriods();renderUndo();});
+  window.addEventListener('focus',()=>{renderPeriods();renderUndo();});
 })();
 </script>
 <script id="v1126-sync-button-status">
