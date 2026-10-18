@@ -381,8 +381,36 @@ header{min-height:0!important;margin:0!important}header #appSubtitle{color:#647c
 @media(max-width:760px){.mobile-valuation-row{display:flex;align-items:flex-end;gap:10px;margin-top:14px}.mobile-valuation-row #gradeBox{flex:0 0 46px;width:46px;margin:0}.mobile-valuation-row #gradeBox label{display:block;margin:0 0 4px}.mobile-valuation-row #grade{width:46px;height:46px;padding:8px 3px!important;text-align:center;font-size:16px!important;appearance:textfield}.mobile-valuation-row #grade::-webkit-inner-spin-button,.mobile-valuation-row #grade::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}.mobile-valuation-row #quickClassToggle{flex:1;min-width:0;height:46px;margin:0!important;padding:8px 10px!important;gap:6px}.mobile-valuation-row .rubric-count{display:none}}
 
 @media(max-width:760px){.lesson-meta-row>.lesson-date-field{grid-column:1;grid-row:1}.lesson-meta-row>.lesson-attendance-field{grid-column:2;grid-row:1}}
+</style><style id="v1126-contraste-real">
+/* Cambio exclusivamente visual: no sustituir las rutinas de guardado ni sincronizacion */
+:root {--brand:#124c8a;--brand-deep:#0b3265;--brand-soft:#dceaf9;--canvas:#ebf1f8;--ink:#152b42;--muted:#3e5268;--line:#aebed0;--green:#13549a;--soft:#e4effa;--cream:#f7f9fc}
+body{background:#ebf1f8!important;color:#152b42!important}
+header h1,.page-intro h2,h2,h3,.today-name{color:#102c4d!important}
+.muted,.eyebrow,header #appVersion,.student-last,.profile-course,.today-next,.year-warning{color:#43566b!important}
+.card,.student-card,.profile-history-item{border:1px solid #b9c9dc!important;background:#fff!important;box-shadow:0 5px 17px #19385a12}
+label,.rating-title{color:#213d58!important}
+input,select,textarea{background:#fff!important;border:1.5px solid #8da4bd!important;color:#172e47!important}
+input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outline-offset:1px}
+.primary{background:#13549a!important;border-color:#13549a!important;color:#fff!important}
+.secondary{background:#e4eef9!important;border:1px solid #a4bbd5!important;color:#153e6d!important}
+.today-panel{background:#e5f0fc!important;border:1px solid #9ebfe1!important}
+.for-today,.student-form-wrap,.summary-stat,.profile-stat{background:#eef5fd!important;border-color:#b5cbe4!important;color:#1a395d!important}
+#quickWork button,.rating-buttons button{background:#eff4fc!important;border-color:#9bb3cf!important;color:#173c67!important}
+#quickWork button.selected,.rating-buttons button.selected{background:#13549a!important;color:#fff!important;border-color:#13549a!important}
+.mobile-bottom-nav{border:1px solid #94afcf!important;box-shadow:0 8px 26px #183b672b!important}
+.mobile-bottom-nav a{color:#254768!important}.mobile-bottom-nav a.active{background:#dceafa!important;color:#0c407f!important}
+.header-actions{align-items:center}.header-actions #openSync{width:auto!important;min-width:44px!important;max-width:225px!important;padding:6px 11px!important;display:flex;align-items:center;gap:7px;line-height:1.15;text-align:left;border-color:#8eabc9!important}
+#openSync .sync-summary-text{font-size:11px;font-weight:800;color:#153e6d;display:inline-block;max-width:160px}
+#openSync[data-sync-tone="attention"]{background:#fff0d7!important;border-color:#ad711c!important}
+#openSync[data-sync-tone="attention"] .sync-summary-text{color:#754409!important}
+#openSync[data-sync-tone="good"]{background:#deefe5!important;border-color:#388258!important}
+#openSync[data-sync-tone="good"] .sync-summary-text{color:#185c38!important}
+.sync-drawer{border:1px solid #8da9c8!important;box-shadow:0 14px 55px #0d325a36!important}
+.sync-drawer #syncState{background:#e7f0fb!important;color:#163b64!important;border:1px solid #a8c0df!important}
+@media(max-width:600px){.wrap{padding:12px 11px 105px!important}.card{padding:15px!important;border-radius:16px!important}header{padding-bottom:10px!important}header h1{font-size:24px!important}.year-bar{margin-bottom:9px!important}.today-panel{padding:12px!important;margin:8px 0 10px!important}.header-actions #openSync{padding:6px 8px!important;max-width:178px!important}#openSync .sync-summary-text{font-size:10px;max-width:112px}}
+@media(max-width:365px){#openSync .sync-summary-text{max-width:87px}}
 </style></head><body><div class="wrap">
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.5 · Pruebas integradas</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Prueba visual de contraste</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -511,7 +539,7 @@ header{min-height:0!important;margin:0!important}header #appSubtitle{color:#647c
     <label for="schoolName">Conservatorio / centro</label><input id="schoolName" placeholder="Ej.: Conservatorio Profesional de Música ...">
     <button type="button" class="primary" id="saveSettings">💾 Guardar configuración</button>
     <span id="settingsStatus" class="muted" style="margin-left:8px"></span>
-    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V11.2.5 · Pruebas integradas</b></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">Versión: <b>V11.2.6 · Prueba visual de contraste</b></div>
   </div>
 
 
@@ -2171,4 +2199,30 @@ function updateForToday(){
  draw();
 })();
 </script>
-</body></html>
+<script id="v1126-sync-button-status">
+(function(){
+  const button=document.getElementById('openSync');
+  const actual=document.getElementById('syncState');
+  if(!button||!actual)return;
+  const icon=button.querySelector('svg');
+  const label=document.createElement('span');label.className='sync-summary-text';
+  button.appendChild(label);
+  function update(){
+    const message=(actual.textContent||'').trim();
+    let short='Consultar estado',tone='neutral';
+    if(/actualizado/i.test(message)){short='Actualizado';tone='good';}
+    else if(/ambos dispositivos/i.test(message)){short='Cambios en ambos';tone='attention';}
+    else if(/nuevos en la nube/i.test(message)){short='Novedades en nube';tone='attention';}
+    else if(/pendientes de subir/i.test(message)){short='Pendiente de subir';tone='attention';}
+    else if(/error|conflicto/i.test(message)){short='Revisar sincronización';tone='attention';}
+    else if(/inicia sesión/i.test(message)){short='Sin sesión';tone='attention';}
+    else if(/sincronizando/i.test(message)){short='Sincronizando';}
+    label.textContent=short;
+    button.dataset.syncTone=tone;
+    button.title=message+' · Pulsa para abrir el panel de sincronización';
+    button.setAttribute('aria-label',message+'. Abrir panel de sincronización');
+  }
+  new MutationObserver(update).observe(actual,{childList:true,subtree:true,characterData:true});
+  update();
+})();
+</script></body></html>
