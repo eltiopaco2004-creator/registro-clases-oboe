@@ -2482,4 +2482,61 @@ const oldRender=renderStudents;renderStudents=function(){oldRender();archivePane
 archivePanel();
 })();
 </script>
-</body></html>
+<style id="preview-year-wizard-style">
+#yearWizardCard{border:1px solid #b2c9e4;background:#fff;border-radius:15px;padding:15px;margin:14px 0;box-shadow:0 4px 15px #142f5610}
+#yearWizardCard>summary{cursor:pointer;font-weight:800;color:#173a67;font-size:16px;padding:5px 0}
+#yearWizardCard .yw-banner{margin:12px 0;padding:10px;background:#f0f6ff;border:1px solid #bad2ef;border-radius:9px;color:#173d69;font-size:13px}
+#yearWizardCard .yw-row{display:grid;grid-template-columns:minmax(130px,2fr) minmax(115px,1.2fr) minmax(130px,1.3fr) minmax(130px,1.3fr);gap:10px;align-items:center;border-bottom:1px solid #dce7f1;padding:9px 0}
+#yearWizardCard .yw-row input,#yearWizardCard .yw-row select{margin:0!important;padding:8px!important;min-width:0;width:100%}
+#yearWizardCard .yw-row label{margin:0}
+#yearWizardCard .yw-name{font-weight:700;color:#173a67}
+#yearWizardCard .yw-desc{font-size:11px;color:#4f657b}
+#yearWizardCard .yw-head{font-size:12px;font-weight:700;color:#445c75}
+#yearWizardCard .yw-footer{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-top:12px}
+@media(max-width:720px){#yearWizardCard .yw-row{grid-template-columns:1fr 1fr;gap:6px}#yearWizardCard .yw-name{grid-column:1/-1}#yearWizardCard .yw-head{display:none}#yearWizardCard .yw-field-label{display:block;font-size:11px;color:#52677c;margin-bottom:4px}}
+@media(min-width:721px){#yearWizardCard .yw-field-label{display:none}}
+</style><script id="year-preview-only-v1126">
+/* Vista previa: nunca modifica alumnos, clases, fechas ni datos de sincronizacion. */
+(function(){
+  const section=document.getElementById('studentsCard');
+  if(!section)return;
+  const card=document.createElement('details');
+  card.id='yearWizardCard';
+  card.innerHTML=`<summary>🎓 Preparar próximo curso · Vista previa</summary>
+    <div class="yw-banner"><b>Simulación sin cambios reales.</b> Las propuestas son editables, pero no se aplican ni sincronizan. Se conservan alumnos, notas, clases y horarios de todos los cursos.</div>
+    <div id="ywSummary"></div><div id="ywRows"></div>
+    <div class="yw-footer"><button type="button" class="secondary" id="ywReload">Recalcular propuesta</button><button type="button" class="primary" id="ywDownload">Descargar propuesta CSV</button></div>
+    <div class="muted">Antes de activar un nuevo curso es necesario proteger las fichas por ID en el sistema de sincronización y guardar las matrículas y horarios históricos por año.</div>`;
+  section.insertAdjacentElement('afterend',card);
+  const courseLevels=[...courseOrder];
+  const nextYear=y=>{const x=parseInt(String(y||''),10);return Number.isFinite(x)?`${x+1}-${String(x+2).slice(-2)}`:'—'};
+  const suggested=c=>{let i=courseLevels.indexOf(c);return i<0?c:(i===3||i===courseLevels.length-1?'revisar':courseLevels[i+1]);};
+  const choices=()=>'<option value="revisar">Revisar salida / transición</option>'+courseLevels.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')+'<option value="archivar">Archivar al finalizar</option>';
+  function update(){
+   const active=sortStudents(students.filter(s=>!s.archived));
+   document.getElementById('ywSummary').textContent=`${year()} → ${nextYear(year())} · ${active.length} alumnos activos · No se ha modificado nada`;
+   const host=document.getElementById('ywRows');
+   host.innerHTML='<div class="yw-row yw-head"><div>Alumno</div><div>Nivel actual</div><div>Propuesta editable</div><div>Horario próximo curso</div></div>'+active.map(s=>{
+    const prop=suggested(s.course);
+    const opt=choices();
+    return `<div class="yw-row" data-yw-student-id="${esc(s.id)}"><div class="yw-name">${esc(displayName(s.name))}<div class="yw-desc">Actual: ${esc(s.scheduleDay||'sin día')} ${esc(s.scheduleTime||'')}</div></div><div>${esc(s.course||'Sin curso')}</div><div><span class="yw-field-label">Nuevo nivel</span><select data-field="newCourse">${opt}</select></div><div><span class="yw-field-label">Nuevo horario (opcional)</span><input data-field="newSchedule" placeholder="Pendiente de asignar" autocomplete="off" maxlength="80"></div></div>`;
+   }).join('');
+   host.querySelectorAll('[data-yw-student-id]').forEach(r=>{const st=active.find(s=>String(s.id)===r.getAttribute('data-yw-student-id'));const v=suggested(st?.course);r.querySelector('select').value=v;});
+  }
+  function exportPlan(){
+   if(!card.open)return;
+   const quoted=v=>'"'+String(v??'').replace(/"/g,'""').replace(/[\r\n]+/g,' ')+'"';
+   const rows=[['ID alumno','Alumno','Curso actual','Curso siguiente (propuesta)','Horario actual','Horario propuesto']];
+   card.querySelectorAll('[data-yw-student-id]').forEach(r=>{
+    const s=students.find(s=>String(s.id)===r.getAttribute('data-yw-student-id'));
+    if(s)rows.push([s.id,s.name,s.course,r.querySelector('[data-field="newCourse"]').value,`${s.scheduleDay||''} ${s.scheduleTime||''}`.trim(),r.querySelector('[data-field="newSchedule"]').value]);
+   });
+   const csv='\ufeff'+rows.map(row=>row.map(quoted).join(';')).join('\r\n');
+   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+   const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Propuesta_curso_'+nextYear(year())+'.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  card.addEventListener('toggle',()=>{if(card.open)update()});
+  card.querySelector('#ywReload').addEventListener('click',update);
+  card.querySelector('#ywDownload').addEventListener('click',exportPlan);
+})();
+</script></body></html>
