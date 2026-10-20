@@ -416,8 +416,38 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
 .holiday-undo-line{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .holiday-undo-line button{white-space:nowrap;background:#fff!important;border-color:#7a9ec3!important;color:#143f73!important;font-weight:700}
 #attendance{font-weight:650;color:#163a65!important}
+</style><style id="export-buttons-equal-style">
+/* Solo los tres botones de Exportación y copias: misma anchura y altura. */
+#csv, #backup, #importBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 76px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.35;
+}
+</style><style>
+/* V11.2.6 — recordatorio de tareas, adaptable y compacto */
+#forToday.lesson-prev-note[hidden]{display:none!important}
+#forToday.lesson-prev-note{margin:6px 0 3px;padding:0;border:1px solid #a9c2db;border-left:3px solid #205a91;border-radius:8px;background:#f0f6fc;color:#143852;font-size:13px;overflow:hidden}
+.lesson-prev-toggle{display:flex;align-items:flex-start;gap:6px;width:100%;border:0;background:transparent;color:inherit;padding:6px 9px;text-align:left;font:inherit;line-height:1.4;cursor:default}
+.lesson-prev-label{font-weight:700;white-space:nowrap;flex:none}
+.lesson-prev-text{flex:1;min-width:0;white-space:normal;overflow-wrap:anywhere}
+.lesson-prev-chevron{display:none}
+@media(max-width:700px){
+ .lesson-prev-toggle{cursor:pointer;align-items:center}
+ .lesson-prev-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;line-clamp:1;overflow:hidden;white-space:normal}
+ .lesson-prev-note.expanded .lesson-prev-text{display:block;-webkit-line-clamp:unset;line-clamp:unset;overflow-wrap:anywhere}
+ .lesson-prev-chevron{display:inline;flex:none;margin-left:auto;font-size:14px}
+ .lesson-prev-note.expanded .lesson-prev-chevron{transform:rotate(180deg)}
+}
 </style></head><body><div class="wrap">
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Festivos reversibles + iconos</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Festivos + tareas anteriores</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -454,6 +484,13 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
   </div>
 </div>
 <label>Alumno</label><select id="student"><option value="">Selecciona un alumno…</option></select>
+<div id="forToday" class="for-today lesson-prev-note" hidden>
+  <button id="previousNoteToggle" type="button" class="lesson-prev-toggle" aria-expanded="false" aria-controls="previousNoteText" title="Ver indicaciones de la clase anterior">
+    <span aria-hidden="true">📖</span><span class="lesson-prev-label">Para hoy:</span>
+    <span id="previousNoteText" class="lesson-prev-text"></span>
+    <span class="lesson-prev-chevron" aria-hidden="true">▾</span>
+  </button>
+</div>
 <div class="lesson-meta-row"><div id="gradeBox"><label for="grade">Nota (0–10)</label><input id="grade" type="number" min="0" max="10" step=".1" inputmode="decimal"></div><div><label for="date">Fecha</label><input id="date" type="date"></div><div><label for="attendance">Estado</label><select id="attendance"><option value="asiste">🟢 Asiste</option><option value="falta">🔴 Falta</option><option value="festivo">📅 Festivo</option></select></div></div>
 
 <button type="button" class="secondary quick-class-toggle" id="quickClassToggle"><span>Valoración de la clase</span><span id="quickClassArrow">▾</span></button>
@@ -464,7 +501,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
 <div id="autoComment" class="auto-comment">Selecciona las valoraciones para generar un comentario automático.</div>
 </div>
 
-<div id="forToday" class="for-today" hidden></div><label>Observaciones de la clase</label><textarea id="obs" placeholder="Puedes añadir cualquier comentario personal..."></textarea>
+<label>Observaciones de la clase</label><textarea id="obs" placeholder="Puedes añadir cualquier comentario personal..."></textarea>
 <div class="next-class">
   <label><strong>📚 Trabajo rápido</strong> <span style="font-weight:normal;color:#777">(opcional)</span></label>
   <div class="quick-work" id="quickWork">
@@ -835,10 +872,10 @@ function currentScheduleContext(){
 }
 function scheduleHour(time){return String(time||"").slice(0,2)}
 function studentsForSlot(day,hour){
-  return students.filter(s=>s.scheduleDay===day&&scheduleHour(s.scheduleTime)===hour);
+  return students.filter(s=>!s.archived&&s.scheduleDay===day&&scheduleHour(s.scheduleTime)===hour);
 }
 function sortedScheduleForDay(day){
-  return students.filter(s=>s.scheduleDay===day&&s.scheduleTime).slice().sort((a,b)=>String(a.scheduleTime).localeCompare(String(b.scheduleTime))||surnameKey(a.name).localeCompare(surnameKey(b.name),"es",{sensitivity:"base"})||String(a.name).localeCompare(String(b.name),"es",{sensitivity:"base"}));
+  return students.filter(s=>!s.archived&&s.scheduleDay===day&&s.scheduleTime).slice().sort((a,b)=>String(a.scheduleTime).localeCompare(String(b.scheduleTime))||surnameKey(a.name).localeCompare(surnameKey(b.name),"es",{sensitivity:"base"})||String(a.name).localeCompare(String(b.name),"es",{sensitivity:"base"}));
 }
 function setScheduleStatus(text,kind){
   const el=q("autoScheduleStatus"); if(!el)return; el.textContent=text||""; el.style.color=kind==="warn"?"#9a6a00":kind==="ok"?"#2f5d50":"#69716d";
@@ -958,13 +995,13 @@ function renderWeeklyAgenda(){
   const box=q("weeklyAgenda");if(!box)return;
   const days=TEACHING_DAYS.filter(d=>d!=="Viernes");
   const rows=[];
-  const times=[...new Set(students.filter(s=>s.scheduleTime).map(s=>s.scheduleTime))].sort();
+  const times=[...new Set(students.filter(s=>!s.archived&&s.scheduleTime).map(s=>s.scheduleTime))].sort();
   if(!times.length){box.innerHTML='<p class="week-empty">Todavía no hay horarios asignados a los alumnos.</p>';return;}
   const ctx=scheduleDisplayContext();
   rows.push(`<table class="weekly-table"><thead><tr><th>Hora</th>${days.map(d=>`<th>${d.slice(0,3)}</th>`).join("")}</tr></thead><tbody>`);
   for(const t of times){
     const cells=days.map(d=>{
-      const ss=students.filter(s=>s.scheduleDay===d&&s.scheduleTime===t);
+      const ss=students.filter(s=>!s.archived&&s.scheduleDay===d&&s.scheduleTime===t);
       const nowClass=ctx.day===d&&ctx.time===t?" class=\"week-now\"":"";
       return `<td${nowClass}>${ss.length?ss.map(st=>`<span class="slot-student"><button type="button" class="student-link" onclick="openStudentProfile('${esc(st.id)}')"><span class="agenda-full-name">${esc(displayName(st.name))}</span><span class="agenda-short-name">${esc(agendaMobileName(st.name).first)}<small>${esc(agendaMobileName(st.name).initial)}</small></span></button></span>`).join(""):"<span class=\"week-empty\">—</span>"}</td>`;
     }).join("");
@@ -1047,19 +1084,19 @@ function updateStudentsPanel(forceOpen){
   if(sum)sum.textContent=`${students.length} alumno${students.length===1?"":"s"} registrados`;
 }
 function renderStudents(){
-  if(!students.length){
+  if(!students.some(s=>!s.archived)){
     q("studentsList").innerHTML='<p class="muted">Todavía no hay alumnos creados. Añádelos aquí al comenzar el curso.</p>';
     updateStudentsPanel(); return;
   }
-  q("studentsList").innerHTML=sortStudents(students).map(s=>{
+  q("studentsList").innerHTML=sortStudents(students.filter(s=>!s.archived)).map(s=>{
     let n=lessons.filter(x=>lessonYear(x)===year()&&x.studentId===s.id).length,
         f=lessons.filter(x=>lessonYear(x)===year()&&x.studentId===s.id&&x.attendance==="falta").length,
         hor=s.scheduleDay&&s.scheduleTime?` · ${esc(s.scheduleDay)} ${esc(s.scheduleTime)}`:"";
-    return `<div class="item"><button type="button" class="student-link" onclick="openStudentProfile('${esc(s.id)}')">${esc(displayName(s.name))}</button><div class="muted">${esc(s.course)}${hor} · ${lessons.filter(x=>lessonYear(x)===year()&&x.studentId===s.id&&x.attendance!=="festivo").length} clases · ${f} faltas</div><button class="secondary" onclick="editStudentProfile('${s.id}')">✏️ Editar</button><button class="danger" onclick="deleteStudent('${s.id}')">🗑️</button></div>`
+    return `<div class="item"><button type="button" class="student-link" onclick="openStudentProfile('${esc(s.id)}')">${esc(displayName(s.name))}</button><div class="muted">${esc(s.course)}${hor} · ${lessons.filter(x=>lessonYear(x)===year()&&x.studentId===s.id&&x.attendance!=="festivo").length} clases · ${f} faltas</div><button class="secondary" onclick="editStudentProfile('${s.id}')">✏️ Editar</button><button class="secondary" onclick="archiveStudent('${s.id}')">📦 Archivar</button></div>`
   }).join("");
   updateStudentsPanel();
 }
-function renderSelect(){let old=q("student").value;q("student").innerHTML='<option value="">Selecciona un alumno…</option>'+students.slice().sort((a,b)=>a.name.localeCompare(b.name,"es")).map(s=>`<option value="${s.id}">${esc(s.name)} — ${esc(s.course)}</option>`).join("");if(students.some(s=>s.id===old))q("student").value=old}
+function renderSelect(){let old=q("student").value;q("student").innerHTML='<option value="">Selecciona un alumno…</option>'+students.filter(s=>!s.archived).slice().sort((a,b)=>a.name.localeCompare(b.name,"es")).map(s=>`<option value="${s.id}">${esc(s.name)} — ${esc(s.course)}</option>`).join("");if(students.some(s=>s.id===old&&!s.archived))q("student").value=old}
 function resetStudentForm(){q("studentName").value="";q("studentCourse").value="";q("studentDay").value="";q("studentTime").value=""}
 q("toggleStudents").onclick=()=>{
   const card=q("studentsCard");
@@ -1760,7 +1797,7 @@ q("studentProfileModal").addEventListener("click",function(e){if(e.target===this
 <nav class="mobile-bottom-nav" aria-label="Navegación móvil"><a href="#lessonCard"><span>📝</span>Clase</a><a href="#weeklyCard"><span>📅</span>Agenda</a><a href="#historyCard"><span>📚</span>Historial</a></nav><script>// Integrated interface. Storage keys and Supabase v16 remain compatible.
 function notifySaved(message){q('saveStatus').textContent='✓ '+message;window.__lessonDirty=false;}
 function historyIdentities(){const map=new Map(students.map(s=>[s.id,s]));for(const x of lessons.filter(x=>lessonYear(x)===year()))if(x.studentId&&!map.has(x.studentId))map.set(x.studentId,{id:x.studentId,name:x.student||'Alumno archivado',course:x.course||'',archived:true});return [...map.values()];}
-function historyList(){return window.historyScope==='archived'?historyIdentities().filter(s=>s.archived):students.slice();}
+function historyList(){return window.historyScope==='archived'?historyIdentities().filter(s=>s.archived):students.filter(s=>!s.archived);}
 function setHistoryScope(scope){window.historyScope=scope==='archived'?'archived':'active';selectedStudentHistory=null;const filter=q('filter');if(filter)filter.value='';renderHistoryStudents();}
 function updateHistoryScope(){const panel=document.querySelector('.history-scopes');if(panel)panel.hidden=!!selectedStudentHistory;const archived=historyIdentities().filter(s=>s.archived).length;if(!q('historyActive'))return;q('historyArchived').textContent=`Archivados (${archived})`;for(const [id,scope] of [['historyActive','active'],['historyArchived','archived']]){const selected=(window.historyScope||'active')===scope;q(id).classList.toggle('selected',selected);q(id).setAttribute('aria-pressed',String(selected));}}
 function updateRubricSummary(){
@@ -1788,11 +1825,20 @@ function showView(id){
  document.querySelectorAll('.mobile-bottom-nav a').forEach(a=>{const active=a.hash==='#'+id;a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
  window.scrollTo({top:0,behavior:'instant'});
 }
+q('previousNoteToggle').addEventListener('click',()=>{
+ if(!window.matchMedia('(max-width: 700px)').matches)return;
+ const box=q('forToday');
+ const expanded=box.classList.toggle('expanded');
+ q('previousNoteToggle').setAttribute('aria-expanded',String(expanded));
+});
 function updateForToday(){
  const sid=q('student').value,date=q('date').value;
  const previous=lessons.filter(x=>x.studentId===sid&&lessonYear(x)===year()&&x.date<date&&x.nextClass&&x.id!==editingLessonId).sort((a,b)=>b.date.localeCompare(a.date))[0];
- q('forToday').hidden=!previous;
- q('forToday').textContent=previous?'Para hoy · '+previous.nextClass:'';
+ const previousBox=q('forToday'),previousToggle=q('previousNoteToggle');
+ previousBox.hidden=!previous;
+ q('previousNoteText').textContent=previous?previous.nextClass:'';
+ previousBox.classList.remove('expanded');
+ previousToggle.setAttribute('aria-expanded','false');
  const st=students.find(s=>s.id===sid);
  if(st){q('todayName').textContent=st.name;q('todayLabel').textContent=editingLessonId?'Editando una clase':'Alumno seleccionado';q('todayNext').textContent=st.course+(st.scheduleDay&&st.scheduleTime?' · '+st.scheduleDay+' '+st.scheduleTime:'');}
  else if(scheduleMode==='manual'){q('todayName').textContent='Elige un alumno';q('todayLabel').textContent='Registro manual';q('todayNext').textContent='';}
@@ -2394,4 +2440,46 @@ function updateForToday(){
   new MutationObserver(update).observe(actual,{childList:true,subtree:true,characterData:true});
   update();
 })();
-</script></body></html>
+</script>
+<style id="student-archive-v1126">
+.student-archive-actions{margin-top:15px;border-top:1px solid #bdd0e4;padding-top:12px}
+.student-archive-actions summary{cursor:pointer;color:#163a63;font-weight:750;padding:8px 0}
+.student-archive-entry{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid #d9e5f0}
+.student-archive-entry .secondary{background:#eaf3ff;color:#163a63;border:1px solid #adc5df}
+</style>
+<script id="archive-safe-v1126">
+/* Gestión reversible de alumnos, sin modificar el motor de sincronización. */
+(function(){
+function archivePanel(){
+ const list=document.getElementById('studentsList');if(!list)return;
+ let section=document.getElementById('studentArchiveSection');
+ if(!section){section=document.createElement('details');section.id='studentArchiveSection';section.className='student-archive-actions';list.insertAdjacentElement('afterend',section)}
+ const items=students.filter(s=>s.archived);
+ section.innerHTML='<summary>📦 Alumnos archivados ('+items.length+')</summary>'+
+  (items.length?items.map(s=>`<div class="student-archive-entry"><span><strong>${esc(displayName(s.name))}</strong><br><small>${esc(s.course)}</small></span><div><button type="button" class="secondary" onclick="reactivateStudent('${esc(s.id)}')">↩ Reactivar</button><button type="button" class="danger" onclick="showDeleteWarning('${esc(s.id)}')">🗑 Eliminar definitivamente</button></div></div>`).join(''):'<p class="muted">No hay alumnos archivados.</p>');
+}
+window.archiveStudent=function(id){
+ const s=students.find(x=>String(x.id)===String(id));if(!s||s.archived)return;
+ const num=lessons.filter(x=>String(x.studentId)===String(id)).length;
+ if(!confirm('¿Archivar a '+s.name+'?\nSe conservan la ficha y sus '+num+' clases. No aparecerá en agenda ni Clase rápida.'))return;
+ const before={archived:s.archived,updatedAt:s.updatedAt};s.archived=true;s.updatedAt=Math.max(Date.now(),Number(s.updatedAt||0)+1);
+ if(!saveS()){Object.assign(s,before);return;}
+ recordSyncChange('students','updated');markLocalSyncDirty();renderStudents();renderSelect();render();updateProfessorUI();renderHistoryStudents();archivePanel();
+};
+window.reactivateStudent=function(id){
+ const s=students.find(x=>String(x.id)===String(id));if(!s||!s.archived)return;
+ if(!confirm('¿Reactivar a '+s.name+'?\nVolverá a la agenda según su horario guardado.'))return;
+ const before={archived:s.archived,updatedAt:s.updatedAt};s.archived=false;s.updatedAt=Math.max(Date.now(),Number(s.updatedAt||0)+1);
+ if(!saveS()){Object.assign(s,before);return;}
+ recordSyncChange('students','updated');markLocalSyncDirty();renderStudents();renderSelect();render();updateProfessorUI();renderHistoryStudents();archivePanel();
+};
+window.showDeleteWarning=function(id){
+ const s=students.find(x=>String(x.id)===String(id));if(!s)return;
+ const n=lessons.filter(x=>String(x.studentId)===String(id)).length;
+ alert('Eliminación definitiva de '+s.name+' ('+n+' clases): función bloqueada temporalmente. Hay que verificar primero que las bajas sincronizadas no permitan recuperar al alumno en otro dispositivo. Puedes archivarlo sin perder información.');
+};
+const oldRender=renderStudents;renderStudents=function(){oldRender();archivePanel()};
+archivePanel();
+})();
+</script>
+</body></html>
