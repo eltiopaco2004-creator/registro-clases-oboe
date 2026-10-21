@@ -462,12 +462,12 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
 </style></head><body><div class="wrap">
 <div id="buildVersionBanner" role="status" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
-  <strong>V11.2.6 · REVISIÓN 05</strong>
-  <div class="build-version-detail"><b>NOVEDAD DE ESTA REVISIÓN:</b> identificación clara de versión y cambios.</div>
-  <div class="build-version-changes"><b>FUNCIONES INCLUIDAS:</b> propuesta del próximo curso en Configuración; promoción editable de alumnos; día y hora nuevos por alumno; borrador recuperable; avisos de horarios coincidentes e incompletos.</div>
-  <div class="build-version-caution">⚠️ SIMULACIÓN: no cambia alumnos, clases ni sincronización.</div>
+  <strong>V11.2.6 · REVISIÓN 06</strong>
+  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> borrado definitivo protegido de alumnos archivados y acceso claro a «Preparar nuevo curso».</div>
+  <div class="build-version-changes"><b>FUNCIONES INCLUIDAS:</b> copia previa y verificación de nube antes del borrado; propuesta del próximo curso en Configuración; promoción editable de alumnos; día y hora nuevos por alumno; borrador recuperable; avisos de horarios coincidentes e incompletos.</div>
+  <div class="build-version-caution">⚠️ El cambio de curso sigue siendo una simulación. El borrado definitivo SÍ altera datos y exige una copia de seguridad y confirmación expresa.</div>
 </div>
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 05 · Identificación de cambios</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 06 · Borrado protegido + preparación de curso</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -2536,7 +2536,7 @@ archivePanel();
   const card=document.createElement('details');
   card.id='yearWizardCard';
   card.className='config-section-block';
-  card.innerHTML=`<summary>🎓 Preparar próximo curso · Vista previa</summary>
+  card.innerHTML=`<summary>🎓 Preparar nuevo curso académico · Vista previa</summary>
     <div class="yw-banner"><b>Simulación: no guarda cambios.</b> Elige los niveles y los futuros horarios de cada alumno. La agenda y los datos reales no se modificarán. Puedes descargar la propuesta en CSV.</div>
     <div id="ywSummary"></div><div id="ywRows"></div>
     <div class="yw-footer"><button type="button" class="secondary" id="ywReload">Reiniciar propuestas</button><button type="button" class="primary" id="ywDownload">Descargar propuesta CSV</button></div>
@@ -2676,6 +2676,119 @@ archivePanel();
  if(school)school.addEventListener('change',()=>{loaded=false;loadYear='';wizard.dataset.initialized='';if(wizard.open){wizard.open=false;wizard.open=true;}});
  // Si ya estaba abierto antes de instalar este bloque.
  if(wizard.open)setTimeout(ready,0);
+})();
+</script>
+
+<style id="rev06-safety-ui">
+#studentArchiveSection .danger{background:#fff0f0!important;border:1px solid #d79494!important;color:#912626!important}
+#rev06DeleteDialog{border:2px solid #ab6262;border-radius:15px;padding:20px;max-width:min(540px,94vw);box-shadow:0 24px 70px #132d4a55;color:#172c43;background:#fff}
+#rev06DeleteDialog::backdrop{background:rgba(9,30,51,.72)}
+#rev06DeleteDialog h3{color:#8b2626!important}
+#rev06DeleteDialog .rev06-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+#rev06DeleteDialog .rev06-warning{border:1px solid #e6b6b6;background:#fff4f4;color:#742323;border-radius:9px;padding:10px}
+#rev06DeleteDialog input{width:100%;margin-top:7px}
+#yearWizardCard .rev06-activate-disabled{display:block;background:#f4f7fb;border:1px solid #bacbda;border-radius:10px;padding:12px;margin:12px 14px;color:#42566c}
+</style>
+<script id="rev06-protected-delete">
+/* Rev06: guarded bulk deletion. Requires a signed-in user, a fresh remote read,
+   an archived student, unique matching student key, and verified target lists. */
+(function(){
+ const dlg=document.createElement('dialog');dlg.id='rev06DeleteDialog';dlg.innerHTML=`<h3>🗑 Eliminar alumno y todas sus clases</h3><div id="rev06DeleteSummary"></div><p class="rev06-warning">Esta operación es irreversible desde la aplicación. Descargaremos primero una copia completa local y de la nube. Después tendrás que sincronizar y comprobar el segundo dispositivo.</p><label>Para confirmar escribe ELIMINAR<input type="text" autocomplete="off" id="rev06Confirm" placeholder="ELIMINAR"/></label><div class="rev06-actions"><button id="rev06Cancel" class="secondary" type="button">Cancelar</button><button id="rev06DeleteNow" class="danger" type="button">Eliminar definitivamente</button></div><p id="rev06DeleteStatus" role="status" class="muted"></p>`;document.body.appendChild(dlg);
+ dlg.querySelector('#rev06Cancel').onclick=()=>dlg.close();
+ let review=null;
+ const describe=(s,ln,cn)=>`${s.name} · ${ln} clases locales · ${cn} clases en nube`;
+ const studentKey=s=>mergeKey(s.name,s.course);
+ const matchingLessons=(collection,studentIds,key)=>{
+   return collection.filter(x=>{
+     const id=String(x.studentId||'');
+     if(id && studentIds.has(id))return true;
+     // Unlinked older lessons may belong to another record: never silently delete them.
+     return false;
+   });
+ };
+ async function cloudSnapshot(){
+   if(!accessToken||!currentUserId())throw new Error('Primero debes iniciar sesión de sincronización.');
+   const path=`/rest/v1/${SYNC_TABLE}?user_id=eq.${encodeURIComponent(currentUserId())}&select=data,updated_at&limit=2`;
+   const resp=await syncRequest('GET',path);
+   if(!resp.ok)throw new Error('No se pudo comprobar la nube ('+resp.status+').');
+   const rows=await resp.json();
+   if(!Array.isArray(rows)||rows.length!==1)throw new Error('No existe una única copia en la nube. Sin borrado.');
+   const cloud=rows[0].data;
+   if(!cloud||!Array.isArray(cloud.students)||!Array.isArray(cloud.lessons))throw new Error('Datos en nube incompletos.');
+   return {cloud,updatedAt:rows[0].updated_at};
+ }
+ window.showDeleteWarning=async function(id){
+   const status=dlg.querySelector('#rev06DeleteStatus');review=null;
+   const s=students.find(x=>String(x.id)===String(id));
+   if(!s||!s.archived){alert('Solo se permite eliminar definitivamente alumnos archivados.');return;}
+   if(syncDirty()){alert('Hay cambios pendientes de sincronización. Sincroniza y vuelve a intentarlo.');return;}
+   const key=studentKey(s);
+   if(students.filter(x=>studentKey(x)===key).length!==1){alert('Existen fichas con el mismo nombre y nivel. Hay que revisarlas antes de eliminar.');return;}
+   dlg.querySelector('#rev06Confirm').value='';status.textContent='Comprobando datos en la nube…';dlg.showModal();
+   try{
+     const {cloud,updatedAt}=await cloudSnapshot();
+     const remoteStudents=cloud.students.filter(x=>studentKey(x)===key);
+     if(remoteStudents.length!==1)throw new Error('La ficha de la nube no coincide exactamente. Sincroniza ambos dispositivos antes de borrar.');
+     if(!remoteStudents[0].archived)throw new Error('En la nube el alumno todavía no está archivado. Sincroniza primero.');
+     const localIds=new Set([String(s.id)]),remoteIds=new Set([String(remoteStudents[0].id)]);
+     const localItems=matchingLessons(lessons,localIds,key);
+     const remoteItems=matchingLessons(cloud.lessons,remoteIds,key);
+     // A record with the same name/course but another pupil ID could be a
+     // legacy alias or a different pupil: abort instead of guessing.
+     const ambiguous=[...lessons.filter(x=>studentKey({name:x.student,course:x.course})===key&&!localIds.has(String(x.studentId||''))),...cloud.lessons.filter(x=>studentKey({name:x.student,course:x.course})===key&&!remoteIds.has(String(x.studentId||'')))];
+     if(ambiguous.length)throw new Error('Existen clases con nombre y nivel coincidentes pero con ID distinto. Revisión manual necesaria antes de borrar.');
+     // Missing links are ambiguous; handle them manually, not as mass deletion.
+     const orphans=[...lessons,...cloud.lessons].filter(x=>!x.studentId&&studentKey({name:x.student,course:x.course})===key);
+     if(orphans.length)throw new Error('Hay clases sin vínculo de ID asociadas a este nombre y curso. Revisión manual necesaria.');
+     const allIds=new Set([...localItems,...remoteItems].map(x=>String(x.id)));
+     const locallyByIds=lessons.filter(x=>allIds.has(String(x.id)));
+     if(locallyByIds.some(x=>String(x.studentId)!==String(s.id)))throw new Error('Una clase parece vinculada a otro alumno local. Sin borrado.');
+     if([...cloud.lessons].filter(x=>allIds.has(String(x.id))).some(x=>String(x.studentId)!==String(remoteStudents[0].id)))throw new Error('Una clase parece vinculada a otro alumno de la nube. Sin borrado.');
+     review={localId:String(s.id),key,studentName:s.name,localItems,remoteItems,allIds:[...allIds],cloud,updatedAt};
+     dlg.querySelector('#rev06DeleteSummary').textContent=describe(s,localItems.length,remoteItems.length)+' (total de registros distintos: '+allIds.size+').';
+     status.textContent='Comprobación terminada. Revisa las cantidades antes de confirmar.';
+   }catch(err){status.textContent='OPERACIÓN BLOQUEADA: '+err.message;dlg.querySelector('#rev06DeleteSummary').textContent='No se borrará ningún dato.';}
+ };
+ dlg.querySelector('#rev06DeleteNow').onclick=async()=>{
+   const status=dlg.querySelector('#rev06DeleteStatus');
+   if(!review){status.textContent='No se ha podido validar la nube. No se borra nada.';return;}
+   if(dlg.querySelector('#rev06Confirm').value.trim()!=='ELIMINAR'){status.textContent='Escribe ELIMINAR exactamente para continuar.';return;}
+   if(syncDirty()){status.textContent='Hay cambios pendientes de sincronización. Operación cancelada.';return;}
+   const s=students.find(x=>String(x.id)===review.localId);
+   if(!s||!s.archived||studentKey(s)!==review.key){status.textContent='La ficha ha cambiado. Vuelve a comprobar.';return;}
+   const btn=dlg.querySelector('#rev06DeleteNow');btn.disabled=true;
+   try{
+     // Check again just before deletion, to avoid acting on an outdated remote read.
+     const fresh=await cloudSnapshot();
+     if(fresh.updatedAt!==review.updatedAt||JSON.stringify(fresh.cloud)!==JSON.stringify(review.cloud))throw new Error('La nube ha cambiado desde la comprobación. Vuelve a empezar.');
+     const ids=new Set(review.allIds);
+     const backup={version:'V11.2.6 Rev06',savedAt:new Date().toISOString(),reason:'Antes de eliminación definitiva',local:syncPayload(),cloud:fresh.cloud};
+     const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+     const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;
+     a.download='COPIA_ANTES_BORRAR_ALUMNO_'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),15000);
+     if(!confirm('Se ha solicitado la descarga de una copia de seguridad. COMPRUEBA que se ha guardado correctamente. ¿Continuar con la eliminación de '+s.name+' y '+ids.size+' clases?'))return;
+     const oldStudents=students.slice(),oldLessons=lessons.slice(),oldDS=deletedStudentKeys.slice(),oldDL=deletedLessonIds.slice();
+     try{
+       students=students.filter(x=>String(x.id)!==review.localId);
+       lessons=lessons.filter(x=>!ids.has(String(x.id)));
+       rememberDeletedStudent(review.key);
+       for(const x of ids)rememberDeletedLesson(x);
+       if(!saveS()||!saveL())throw new Error('No se pudieron guardar todos los cambios locales.');
+       recordSyncChange('students','deleted');for(const x of ids)recordSyncChange('lessons','deleted');markLocalSyncDirty();
+     }catch(err){students=oldStudents;lessons=oldLessons;deletedStudentKeys=oldDS;deletedLessonIds=oldDL;saveS();saveL();saveDeleted();throw err;}
+     dlg.close();renderStudents();renderSelect();render();updateProfessorUI();renderHistoryStudents();
+     alert('Eliminación local registrada. SINCRONIZA AHORA este dispositivo y después el otro. Verifica que el alumno y las clases no reaparezcan. Conserva la copia de seguridad.');
+   }catch(err){status.textContent='No se ha eliminado: '+err.message;}
+   finally{btn.disabled=false;review=null;}
+ };
+ const wizard=document.getElementById('yearWizardCard');
+ if(wizard){
+   const banner=wizard.querySelector('.yw-banner');
+   if(banner)banner.innerHTML='<b>PASO 1 · PREPARAR NUEVO CURSO (2027-28 u otro)</b>. Revisa promociones, repetidores, días y horas. Puedes guardar un borrador y descargar el CSV. Nada se aplica todavía.';
+   const section=document.createElement('div');section.className='rev06-activate-disabled';
+   section.innerHTML='<b>PASO 2 · ACTIVAR NUEVO CURSO</b><p>Se habilitará en una revisión posterior, tras las pruebas de seguridad de datos y sincronización.</p><button type="button" class="secondary" disabled>🔒 Activar nuevo curso (pendiente de validación)</button>';
+   wizard.append(section);
+ }
 })();
 </script>
 </body></html>
