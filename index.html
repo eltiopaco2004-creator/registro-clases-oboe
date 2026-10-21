@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases</title><style>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases — V11.2.6 R03 PRUEBA</title><style>
 body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-width:720px;margin:auto;padding:16px}.card{background:white;border:1px solid #ddd;border-radius:16px;padding:16px;margin:12px 0}label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:10px;font:inherit}textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{border:0;border-radius:10px;padding:10px 13px;margin:6px 4px 0 0;font-weight:700;max-width:100%;white-space:normal}.primary{background:#2f5d50;color:#fff}.secondary{background:#dfe9e4;color:#2f5d50}.danger{background:#f3dddd;color:#a44242}.item{border-top:1px solid #ddd;padding:12px 0}.muted{color:#69716d;font-size:12px}.grade{float:right;font-size:20px;font-weight:800;color:#2f5d50}.hidden{display:none}.rec{padding:10px;background:#f7f7f4;border-radius:10px;margin-top:8px}
 .rating-group{margin:12px 0}.rating-title{font-weight:700;font-size:13px;margin-bottom:6px}
 .rating-buttons{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;width:100%}
@@ -446,8 +446,28 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
  .lesson-prev-chevron{display:inline;flex:none;margin-left:auto;font-size:14px}
  .lesson-prev-note.expanded .lesson-prev-chevron{transform:rotate(180deg)}
 }
+</style><style id="version-banner-visible-v1126-r02">
+#buildVersionBanner{box-sizing:border-box!important;display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:8px 12px!important;background:#123b6a!important;color:#fff!important;border:2px solid #0b2c51!important;border-radius:13px!important;padding:12px 15px!important;margin:0 0 12px!important;box-shadow:0 3px 12px rgba(7,35,66,.18)!important;font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important;line-height:1.4!important;position:relative!important;z-index:1!important}
+#buildVersionBanner .build-version-marker{background:#ffdf78!important;color:#142c45!important;font-weight:900!important;letter-spacing:.025em!important;font-size:12px!important;border-radius:7px!important;padding:4px 8px!important}
+#buildVersionBanner strong{color:#fff!important;font-size:17px!important;font-weight:800!important}
+#buildVersionBanner .build-version-detail{color:#f0f6ff!important;font-size:13px!important}
+@media(max-width:550px){#buildVersionBanner{padding:10px 12px!important;gap:5px 9px!important}#buildVersionBanner strong{font-size:15px!important}#buildVersionBanner .build-version-detail{flex-basis:100%!important;font-size:12px!important}}
+</style><style id="version-banner-details-v1126-r05">
+#buildVersionBanner{display:grid!important;grid-template-columns:max-content 1fr!important;align-items:start!important;column-gap:12px!important;row-gap:7px!important}
+#buildVersionBanner .build-version-marker{grid-column:1!important;grid-row:1!important;align-self:center!important}
+#buildVersionBanner>strong{grid-column:2!important;grid-row:1!important;align-self:center!important}
+#buildVersionBanner .build-version-detail,#buildVersionBanner .build-version-changes,#buildVersionBanner .build-version-caution{grid-column:1/-1!important;font-size:13px!important;line-height:1.45!important;color:#f7fbff!important}
+#buildVersionBanner .build-version-caution{color:#ffe6a6!important;font-weight:700!important;font-size:12px!important}
+@media(max-width:550px){#buildVersionBanner{grid-template-columns:1fr!important}#buildVersionBanner .build-version-marker,#buildVersionBanner>strong,#buildVersionBanner .build-version-detail,#buildVersionBanner .build-version-changes,#buildVersionBanner .build-version-caution{grid-column:1!important;grid-row:auto!important}#buildVersionBanner .build-version-marker{justify-self:start!important}#buildVersionBanner .build-version-detail,#buildVersionBanner .build-version-changes{font-size:12px!important}}
 </style></head><body><div class="wrap">
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Festivos + tareas anteriores</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<div id="buildVersionBanner" role="status" aria-label="Versión de prueba y novedades incluidas">
+  <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
+  <strong>V11.2.6 · REVISIÓN 05</strong>
+  <div class="build-version-detail"><b>NOVEDAD DE ESTA REVISIÓN:</b> identificación clara de versión y cambios.</div>
+  <div class="build-version-changes"><b>FUNCIONES INCLUIDAS:</b> propuesta del próximo curso en Configuración; promoción editable de alumnos; día y hora nuevos por alumno; borrador recuperable; avisos de horarios coincidentes e incompletos.</div>
+  <div class="build-version-caution">⚠️ SIMULACIÓN: no cambia alumnos, clases ni sincronización.</div>
+</div>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 05 · Identificación de cambios</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -2480,6 +2500,182 @@ window.showDeleteWarning=function(id){
 };
 const oldRender=renderStudents;renderStudents=function(){oldRender();archivePanel()};
 archivePanel();
+})();
+</script>
+<style id="preview-year-wizard-style">
+#yearWizardCard{border:1px solid #b2c9e4;background:#fff;border-radius:15px;padding:15px;margin:14px 0;box-shadow:0 4px 15px #142f5610}
+#yearWizardCard>summary{cursor:pointer;font-weight:800;color:#173a67;font-size:16px;padding:5px 0}
+#yearWizardCard .yw-banner{margin:12px 0;padding:10px;background:#f0f6ff;border:1px solid #bad2ef;border-radius:9px;color:#173d69;font-size:13px}
+#yearWizardCard .yw-row{display:grid;grid-template-columns:minmax(130px,2fr) minmax(115px,1.2fr) minmax(130px,1.3fr) minmax(130px,1.3fr);gap:10px;align-items:center;border-bottom:1px solid #dce7f1;padding:9px 0}
+#yearWizardCard .yw-row input,#yearWizardCard .yw-row select{margin:0!important;padding:8px!important;min-width:0;width:100%}
+#yearWizardCard .yw-row label{margin:0}
+#yearWizardCard .yw-name{font-weight:700;color:#173a67}
+#yearWizardCard .yw-desc{font-size:11px;color:#4f657b}
+#yearWizardCard .yw-head{font-size:12px;font-weight:700;color:#445c75}
+#yearWizardCard .yw-footer{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-top:12px}
+@media(max-width:720px){#yearWizardCard .yw-row{grid-template-columns:1fr 1fr;gap:6px}#yearWizardCard .yw-name{grid-column:1/-1}#yearWizardCard .yw-head{display:none}#yearWizardCard .yw-field-label{display:block;font-size:11px;color:#52677c;margin-bottom:4px}}
+@media(min-width:721px){#yearWizardCard .yw-field-label{display:none}}
+</style><style id="year-wizard-rev03-layout">
+/* El asistente pertenece a Configuración y se mantiene plegado por defecto. */
+#configCard #yearWizardCard{display:block;border:1px solid #b4c9df;border-radius:12px;padding:0;background:#fff;margin:16px 0 0;box-shadow:none}
+#configCard #yearWizardCard>summary{padding:12px 14px;font-size:15px;cursor:pointer;color:#173a67;font-weight:800;list-style-position:inside}
+#configCard #yearWizardCard[open]{padding-bottom:12px}
+#configCard #yearWizardCard .yw-banner,#configCard #yearWizardCard #ywSummary,#configCard #yearWizardCard #ywRows,#configCard #yearWizardCard .yw-footer,#configCard #yearWizardCard>.muted{margin-left:14px;margin-right:14px}
+#configCard #yearWizardCard .yw-row{display:grid;grid-template-columns:minmax(150px,1.5fr) repeat(3,minmax(110px,1fr));gap:10px;align-items:end;padding:12px 0;border-bottom:1px solid #dce7f1}
+#configCard #yearWizardCard .yw-editor label{display:block;margin:0;color:#284760;font-size:12px}
+#configCard #yearWizardCard .yw-editor select{display:block;width:100%;min-width:0;margin:5px 0 0!important;min-height:42px}
+#configCard #yearWizardCard .yw-name{align-self:center}
+#configCard #yearWizardCard .yw-footer{margin-top:16px}
+@media(max-width:730px){#configCard #yearWizardCard .yw-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#configCard #yearWizardCard .yw-name{grid-column:1/-1}#configCard #yearWizardCard .yw-editor:first-of-type{grid-column:1/-1}}
+</style>
+<script id="year-preview-only-v1126">
+/* V11.2.6 Rev03: asistente exclusivamente de vista previa; no modifica datos ni sincroniza. */
+(function(){
+  const section=document.getElementById('configCard');
+  if(!section)return;
+  const card=document.createElement('details');
+  card.id='yearWizardCard';
+  card.className='config-section-block';
+  card.innerHTML=`<summary>🎓 Preparar próximo curso · Vista previa</summary>
+    <div class="yw-banner"><b>Simulación: no guarda cambios.</b> Elige los niveles y los futuros horarios de cada alumno. La agenda y los datos reales no se modificarán. Puedes descargar la propuesta en CSV.</div>
+    <div id="ywSummary"></div><div id="ywRows"></div>
+    <div class="yw-footer"><button type="button" class="secondary" id="ywReload">Reiniciar propuestas</button><button type="button" class="primary" id="ywDownload">Descargar propuesta CSV</button></div>
+    <div class="muted">La activación definitiva del nuevo curso seguirá bloqueada hasta verificar la sincronización y la conservación de los horarios históricos.</div>`;
+  section.appendChild(card);
+  const courseLevels=[...courseOrder];
+  const days=['Lunes','Martes','Miércoles','Jueves','Viernes'];
+  const hours=Array.from({length:14},(_,n)=>String(n+8).padStart(2,'0')+':00');
+  const nextYear=y=>{const x=parseInt(String(y||''),10);return Number.isFinite(x)?`${x+1}-${String(x+2).slice(-2)}`:'—'};
+  const suggested=c=>{let i=courseLevels.indexOf(c);return i<0?c:(i===3||i===courseLevels.length-1?'revisar':courseLevels[i+1]);};
+  const choices=()=>'<option value="revisar">Revisar salida / transición</option>'+courseLevels.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')+'<option value="archivar">Archivar al finalizar</option>';
+  const dayChoices=()=>'<option value="">Elegir día…</option>'+days.map(d=>`<option value="${d}">${d}</option>`).join('');
+  const timeChoices=()=>'<option value="">Elegir hora…</option>'+hours.map(t=>`<option value="${t}">${t}</option>`).join('');
+  function update(){
+   const active=sortStudents(students.filter(s=>!s.archived));
+   document.getElementById('ywSummary').textContent=`${year()} → ${nextYear(year())} · ${active.length} alumnos activos · Vista previa sin cambios reales`;
+   const host=document.getElementById('ywRows');
+   host.innerHTML=active.length?active.map(s=>{
+    return `<div class="yw-row" data-yw-student-id="${esc(s.id)}"><div class="yw-name">${esc(displayName(s.name))}<div class="yw-desc">Actual: ${esc(s.course||'sin curso')} · ${esc(s.scheduleDay||'sin día')} ${esc(s.scheduleTime||'')}</div></div><div class="yw-editor"><label>Próximo nivel<select data-field="newCourse">${choices()}</select></label></div><div class="yw-editor"><label>Día próximo curso<select data-field="newDay">${dayChoices()}</select></label></div><div class="yw-editor"><label>Hora próximo curso<select data-field="newTime">${timeChoices()}</select></label></div></div>`;
+   }).join(''):'<p class="muted">No hay alumnos activos para preparar.</p>';
+   host.querySelectorAll('[data-yw-student-id]').forEach(r=>{
+    const st=active.find(s=>String(s.id)===r.getAttribute('data-yw-student-id'));
+    r.querySelector('[data-field="newCourse"]').value=suggested(st?.course);
+   });
+  }
+  function exportPlan(){
+   const quoted=v=>'"'+String(v??'').replace(/"/g,'""').replace(/[\r\n]+/g,' ')+'"';
+   const rows=[['ID alumno','Alumno','Nivel actual','Nivel propuesto','Día actual','Hora actual','Día nuevo','Hora nueva']];
+   card.querySelectorAll('[data-yw-student-id]').forEach(r=>{
+    const s=students.find(s=>String(s.id)===r.getAttribute('data-yw-student-id'));
+    if(s)rows.push([s.id,s.name,s.course,r.querySelector('[data-field="newCourse"]').value,s.scheduleDay||'',s.scheduleTime||'',r.querySelector('[data-field="newDay"]').value,r.querySelector('[data-field="newTime"]').value]);
+   });
+   const csv='\ufeff'+rows.map(row=>row.map(quoted).join(';')).join('\r\n');
+   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+   const url=URL.createObjectURL(blob),a=document.createElement('a');
+   a.href=url;a.download='Propuesta_curso_'+nextYear(year())+'.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  card.addEventListener('toggle',()=>{if(card.open&&!card.dataset.initialized){update();card.dataset.initialized='1';}});
+  card.querySelector('#ywReload').addEventListener('click',()=>{if(confirm('¿Reiniciar la propuesta? Se perderán los cambios de esta simulación.'))update();});
+  card.querySelector('#ywDownload').addEventListener('click',exportPlan);
+})();
+</script>
+<style id="yw-rev04-style">
+#yearWizardCard .yw-review{margin:12px 14px;padding:12px;border:1px solid #b8cee4;background:#f1f7fe;border-radius:10px;color:#173a60;font-size:13px;line-height:1.5}
+#yearWizardCard .yw-review strong{color:#10355c}
+#yearWizardCard .yw-review .yw-warning{color:#913e14;font-weight:700}
+#yearWizardCard .yw-row.yw-conflict{background:#fff4e7;border-radius:7px;padding-inline:7px}
+#yearWizardCard .yw-draft-status{font-size:12px;color:#355578;display:inline-block;margin-top:6px}
+#yearWizardCard button:disabled{opacity:.6;cursor:not-allowed}
+</style>
+<script id="yw-rev04-safety-features">
+/* Rev04: guarda SOLO borradores locales. Nunca edita alumnos, clases ni sincronización. */
+(function(){
+ const wizard=document.getElementById('yearWizardCard');
+ if(!wizard)return;
+ const rows=wizard.querySelector('#ywRows');
+ const footer=wizard.querySelector('.yw-footer');
+ const summary=wizard.querySelector('#ywSummary');
+ if(!rows||!footer||!summary)return;
+ const safeYear=()=>{const v=document.getElementById('schoolYear');return v?v.value:''};
+ const successor=y=>{const n=parseInt(String(y||''),10);return Number.isFinite(n)?`${n+1}-${String(n+2).slice(-2)}`:''};
+ const draftKey=()=>`oboeCambioCursoBorradorRev04_${safeYear()}_${successor(safeYear())}`;
+ const stateLine=document.createElement('div');stateLine.className='yw-draft-status';stateLine.setAttribute('aria-live','polite');
+ summary.after(stateLine);
+ const review=document.createElement('div');review.className='yw-review';review.id='ywReviewRev04';review.setAttribute('aria-live','polite');
+ rows.after(review);
+ const clear=document.createElement('button');clear.type='button';clear.className='secondary';clear.textContent='🧹 Borrar borrador local';footer.append(clear);
+ let loadYear='',loaded=false,loading=false;
+ const getRows=()=>[...rows.querySelectorAll('[data-yw-student-id]')];
+ function extract(){return getRows().map(r=>({id:r.getAttribute('data-yw-student-id'),course:r.querySelector('[data-field="newCourse"]')?.value||'',day:r.querySelector('[data-field="newDay"]')?.value||'',time:r.querySelector('[data-field="newTime"]')?.value||''}));}
+ function reflect(items){
+   const byId=new Map((Array.isArray(items)?items:[]).map(x=>[String(x.id),x]));
+   for(const r of getRows()){
+     const entry=byId.get(r.getAttribute('data-yw-student-id'));if(!entry)continue;
+     for(const [field,value] of [['newCourse',entry.course],['newDay',entry.day],['newTime',entry.time]]){
+       const input=r.querySelector(`[data-field="${field}"]`);
+       if(input&&[...input.options].some(o=>o.value===value))input.value=value;
+     }
+   }
+ }
+ function persist(){
+   if(loading||!loaded||!wizard.open)return;
+   try{localStorage.setItem(draftKey(),JSON.stringify({sourceYear:safeYear(),targetYear:successor(safeYear()),at:new Date().toISOString(),students:extract()}));stateLine.textContent='Borrador guardado en este dispositivo (sin modificar alumnos ni clases).';}
+   catch(e){stateLine.textContent='No se pudo guardar el borrador local. Descarga la propuesta CSV.';}
+ }
+ function evaluate(){
+   const entries=extract(),conflicts=new Set();let toReview=0,missing=0,archived=0,assigned=0;
+   const seen=new Map();
+   for(const x of entries){
+     if(x.course==='archivar'){archived++;continue;}
+     if(x.course==='revisar'||!x.course)toReview++;
+     if(!x.day||!x.time){missing++;continue;}
+     assigned++;
+     const slot=x.day+'|'+x.time;
+     if(seen.has(slot)){conflicts.add(x.id);conflicts.add(seen.get(slot));}else seen.set(slot,x.id);
+   }
+   for(const r of getRows())r.classList.toggle('yw-conflict',conflicts.has(r.getAttribute('data-yw-student-id')));
+   const parts=[`<strong>${entries.length}</strong> alumnos en propuesta`,`${assigned} horarios completos`,`${archived} propuestos para archivar`];
+   if(missing)parts.push(`<span class="yw-warning">${missing} sin día u hora asignados</span>`);
+   if(toReview)parts.push(`<span class="yw-warning">${toReview} niveles por revisar</span>`);
+   if(conflicts.size)parts.push(`<span class="yw-warning">${conflicts.size} alumnos con coincidencias de día y hora</span>`);
+   review.innerHTML=parts.join(' · ')+'.<div style="margin-top:6px">Las coincidencias son avisos para revisar: no bloquean la descarga CSV. <b>No se aplica ningún cambio real.</b></div>';
+ }
+ function restore(){
+   loading=true;
+   try{
+     const raw=localStorage.getItem(draftKey());const obj=raw?JSON.parse(raw):null;
+     if(obj&&obj.sourceYear===safeYear()&&obj.targetYear===successor(safeYear())){reflect(obj.students);stateLine.textContent='Borrador recuperado de este dispositivo.';}
+     else stateLine.textContent='Propuesta nueva. Los cambios se guardan solo en este dispositivo.';
+   }catch(e){stateLine.textContent='No se pudo leer el borrador. Puedes empezar uno nuevo.';}
+   loading=false;loaded=true;loadYear=safeYear();evaluate();
+ }
+ function ready(){
+   if(!wizard.open)return;
+   if(!wizard.dataset.initialized){return;}
+   if(!getRows().length){loaded=true;loadYear=safeYear();evaluate();return;}
+   if(!loaded||loadYear!==safeYear())restore();
+ }
+ wizard.addEventListener('toggle',()=>setTimeout(ready,0));
+ rows.addEventListener('change',e=>{if(!e.target.matches('select[data-field]'))return;evaluate();persist();});
+ const reset=wizard.querySelector('#ywReload');
+ if(reset)reset.addEventListener('click',()=>{setTimeout(()=>{if(!wizard.open)return;loaded=true;loadYear=safeYear();evaluate();persist();},0)});
+ clear.addEventListener('click',()=>{
+   if(!confirm('¿Borrar la propuesta guardada de este curso en este dispositivo? No se borrarán alumnos ni clases.'))return;
+   try{localStorage.removeItem(draftKey());}catch(e){}
+   // Se borran solo valores editados: curso vuelve a propuesta inicial, día/hora quedan vacíos.
+   for(const r of getRows()){
+     const id=r.getAttribute('data-yw-student-id');
+     const st=(typeof students!=='undefined'?students:[]).find(x=>String(x.id)===id);
+     const select=r.querySelector('[data-field="newCourse"]');
+     if(select&&st){const i=courseOrder.indexOf(st.course);select.value=i<0?st.course:(i===3||i===courseOrder.length-1?'revisar':courseOrder[i+1]);}
+     const day=r.querySelector('[data-field="newDay"]');const time=r.querySelector('[data-field="newTime"]');if(day)day.value='';if(time)time.value='';
+   }
+   stateLine.textContent='Borrador eliminado. Propuesta inicial restaurada.';evaluate();
+ });
+ const school=document.getElementById('schoolYear');
+ if(school)school.addEventListener('change',()=>{loaded=false;loadYear='';wizard.dataset.initialized='';if(wizard.open){wizard.open=false;wizard.open=true;}});
+ // Si ya estaba abierto antes de instalar este bloque.
+ if(wizard.open)setTimeout(ready,0);
 })();
 </script>
 </body></html>
