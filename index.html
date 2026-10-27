@@ -474,7 +474,22 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
 }
 #syncMsg{white-space:pre-line!important;line-height:1.5!important;overflow-wrap:anywhere!important;}
 </style>
-</head><body><div class="wrap">
+
+<style id="rev09-sync-tools-style">
+#rev09Tools{border:1px solid #adc6e1;border-radius:12px;padding:12px;margin:12px 0;background:#f5f9ff;color:#163a63;font-size:13px}
+#rev09Tools .rev09top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#rev09Tools .rev09top label{display:flex;align-items:center;gap:8px;margin:0;font-weight:750;font-size:13px}
+#rev09Tools input[type=checkbox]{width:20px;height:20px;margin:0;accent-color:#175eaa;flex:none}
+#rev09Tools .rev09status{margin-top:8px;color:#334f70;line-height:1.45;overflow-wrap:anywhere}
+#rev09Tools .rev09pending{margin-top:10px;padding:9px 10px;border:1px solid #cad8e9;background:#fff;border-radius:9px;line-height:1.5}
+#rev09Tools details{border-top:1px solid #cad8e9;margin-top:11px;padding-top:9px}
+#rev09Tools summary{font-weight:750;cursor:pointer;color:#173e6c}
+#rev09Tools ol{margin:10px 0 0;padding-left:21px;max-height:230px;overflow:auto}
+#rev09Tools li{margin:7px 0;border-bottom:1px solid #e1eaf4;padding-bottom:7px;overflow-wrap:anywhere}
+#rev09Tools .rev09small{font-size:11px;color:#52657b;margin-top:6px}
+@media(max-width:600px){#rev09Tools{padding:10px}#rev09Tools .rev09top{align-items:flex-start}}
+</style>
+</head><body><div id="rev10Banner" style="position:relative;z-index:3;background:#123c6c;color:#fff;border-radius:12px;padding:11px 14px;margin:8px auto 12px;max-width:1180px;font:600 13px/1.5 system-ui"><b>VERSIÓN NUEVA · PRUEBA — V11.2.6 · REVISION 10</b><div style="font-weight:400">Novedades: activación protegida del curso académico, promociones editables, validación de horarios, copia de seguridad e historial de niveles y horarios. Sincronización manual obligatoria tras activar.</div></div><div class="wrap">
 <div id="buildVersionBanner" role="status" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
   <strong>V11.2.6 · REVISIÓN 07</strong>
@@ -482,7 +497,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
   <div class="build-version-changes"><b>FUNCIONES INCLUIDAS:</b> copia previa y verificación de nube antes del borrado; propuesta del próximo curso en Configuración; promoción editable de alumnos; día y hora nuevos por alumno; borrador recuperable; avisos de horarios coincidentes e incompletos.</div>
   <div class="build-version-caution">⚠️ El cambio de curso sigue siendo una simulación. El borrado definitivo SÍ altera datos y exige una copia de seguridad y confirmación expresa.</div>
 </div>
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 07 · Informe de sincronización + configuración accesible</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 10 · Sincronización automática opcional, historial y cambios pendientes</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header><div id="rev09ChangeBanner" style="background:#e8f1ff;border:1px solid #aac6e4;border-radius:10px;padding:9px 12px;margin:10px 0;color:#173d69;font-size:12px"><strong>VERSIÓN NUEVA · V11.2.6 REV09 · PRUEBA</strong><div>Incluye: sincronización automática opcional, historial de operaciones y resumen de cambios locales pendientes. Conserva borrado definitivo y correcciones previas.</div></div>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -2158,6 +2173,8 @@ function updateForToday(){
     }
     window.__syncReviewCloud=cloud;checkConflicts(cloud);
     // Snapshot for an auditable, conservative report. Counts never infer record changes from a generic success string.
+    const syncLocalDeletedStudentsBefore=new Set(deletedStudentKeys.map(String));
+    const syncLocalDeletedLessonsBefore=new Set(deletedLessonIds.map(String));
     const syncBeforeStudents=new Set(students.map(x=>String(x.id)));
     const syncBeforeLessons=new Set(lessons.map(x=>String(x.id)));
     const syncPendingBefore=pendingSyncChanges();
@@ -2194,8 +2211,12 @@ function updateForToday(){
     const syncDiff=(before,items)=>({added:items.filter(x=>!before.has(String(x.id))).length,removed:[...before].filter(id=>!items.some(x=>String(x.id)===id)).length});
     const syncStudentDiff=syncDiff(syncBeforeStudents,students),syncLessonDiff=syncDiff(syncBeforeLessons,lessons);
     const syncAddedTombstones=(items,base)=>items.filter(x=>!base.has(String(x))).length;
-    const syncRemoteStudentDeletes=syncAddedTombstones(after.data.deletedStudentKeys||[],syncCloudDeletedStudents);
-    const syncRemoteLessonDeletes=syncAddedTombstones(after.data.deletedLessonIds||[],syncCloudDeletedLessons);
+    // Separate uploads from downloads. Comparing only with the cloud misses
+    // deletions already present in the cloud that have just reached this device.
+    const syncServerStudentDeletes=syncAddedTombstones(after.data.deletedStudentKeys||[],syncCloudDeletedStudents);
+    const syncServerLessonDeletes=syncAddedTombstones(after.data.deletedLessonIds||[],syncCloudDeletedLessons);
+    const syncReceivedStudentDeletes=syncAddedTombstones(after.data.deletedStudentKeys||[],syncLocalDeletedStudentsBefore);
+    const syncReceivedLessonDeletes=syncAddedTombstones(after.data.deletedLessonIds||[],syncLocalDeletedLessonsBefore);
     const n=v=>Number(v||0);
     const syncReportLines=[
       '✅ SINCRONIZACIÓN COMPLETADA Y VERIFICADA',
@@ -2206,12 +2227,14 @@ function updateForToday(){
       '📥 CAMBIOS EN ESTE DISPOSITIVO TRAS SINCRONIZAR:',
       `• Alumnos: ${syncStudentDiff.added} incorporados · ${syncStudentDiff.removed} retirados`,
       `• Clases: ${syncLessonDiff.added} incorporadas · ${syncLessonDiff.removed} retiradas`,
-      '☁️ BAJAS CONFIRMADAS EN EL REGISTRO COMBINADO:',
-      `• Alumnos: ${syncRemoteStudentDeletes} nuevas marcas de baja · Clases: ${syncRemoteLessonDeletes} nuevas marcas de baja`,
+      '☁️ BAJAS CONFIRMADAS POR LA SINCRONIZACIÓN:',
+      `• Nuevas marcas enviadas a la nube: ${syncServerStudentDeletes} alumnos · ${syncServerLessonDeletes} clases`,
+      `• Marcas de baja recibidas en este dispositivo: ${syncReceivedStudentDeletes} alumnos · ${syncReceivedLessonDeletes} clases`,
       'Las modificaciones recibidas se conservan, pero no se cuentan si no puede determinarse su origen de forma inequívoca.'
     ];
     const syncReport=syncReportLines.join('\n');
     try{localStorage.setItem('registroUltimoInformeSyncV1126',syncReport);}catch(ignore){}
+    window.__showSyncReportV08?.(syncReport);
     saveSyncMeta({lastSyncAt:after.updated_at||nextStamp,localDirty:false});clearPendingSyncChanges();verified=after;
     const legacy=lessons.filter(x=>!x.schoolYear).length;
     syncMsg(syncReport+(legacy?'\n⚠️ Hay '+legacy+' clases sin curso académico explícito. Revisa su clasificación por fechas.':''));
@@ -2843,6 +2866,198 @@ archivePanel();
     const old=localStorage.getItem('registroUltimoInformeSyncV1126');
     if(old && (!status.textContent.trim() || /sincronizaci[oó]n pendiente|sincroniza para/i.test(status.textContent)))status.textContent=old;
   }catch(e){}
+})();
+</script>
+
+<style id="rev08-report-style">
+#syncReportV08{white-space:pre-line;line-height:1.6;overflow-wrap:anywhere;padding:12px 14px;margin:10px 0;background:#eef5ff;border:1px solid #adc6e1;border-radius:12px;color:#163a63;font-size:13px}
+#syncReportV08[hidden]{display:none!important}
+#syncReportV08 h4{margin:0 0 8px;color:#12375e}
+</style>
+<script id="rev08-report-visibility">
+(function(){
+ const details=document.getElementById('syncDetails');
+ if(!details)return;
+ const pane=document.createElement('section');pane.id='syncReportV08';pane.setAttribute('aria-live','polite');pane.hidden=true;
+ details.after(pane);
+ function show(msg){if(!msg)return;pane.textContent='ÚLTIMO INFORME DE SINCRONIZACIÓN\n'+msg;pane.hidden=false;}
+ window.__showSyncReportV08=show;
+ try{show(localStorage.getItem('registroUltimoInformeSyncV1126'));}catch(e){}
+})();
+</script>
+
+<script id="rev09-auto-sync-history">
+(function(){
+ 'use strict';
+ const AUTO_KEY='registroAutoSyncEnabledV1126';
+ const LOG_KEY='registroSyncHistoryV1126';
+ const MAX_LOG=12;
+ const details=document.getElementById('syncDetails');
+ const btn=document.getElementById('syncBtn');
+ const msg=document.getElementById('syncMsg');
+ if(!details||!btn||!msg)return;
+ const root=document.createElement('section');root.id='rev09Tools';
+ root.innerHTML='<div class="rev09top"><label><input id="rev09Auto" type="checkbox"> Sincronización automática</label><span id="rev09RunState">Manual</span></div>'+
+   '<div class="rev09small">Opcional. Guarda primero en este dispositivo. Después de 8 segundos sin más cambios intentará sincronizar; también al volver a la aplicación o recuperar Internet. Conserva el botón manual.</div>'+
+   '<div class="rev09status" id="rev09AutoStatus" aria-live="polite"></div>'+
+   '<div class="rev09pending" id="rev09Pending">Comprobando cambios pendientes…</div>'+
+   '<details><summary>Últimas sincronizaciones <span id="rev09LogCount"></span></summary><ol id="rev09Log"></ol></details>';
+ details.after(root);
+ const el=id=>document.getElementById(id);
+ const checkbox=el('rev09Auto'),state=el('rev09RunState'),status=el('rev09AutoStatus');
+ const pending=el('rev09Pending'),list=el('rev09Log'),count=el('rev09LogCount');
+ let enabled=false,lastChangeSeen='',dueAt=0,trying=false,lastLogSig='',lastSessionState='',lastRendered='';
+ function readLog(){try{const v=JSON.parse(localStorage.getItem(LOG_KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
+ function writeLog(kind,description){try{const data=readLog();const entry={at:new Date().toISOString(),kind,description:String(description||'').slice(0,1000)};data.unshift(entry);localStorage.setItem(LOG_KEY,JSON.stringify(data.slice(0,MAX_LOG)));renderLog()}catch(e){}}
+ function renderLog(){const data=readLog();count.textContent='('+data.length+')';list.replaceChildren();if(!data.length){const li=document.createElement('li');li.textContent='Todavía no hay operaciones registradas en esta revisión.';list.append(li);return;}for(const entry of data){const li=document.createElement('li');const at=document.createElement('strong');at.textContent=new Date(entry.at).toLocaleString('es-ES')+' · '+(entry.kind==='ok'?'Correcta':'Error');li.append(at,document.createElement('br'),document.createTextNode(entry.description));list.append(li);}}
+ function localPending(){try{return typeof pendingSyncChanges==='function'?pendingSyncChanges():{}}catch(e){return {}}}
+ function showPending(){try{const c=localPending(),a=c.students||{},l=c.lessons||{},s=c.settings||{};const dirty=typeof syncDirty==='function'&&syncDirty();const line='Alumnos: '+Number(a.added||0)+' altas, '+Number(a.updated||0)+' cambios, '+Number(a.deleted||0)+' bajas · Clases: '+Number(l.added||0)+' altas, '+Number(l.updated||0)+' cambios, '+Number(l.deleted||0)+' bajas';const value='<strong>'+(dirty?'Cambios locales pendientes':'Sin cambios locales pendientes')+'</strong><div>'+line+'</div>'+(Number(s.updated||0)?'<div>Configuración: '+Number(s.updated||0)+' cambios</div>':'');if(value!==lastRendered){pending.innerHTML=value;lastRendered=value;}return JSON.stringify({dirty,c});}catch(e){return ''}}
+ function sessionReady(){try{return !!accessToken&&!!currentUserId()}catch(e){return false}}
+ function canRun(){return enabled&&navigator.onLine!==false&&sessionReady()&&!window.__lessonDirty&&!btn.disabled&&!trying}
+ function plan(reason){if(!enabled)return;dueAt=Date.now()+8000;status.textContent='Pendiente: '+reason+'. Se intentará sincronizar automáticamente cuando sea seguro.'}
+ function setState(){checkbox.checked=enabled;state.textContent=enabled?'Activada':'Manual';if(!enabled)status.textContent='La sincronización manual permanece disponible.';}
+ try{enabled=localStorage.getItem(AUTO_KEY)==='1'}catch(e){enabled=false}
+ checkbox.addEventListener('change',()=>{enabled=checkbox.checked;try{localStorage.setItem(AUTO_KEY,enabled?'1':'0')}catch(e){enabled=false;checkbox.checked=false;alert('No se ha podido guardar esta preferencia.')}setState();if(enabled)plan('modo activado')});
+ function scan(){const fingerprint=showPending();if(!enabled)return;let dirty=false;try{dirty=syncDirty()}catch(e){}if(fingerprint!==lastChangeSeen){lastChangeSeen=fingerprint;if(dirty)plan('hay cambios locales')}
+   if(dirty&&dueAt===0)plan('hay cambios locales');
+   if(!dueAt||Date.now()<dueAt)return;
+   if(!canRun()){if(navigator.onLine===false)status.textContent='Sin conexión: los cambios siguen guardados localmente.';else if(window.__lessonDirty)status.textContent='Hay una clase sin guardar: sincronización automática en pausa.';return;}
+   dueAt=0;trying=true;status.textContent='Sincronizando automáticamente…';btn.click();setTimeout(()=>{trying=false;status.textContent=btn.disabled?'Sincronización en marcha…':'Comprobando resultado…'},2500);
+ }
+ // This observes the existing sync engine; it never changes merge or deletion logic.
+ function observeResult(){const value=(msg.textContent||'').trim();if(!value||value===lastSessionState)return;lastSessionState=value;
+   const ok=/SINCRONIZACI[ÓO]N COMPLETADA Y VERIFICADA/i.test(value);
+   const error=/^❌/.test(value);
+   if(!ok&&!error)return;
+   const sig=(ok?'ok:':'err:')+value;
+   if(sig===lastLogSig)return;
+   lastLogSig=sig;
+   writeLog(ok?'ok':'error',ok?value.split('\n').slice(0,8).join(' | '):value);
+   if(ok){dueAt=0;status.textContent='Última sincronización correcta.';lastChangeSeen=showPending()}
+   if(error){dueAt=0;status.textContent='Falló la sincronización. Revisa el informe; no se repetirá automáticamente hasta un nuevo cambio o una nueva apertura.';}
+ }
+ const observer=new MutationObserver(observeResult);observer.observe(msg,{childList:true,characterData:true,subtree:true});
+ window.addEventListener('online',()=>{if(enabled)plan('conexión recuperada')});
+ window.addEventListener('focus',()=>{if(enabled)plan('aplicación activa')});
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&enabled)plan('aplicación visible')});
+ setState();renderLog();showPending();lastChangeSeen=showPending();
+ setInterval(()=>{if(!document.hidden)scan()},1300);
+ if(enabled)setTimeout(()=>plan('inicio de sesión'),3500);
+})();
+</script>
+<style id="rev10-year-activate-style">
+#yearWizardCard .rev06-activate-disabled{background:#f1f6fc!important;border-color:#9eb9d5!important}
+#yearWizardCard .rev10-activate{width:100%;margin-top:10px;min-height:48px;background:#195b9f!important;color:white!important;border:1px solid #134b84!important}
+#yearWizardCard .rev10-activate:disabled{background:#a7b6c7!important;border-color:#a7b6c7!important;color:#203448!important}
+#yearWizardCard .rev10-state{font-size:13px;color:#1b3958;line-height:1.55;margin-top:8px;white-space:pre-line}
+#yearWizardCard .rev10-guide{font-size:13px;line-height:1.55;margin-top:9px;color:#284866}
+</style>
+<script id="rev10-activate-school-year-safe">
+/* Rev10: activation is explicit, guarded and local-first. Existing sync engine untouched. */
+(function(){
+ const wizard=document.getElementById('yearWizardCard');if(!wizard)return;
+ const section=wizard.querySelector('.rev06-activate-disabled');if(!section)return;
+ section.innerHTML='<b>PASO 2 · ACTIVAR NUEVO CURSO</b><p class="rev10-guide">Antes de activar: sincroniza ambos dispositivos; desactiva la sincronización automática; completa niveles y horarios. La activación guarda una copia de seguridad y actualiza fichas y agenda, pero nunca modifica las clases antiguas. Después sincroniza primero este dispositivo y luego el otro.</p><button type="button" class="rev10-activate" id="rev10Activate">🎓 Comprobar y activar nuevo curso</button><div role="status" aria-live="polite" class="rev10-state" id="rev10State">Solo se activará después de revisar y confirmar todos los cambios.</div>';
+ const btn=document.getElementById('rev10Activate'),status=document.getElementById('rev10State');
+ const str=v=>String(v==null?'':v);
+ const nextYear=v=>{const m=/^(\d{4})-(\d{2})$/.exec(str(v));if(!m||Number(m[2])!==(Number(m[1])+1)%100)return null;const n=Number(m[1])+1;return n+'-'+String(n+1).slice(-2)};
+ const clone=x=>JSON.parse(JSON.stringify(x));
+ const rows=()=>Array.from(wizard.querySelectorAll('#ywRows [data-yw-student-id]'));
+ function plan(){
+   const roster=students.filter(s=>!s.archived),formRows=rows();
+   if(!wizard.open||!wizard.dataset.initialized||formRows.length!==roster.length)throw new Error('Abre y actualiza la propuesta completa antes de activar.');
+   const current=year(),target=nextYear(current);if(!target)throw new Error('El curso actual no tiene el formato esperado.');
+   const seenIds=new Set(),used=new Set(),changes=[];
+   for(const row of formRows){
+     const id=str(row.dataset.ywStudentId),student=roster.find(s=>str(s.id)===id);
+     if(!student||seenIds.has(id))throw new Error('La lista de alumnos ha cambiado. Cierra y reabre la propuesta.');seenIds.add(id);
+     const course=row.querySelector('[data-field="newCourse"]')?.value||'';
+     const day=row.querySelector('[data-field="newDay"]')?.value||'';
+     const time=row.querySelector('[data-field="newTime"]')?.value||'';
+     if(course==='revisar'||!course)throw new Error('Hay niveles pendientes de revisión: '+student.name);
+     if(course!=='archivar'&&!courseOrder.includes(course))throw new Error('Nivel no válido para '+student.name);
+     if(course!=='archivar'){
+       if(!['Lunes','Martes','Miércoles','Jueves','Viernes'].includes(day)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(time))throw new Error('Falta un horario válido para '+student.name);
+       const slot=day+'|'+time;if(used.has(slot))throw new Error('Hay dos alumnos con el mismo día y hora: '+day+' '+time);used.add(slot);
+     }
+     changes.push({id,name:student.name,oldCourse:student.course,oldDay:student.scheduleDay||'',oldTime:student.scheduleTime||'',newCourse:course,newDay:day,newTime:time});
+   }
+   const eventual=students.filter(s=>s.archived).map(s=>({name:s.name,course:s.course,id:s.id}));
+   for(const c of changes){if(c.newCourse!=='archivar')eventual.push({name:c.name,course:c.newCourse,id:c.id});}
+   const keys=new Set();for(const s of eventual){const key=mergeKey(s.name,s.course);if(keys.has(key))throw new Error('Dos fichas quedarían con el mismo nombre y nivel: '+s.name);keys.add(key);if(deletedStudentKeys.includes(key))throw new Error('El nivel de destino de '+s.name+' coincide con una ficha eliminada anteriormente. Revisión manual necesaria.');}
+   return {current,target,changes};
+ }
+ async function remotePreflight(){
+   if(!accessToken||!currentUserId())throw new Error('Debes iniciar sesión y sincronizar primero.');
+   const path='/rest/v1/'+SYNC_TABLE+'?user_id=eq.'+encodeURIComponent(currentUserId())+'&select=data,updated_at&limit=2';
+   const resp=await syncRequest('GET',path);if(!resp.ok)throw new Error('No se pudo comprobar la nube ('+resp.status+').');
+   const data=await resp.json();if(!Array.isArray(data)||data.length!==1||!data[0].data)throw new Error('La copia de la nube no es única o está incompleta.');
+   const cloud=data[0].data;
+   if(!Array.isArray(cloud.students)||!Array.isArray(cloud.lessons))throw new Error('La nube no tiene alumnos y clases completos.');
+   const studentSig=x=>[str(x.id),str(x.name),str(x.course),str(x.scheduleDay),str(x.scheduleTime),Boolean(x.archived),Number(x.updatedAt||0)].join('|');
+   const lessonSig=x=>[str(x.id),str(x.studentId),str(x.date),str(x.schoolYear),str(x.course),str(x.attendance),Number(x.updatedAt||x.created||0)].join('|');
+   const canon=(arr,fn)=>arr.map(fn).sort().join('\n');
+   if(canon(cloud.students,studentSig)!==canon(students,studentSig)||canon(cloud.lessons,lessonSig)!==canon(lessons,lessonSig))throw new Error('Los alumnos o las clases de la nube no coinciden con este dispositivo. Sincroniza y revisa antes de activar.');
+   const remDel=JSON.stringify((cloud.deletedStudentKeys||[]).slice().sort()),localDel=JSON.stringify(deletedStudentKeys.slice().sort());
+   if(remDel!==localDel)throw new Error('Las marcas de bajas no coinciden con la nube. Sincroniza antes de activar.');
+   return cloud;
+ }
+ btn.addEventListener('click',async()=>{
+   if(btn.disabled)return;btn.disabled=true;status.textContent='Comprobando los niveles, horarios y la nube…';
+   try{
+     if(window.__lessonDirty)throw new Error('Guarda o cancela la clase que estás editando.');
+     if(document.getElementById('rev09Auto')?.checked)throw new Error('Desactiva temporalmente la sincronización automática para activar el curso.');
+     if(document.getElementById('syncBtn')?.disabled)throw new Error('Hay una sincronización en marcha.');
+     if(syncDirty())throw new Error('Hay cambios locales pendientes: sincroniza primero.');
+     const proposal=plan();
+     if(proposal.changes.length===0)throw new Error('No hay alumnos activos que promocionar.');
+     const cloud=await remotePreflight();
+     // An unlinked record can belong to an unresolved historical student; no silent rebinding.
+     if(lessons.some(l=>l.studentId&&!students.some(s=>str(s.id)===str(l.studentId))))throw new Error('Hay clases asociadas a alumnos que no figuran en las fichas actuales. Revisa antes de activar.');
+     const names=proposal.changes.filter(c=>c.newCourse==='archivar').length;
+     const summary='Curso '+proposal.current+' → '+proposal.target+'\n'+proposal.changes.length+' alumnos revisados · '+names+' propuestos para archivar.\nLas clases históricas no se modificarán.';
+     status.textContent=summary;
+     if(!confirm(summary+'\n\n¿Preparar la copia de seguridad previa?'))return;
+     const snapshot={version:'V11.2.6 Rev10',at:new Date().toISOString(),operation:'before-academic-year-activation',sourceYear:proposal.current,targetYear:proposal.target,local:syncPayload(),cloud};
+     const blob=new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+     a.href=url;a.download='COPIA_ANTES_CAMBIO_CURSO_'+proposal.current+'_A_'+proposal.target+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+     if(!confirm('Confirma que se ha descargado la copia de seguridad completa.\n\n¿ACTIVAR AHORA el curso '+proposal.target+'? Esta acción cambiará las fichas y el año activo, pero conservará todas las clases antiguas.')){status.textContent='Operación cancelada; no se modificó ningún dato.';return;}
+     // Recheck no edits or autosync were triggered while confirmations were shown.
+     if(syncDirty()||document.getElementById('rev09Auto')?.checked)throw new Error('Se detectó una sincronización o modificación: operación cancelada.');
+     const now=Date.now(),beforeS=clone(students),beforeYear=year(),beforeDel=deletedStudentKeys.slice(),beforePrefs=clone(appSettings),beforeSettingsTs=settingsUpdatedAt();
+     const oldStudentsRaw=localStorage.getItem(SK),oldPrefsRaw=localStorage.getItem(SETK),oldDelRaw=localStorage.getItem(DEL_STUDENTS_KEY),oldYearRaw=localStorage.getItem(YK),oldMeta=localStorage.getItem(SETTINGS_META_KEY);
+     const archiveKey='oboeArchivoCursosV1_'+proposal.current;
+     const oldArchive=localStorage.getItem(archiveKey);
+     try{
+       // Local historic roster snapshot; also retained inside synchronized app settings.
+       const historical={year:proposal.current,nextYear:proposal.target,at:new Date(now).toISOString(),students:beforeS.map(s=>({id:s.id,name:s.name,course:s.course,scheduleDay:s.scheduleDay||'',scheduleTime:s.scheduleTime||'',archived:!!s.archived}))};
+       localStorage.setItem(archiveKey,JSON.stringify(historical));
+       const updates=new Map(proposal.changes.map(c=>[str(c.id),c]));
+       students=students.map(s=>{
+         const c=updates.get(str(s.id));if(!c)return s;
+         if(c.newCourse!=='archivar'&&c.oldCourse!==c.newCourse)rememberDeletedStudent(mergeKey(s.name,s.course));
+         return {...s,archived:c.newCourse==='archivar',course:c.newCourse==='archivar'?s.course:c.newCourse,scheduleDay:c.newCourse==='archivar'?s.scheduleDay:c.newDay,scheduleTime:c.newCourse==='archivar'?s.scheduleTime:c.newTime,updatedAt:now};
+       });
+       const history=Array.isArray(appSettings.academicYearArchives)?appSettings.academicYearArchives:[];
+       appSettings={...appSettings,academicYearArchives:[...history.filter(x=>x.year!==proposal.current),historical]};
+       localStorage.setItem(SETK,JSON.stringify(appSettings));markSettingsUpdated();
+       if(!saveS())throw new Error('No se pudieron guardar las fichas actualizadas.');
+       document.getElementById('schoolYear').value=proposal.target;
+       localStorage.setItem(YK,proposal.target);
+       recordSyncChange('students','updated');recordSyncChange('settings','updated');markLocalSyncDirty();
+     }catch(e){
+       students=beforeS;appSettings=beforePrefs;document.getElementById('schoolYear').value=beforeYear;deletedStudentKeys=beforeDel;
+       for(const [key,old] of [[SK,oldStudentsRaw],[SETK,oldPrefsRaw],[DEL_STUDENTS_KEY,oldDelRaw],[YK,oldYearRaw],[SETTINGS_META_KEY,oldMeta],[archiveKey,oldArchive]]){try{old===null?localStorage.removeItem(key):localStorage.setItem(key,old)}catch(_){} }
+       throw e;
+     }
+     renderStudents();renderSelect();render();updateProfessorUI();renderHistoryStudents();applySettings();
+     const visible=document.getElementById('visibleYear');if(visible)visible.textContent=proposal.target;
+     status.textContent='Curso '+proposal.target+' activado localmente. Las clases antiguas permanecen intactas. SINCRONIZA primero este dispositivo y después el segundo. Conserva la copia de seguridad.';
+     wizard.open=false;
+     alert('Curso '+proposal.target+' preparado en este dispositivo. No crees clases nuevas hasta sincronizar y comprobar las fichas en ambos dispositivos.');
+   }catch(e){status.textContent='NO SE HA ACTIVADO: '+(e?.message||e);}
+   finally{btn.disabled=false;}
+ });
 })();
 </script>
 </body></html>
