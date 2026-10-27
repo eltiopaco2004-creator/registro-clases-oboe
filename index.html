@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases — V11.2.6 REVISIÓN 10 PRUEBA</title><style>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV14</title><style>
 body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-width:720px;margin:auto;padding:16px}.card{background:white;border:1px solid #ddd;border-radius:16px;padding:16px;margin:12px 0}label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:10px;font:inherit}textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{border:0;border-radius:10px;padding:10px 13px;margin:6px 4px 0 0;font-weight:700;max-width:100%;white-space:normal}.primary{background:#2f5d50;color:#fff}.secondary{background:#dfe9e4;color:#2f5d50}.danger{background:#f3dddd;color:#a44242}.item{border-top:1px solid #ddd;padding:12px 0}.muted{color:#69716d;font-size:12px}.grade{float:right;font-size:20px;font-weight:800;color:#2f5d50}.hidden{display:none}.rec{padding:10px;background:#f7f7f4;border-radius:10px;margin-top:8px}
 .rating-group{margin:12px 0}.rating-title{font-weight:700;font-size:13px;margin-bottom:6px}
 .rating-buttons{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;width:100%}
@@ -519,12 +519,12 @@ body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40
 </head><body><div class="wrap">
 <div id="buildVersionBanner" role="status" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
-  <strong>V11.2.6 · REVISIÓN 12</strong>
-  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> un único curso activo; consulta histórica en modo solo lectura; bloqueo de edición y altas fuera del curso activo; eliminado el recuadro vacío de Configuración.</div>
+  <strong>V11.2.6 · REVISIÓN 14</strong>
+  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> informe con cambios locales, cambios recibidos y bajas verificadas; historial con fecha y hora. Conserva el borrador del cierre académico con notas y continuidad.</div>
   <div class="build-version-changes"><b>FUNCIONES ACUMULADAS:</b> altas y bajas de alumnos, borrado definitivo protegido, festivos, tareas anteriores, informes de sincronización y sincronización automática opcional.</div>
   <div class="build-version-caution">⚠️ Versión de prueba: seleccionar un curso anterior NO cambia el curso activo ni modifica la nube. La activación de curso sigue pendiente de validación con datos ficticios.</div>
 </div>
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 12 · Curso activo protegido e historial solo lectura</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 14 · Cierre académico e informe claro de sincronización</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -3242,6 +3242,190 @@ archivePanel();
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshActive()});
  window.__academicYearProtection={getActive,isHistorical:()=>historic};
  tag.textContent='Curso activo · edición permitida';
+})();
+</script>
+
+<style id="rev13-cierre-academico-style">
+#academicCloseCard{margin:14px 0;border:1px solid #b3c6da;border-radius:12px;background:#fff;padding:0;overflow:hidden}
+#academicCloseCard>summary{cursor:pointer;padding:13px 14px;font-size:15px;font-weight:800;color:#153e6a;background:#f1f6fd}
+#academicCloseCard .ac-content{padding:12px 14px}
+#academicCloseCard .ac-warning{background:#eef5fd;border:1px solid #b4cbe3;border-radius:9px;padding:10px;font-size:13px;color:#1b4065}
+#academicCloseCard .ac-row{padding:12px 0;border-bottom:1px solid #dce6f0;display:grid;grid-template-columns:minmax(125px,1.3fr) minmax(120px,1fr) minmax(80px,.65fr) minmax(150px,1.2fr);gap:9px;align-items:end}
+#academicCloseCard .ac-row label{display:block;margin:0 0 4px;font-size:12px;color:#244765;font-weight:750}
+#academicCloseCard .ac-row select,#academicCloseCard .ac-row input{width:100%;min-width:0;min-height:40px;padding:8px!important;margin:0!important}
+#academicCloseCard .ac-name{font-weight:800;color:#163d68;align-self:center}
+#academicCloseCard .ac-name small{display:block;font-weight:400;color:#52657b;margin-top:3px}
+#academicCloseCard .ac-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+#academicCloseCard .ac-actions button{margin:0}
+#academicCloseCard #acStatus{margin:9px 0;font-size:13px;color:#285175}
+#academicCloseCard #acTotals{font-size:13px;margin-top:12px;font-weight:650}
+#academicCloseCard .ac-note{font-size:12px;color:#536779;margin:10px 0}
+@media(max-width:750px){#academicCloseCard .ac-row{grid-template-columns:repeat(2,minmax(0,1fr))}#academicCloseCard .ac-name{grid-column:1/-1}}
+</style>
+<script id="rev13-cierre-academico-borrador">
+(function(){
+ 'use strict';
+ const config=document.getElementById('configCard'), wizard=document.getElementById('yearWizardCard');
+ if(!config||!wizard)return;
+ const close=document.createElement('details');close.id='academicCloseCard';close.className='config-section-block';
+ close.innerHTML=`<summary>🎓 Finalizar curso académico · Borrador editable</summary><div class="ac-content">
+ <div class="ac-warning"><b>Primero cerrar, después preparar.</b> Indica resultado, calificación opcional y continuidad. Esto solo guarda una propuesta en ESTE dispositivo: no cambia alumnos, clases, curso activo ni sincronización.</div>
+ <div id="acTotals"></div><div id="acRows"></div><div id="acStatus" aria-live="polite"></div>
+ <div class="ac-actions"><button type="button" class="secondary" id="acSave">Guardar borrador</button><button type="button" class="primary" id="acTransfer">Trasladar decisiones a Preparar nuevo curso</button><button type="button" class="secondary" id="acExport">Exportar cierre CSV</button><button type="button" class="secondary" id="acReset">Borrar borrador</button></div>
+ <p class="ac-note">La selección «No continúa» propondrá «Archivar al finalizar» en el asistente siguiente. «Continúa» mantendrá la promoción editable. «Pendiente» no debe activarse sin revisar. La calificación de cierre es orientativa y no altera las notas de las clases.</p>
+ </div>`;
+ wizard.parentNode.insertBefore(close,wizard);
+ const rows=close.querySelector('#acRows'),msg=close.querySelector('#acStatus'),total=close.querySelector('#acTotals');
+ const thisYear=()=>document.getElementById('schoolYear')?.value||'';
+ const activeYear=()=>localStorage.getItem('registroOboeCursoActivoV1')||'2026-27';
+ const storeKey=()=>`registroOboeCierreAcademicoBorradorV1_${activeYear()}`;
+ const original=()=>[...students].filter(s=>!s.archived).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'es'));
+ const escapeHtml=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const read=()=>{try{const data=JSON.parse(localStorage.getItem(storeKey())||'null');return data?.year===activeYear()?data.entries||{}:{}}catch{return {}}};
+ function items(){return [...rows.querySelectorAll('.ac-row')].map(r=>({id:r.dataset.id,resultado:r.querySelector('[data-f="result"]')?.value||'',nota:r.querySelector('[data-f="grade"]')?.value||'',continuidad:r.querySelector('[data-f="continue"]')?.value||'pendiente'}));}
+ function updateSummary(){const e=items(),c={si:0,no:0,pendiente:0};let results=0;for(const x of e){c[x.continuidad]=(c[x.continuidad]||0)+1;if(x.resultado)results++}total.textContent=`${e.length} alumnos · ${results} con resultado · ${c.si} continúan · ${c.no} no continúan · ${c.pendiente} pendientes de confirmar`;}
+ function render(){const saved=read();rows.innerHTML=original().map(s=>{const x=saved[String(s.id)]||{};const result=x.resultado||'';const cont=x.continuidad||'pendiente';return `<div class="ac-row" data-id="${escapeHtml(s.id)}"><div class="ac-name">${escapeHtml(s.name)}<small>${escapeHtml(s.course||'Sin nivel')}</small></div><div><label>Resultado académico</label><select data-f="result"><option value="">Sin evaluar</option><option value="aprobado" ${result==='aprobado'?'selected':''}>Aprobado</option><option value="suspenso" ${result==='suspenso'?'selected':''}>Suspenso</option></select></div><div><label>Nota (0–10)</label><input type="number" data-f="grade" min="0" max="10" step="0.1" placeholder="Opcional" value="${escapeHtml(x.nota||'')}"></div><div><label>Próximo curso</label><select data-f="continue"><option value="pendiente" ${cont==='pendiente'?'selected':''}>Pendiente</option><option value="si" ${cont==='si'?'selected':''}>Continúa</option><option value="no" ${cont==='no'?'selected':''}>No continúa · Archivar</option></select></div></div>`}).join('')||'<p>No hay alumnos activos.</p>';updateSummary();msg.textContent='Borrador local. Ningún dato académico ha sido modificado.';}
+ function validate(){for(const x of items()){if(x.nota!==''&&(!Number.isFinite(Number(x.nota))||Number(x.nota)<0||Number(x.nota)>10)){msg.textContent='Hay una nota fuera del intervalo de 0 a 10. Corrígela antes de guardar.';return false}}return true}
+ function save(){if(!validate())return false;const entries={};for(const x of items())entries[x.id]=x;try{localStorage.setItem(storeKey(),JSON.stringify({year:activeYear(),savedAt:new Date().toISOString(),entries}));msg.textContent='Borrador de cierre guardado solo en este dispositivo. No afecta al registro real.';return true}catch(e){msg.textContent='No se ha podido guardar. Comprueba el almacenamiento del navegador.';return false}}
+ function transfer(){if(!save())return;const pending=items().filter(x=>x.continuidad==='pendiente');if(pending.length){msg.textContent=`Hay ${pending.length} alumno(s) con continuidad pendiente. Resuélvelos antes de trasladar la propuesta.`;return}
+ wizard.open=true;
+ // El asistente original genera su tabla al abrirse y restaura su borrador propio.
+ setTimeout(()=>{const wRows=[...wizard.querySelectorAll('[data-yw-student-id]')];if(wRows.length!==items().length){msg.textContent='No se pudo asociar la propuesta a todos los alumnos. No se ha modificado nada.';return}
+ const byId=new Map(items().map(x=>[String(x.id),x]));let adapted=0;
+ for(const r of wRows){const x=byId.get(r.getAttribute('data-yw-student-id'));if(!x)continue;const select=r.querySelector('[data-field="newCourse"]');if(!select)continue;
+ if(x.continuidad==='no'){select.value='archivar';adapted++}
+ else if(x.resultado==='suspenso'){const st=students.find(s=>String(s.id)===x.id);if(st&&[...select.options].some(o=>o.value===st.course)){select.value=st.course;adapted++}}
+ select.dispatchEvent(new Event('change',{bubbles:true}));
+ }
+ msg.textContent=`Decisiones trasladadas a la propuesta del próximo curso (${adapted} niveles/archivos ajustados). Revísala antes de aplicar cualquier cambio real.`;
+ wizard.scrollIntoView({behavior:'smooth',block:'start'});
+ },120);
+ }
+ function exportCsv(){if(!validate())return;const data=items(),people=new Map(original().map(s=>[String(s.id),s]));const rowsCsv=[['Alumno','Nivel actual','Resultado','Nota','Continuidad']];for(const x of data){const s=people.get(x.id);rowsCsv.push([s?.name||'',s?.course||'',x.resultado,x.nota,x.continuidad])}const csv='\ufeff'+rowsCsv.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(';')).join('\r\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Borrador_cierre_'+activeYear()+'.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+ close.addEventListener('toggle',()=>{if(close.open)render()});
+ rows.addEventListener('change',updateSummary);rows.addEventListener('input',updateSummary);
+ close.querySelector('#acSave').addEventListener('click',save);
+ close.querySelector('#acTransfer').addEventListener('click',transfer);
+ close.querySelector('#acExport').addEventListener('click',exportCsv);
+ close.querySelector('#acReset').addEventListener('click',()=>{if(!confirm('¿Borrar este borrador de cierre? No se modificará ninguna clase ni alumno.'))return;localStorage.removeItem(storeKey());render()});
+})();
+</script>
+<style id="rev14-sync-audit-style">
+/* Una lectura principal; controles de sincronización existentes intactos. */
+#syncReportV08{display:none!important}
+#rev09Tools>details{display:none!important}
+#syncMsg.rev14-report-detailed{display:none!important}
+#rev14SyncAudit{margin:14px 0;padding:14px;border:1px solid #8eafcf;border-radius:14px;background:#f8fbff;color:#17334f;font-size:13px;line-height:1.5}
+#rev14SyncAudit h4{margin:0 0 7px;font-size:16px;color:#123b68}
+#rev14SyncAudit .rev14-muted{color:#4a627a;font-size:12px;margin:0 0 8px}
+#rev14SyncAudit .rev14-group{background:white;border:1px solid #cbd9e9;border-radius:10px;padding:10px 12px;margin:9px 0}
+#rev14SyncAudit .rev14-group b{color:#103d71}
+#rev14SyncAudit .rev14-stat{display:flex;gap:8px;justify-content:space-between;padding:3px 0;border-bottom:1px solid #eef2f7}
+#rev14SyncAudit .rev14-stat:last-child{border-bottom:0}
+#rev14SyncAudit .rev14-stat strong{font-variant-numeric:tabular-nums;color:#123b68}
+#rev14SyncAudit details{margin-top:10px;border-top:1px solid #d3e1ef;padding-top:10px}
+#rev14SyncAudit summary{cursor:pointer;font-weight:750;color:#124c82}
+#rev14SyncAudit ol{padding-left:20px;max-height:300px;overflow:auto}
+#rev14SyncAudit li{padding:8px 0;border-bottom:1px solid #dbe6f2}
+#rev14SyncAudit .rev14-error{border-color:#d99595;background:#fff2f2}
+@media(max-width:560px){#rev14SyncAudit{padding:11px;font-size:12px}.rev14-stat{align-items:baseline}}
+</style>
+<script id="rev14-sync-audit-presentation">
+/* Presentation and per-device history only. No writes to cloud or sync data collections. */
+(function(){
+ 'use strict';
+ const details=document.getElementById('syncDetails');
+ const msg=document.getElementById('syncMsg');
+ if(!details||!msg)return;
+ const KEY='registroSyncAuditV1126Rev14';
+ const LIMIT=20;
+ const box=document.createElement('section');box.id='rev14SyncAudit';box.setAttribute('aria-label','Informe claro de sincronización');
+ details.after(box);
+ const lineNumber=(report,pattern)=>{
+  const match=report.match(pattern);return match?Number(match[1]):null;
+ };
+ // Only measured quantities from the verified report emitted by the current sync engine.
+ function parseReport(report){
+  if(!report.includes('SINCRONIZACIÓN COMPLETADA Y VERIFICADA'))return null;
+  const get=(section,pattern)=>{
+   const block=report.split(section)[1]?.split(/📤|📥|☁️/)[0]||'';
+   return lineNumber(block,pattern);
+  };
+  const local=report.split('📤 CAMBIOS LOCALES REGISTRADOS:')[1]?.split('📥')[0]||'';
+  const received=report.split('📥 CAMBIOS EN ESTE DISPOSITIVO TRAS SINCRONIZAR:')[1]?.split('☁️')[0]||'';
+  const checked=report.split('☁️ BAJAS CONFIRMADAS POR LA SINCRONIZACIÓN:')[1]||'';
+  const changes=(group)=>{
+   const m=local.match(new RegExp('• '+group+': (\\d+) altas · (\\d+) modificaciones · (\\d+) bajas'));
+   return m?m.slice(1,4).map(Number):null;
+  };
+  const diff=(group)=>{
+   const m=received.match(new RegExp('• '+group+': (\\d+) incorporad[oa]s · (\\d+) retirad[oa]s'));
+   return m?m.slice(1,3).map(Number):null;
+  };
+  const sent=checked.match(/Nuevas marcas enviadas a la nube: (\d+) alumnos · (\d+) clases/);
+  const incoming=checked.match(/Marcas de baja recibidas en este dispositivo: (\d+) alumnos · (\d+) clases/);
+  return {localStudents:changes('Alumnos'),localLessons:changes('Clases'),receivedStudents:diff('Alumnos'),receivedLessons:diff('Clases'),cloudNew:sent?sent.slice(1).map(Number):null,cloudReceived:incoming?incoming.slice(1).map(Number):null};
+ }
+ function read(){try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(x)?x:[]}catch(e){return []}}
+ let entries=read();
+ const last=entries[0]||null;
+ const el=(tag,txt,cls)=>{const node=document.createElement(tag);if(txt!==undefined)node.textContent=txt;if(cls)node.className=cls;return node};
+ const number=v=>v===null||v===undefined?'Sin dato':String(v);
+ function stat(root,label,value){const row=el('div',undefined,'rev14-stat');row.append(el('span',label),el('strong',number(value)));root.append(row)}
+ function group(root,title,values){const panel=el('div',undefined,'rev14-group');panel.append(el('b',title));for(const pair of values)stat(panel,pair[0],pair[1]);root.append(panel)}
+ function summary(result){
+  if(!result)return 'Informe previo sin desglose verificable.';
+  const l=result.localLessons||[null,null,null],s=result.localStudents||[null,null,null];
+  const r=result.receivedLessons||[null,null],rs=result.receivedStudents||[null,null];
+  return 'Local: '+number(s[0])+' altas, '+number(s[1])+' cambios y '+number(s[2])+' bajas de alumnos; '+number(l[0])+' altas, '+number(l[1])+' cambios y '+number(l[2])+' bajas de clases. Recibidos: '+number(rs[1])+' alumnos y '+number(r[1])+' clases retirados.';
+ }
+ function render(){
+  box.replaceChildren();box.append(el('h4','Última sincronización · informe claro'));
+  const current=entries[0];
+  if(!current){box.append(el('p','Todavía no hay una sincronización verificada registrada con la Revisión 14. Las operaciones anteriores no pueden reconstruirse con precisión.','rev14-muted'));}
+  else{
+   box.append(el('p',new Date(current.at).toLocaleString('es-ES')+' · Sincronización verificada en este dispositivo','rev14-muted'));
+   const r=current.result;
+   if(r){
+    const s=r.localStudents||[],l=r.localLessons||[],rs=r.receivedStudents||[],rl=r.receivedLessons||[],sent=r.cloudNew||[],incoming=r.cloudReceived||[];
+    group(box,'📤 Cambios que este dispositivo tenía registrados antes de sincronizar',[
+      ['Alumnos: altas · modificaciones · bajas',s.length?s.join(' · '):'Sin dato'],
+      ['Clases: altas · modificaciones · bajas',l.length?l.join(' · '):'Sin dato']]);
+    group(box,'📥 Cambios aplicados a los registros de este dispositivo',[
+      ['Alumnos incorporados',rs[0]],['Alumnos retirados',rs[1]],
+      ['Clases incorporadas',rl[0]],['Clases retiradas',rl[1]]]);
+    group(box,'☁️ Marcas de eliminación comprobadas',[
+      ['Nuevas marcas en nube: alumnos · clases',sent.length?sent.join(' · '):'Sin dato'],
+      ['Marcas presentes en nube que antes no tenía este dispositivo: alumnos · clases',incoming.length?incoming.join(' · '):'Sin dato']]);
+   }
+   box.append(el('p','Los contadores locales indican operaciones registradas antes de sincronizar; no garantizan que cada cambio sea exclusivo de esta ejecución. Las bajas recibidas se miden comparando el estado anterior del dispositivo con el posterior.','rev14-muted'));
+  }
+  const history=el('details');const head=el('summary','Historial de sincronizaciones verificadas ('+entries.length+')');history.append(head);
+  const list=el('ol');if(!entries.length)list.append(el('li','Sin operaciones registradas todavía.'));
+  for(const entry of entries){const item=el('li');item.append(el('strong',new Date(entry.at).toLocaleString('es-ES')));item.append(el('div',summary(entry.result)));list.append(item)}
+  history.append(list);box.append(history);
+  box.append(el('p','Este historial se conserva únicamente en este navegador. No cambia las clases ni los datos de Supabase.','rev14-muted'));
+ }
+ const previousShow=window.__showSyncReportV08;
+ window.__showSyncReportV08=function(report){
+  if(typeof previousShow==='function')previousShow(report);
+  const result=parseReport(String(report||''));if(!result)return;
+  const entry={at:new Date().toISOString(),result};
+  entries=[entry,...entries].slice(0,LIMIT);
+  try{localStorage.setItem(KEY,JSON.stringify(entries))}catch(e){}
+  msg.classList.add('rev14-report-detailed');
+  render();
+ };
+ const observer=new MutationObserver(()=>{
+  const value=msg.textContent||'';
+  if(/^❌/.test(value)){msg.classList.remove('rev14-report-detailed');}
+  else if(value.includes('SINCRONIZACIÓN COMPLETADA Y VERIFICADA'))msg.classList.add('rev14-report-detailed');
+  else msg.classList.remove('rev14-report-detailed');
+ });
+ observer.observe(msg,{subtree:true,childList:true,characterData:true});
+ render();
+ // Exposed only for non-destructive automated UI checks.
+ window.__rev14AuditProbe={parseReport,read};
 })();
 </script>
 </body></html>
