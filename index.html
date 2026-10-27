@@ -489,15 +489,42 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
 #rev09Tools .rev09small{font-size:11px;color:#52657b;margin-top:6px}
 @media(max-width:600px){#rev09Tools{padding:10px}#rev09Tools .rev09top{align-items:flex-start}}
 </style>
+<style id="rev11-weekly-style">
+#weeklyOverviewCard{padding:16px 18px!important;border:1px solid #b7cce1!important;background:#fff!important}
+.weekly-overview-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.weekly-overview-heading h2{margin:0;font-size:19px;color:#153f70}
+.weekly-overview-heading button{margin:0;min-height:36px;padding:7px 12px}
+.weekly-overview-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px 0}
+.weekly-overview-stat{border:1px solid #d0dfed;background:#f2f7fd;border-radius:12px;padding:12px 7px;text-align:center}
+.weekly-overview-stat strong{display:block;font-size:23px;line-height:1.3;color:#143f73;font-variant-numeric:tabular-nums}
+.weekly-overview-stat span{display:block;font-size:11px;font-weight:700;color:#435d78}
+#weeklyOverviewDetails{border-top:1px solid #d8e4f1;padding-top:9px;margin-top:9px}
+#weeklyOverviewDetails summary{cursor:pointer;color:#15477f;font-weight:750;font-size:13px}
+#weeklyOverviewMissing{font-size:13px;line-height:1.6;padding:8px 3px;color:#253e58}
+.weekly-overview-missing-row{padding:5px 1px;border-bottom:1px solid #e7eef6}
+#weeklyOverviewNote{margin:11px 0 0;font-size:11px}
+@media(max-width:550px){.weekly-overview-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.weekly-overview-stat{padding:8px}.weekly-overview-stat strong{font-size:20px}}
+</style>
+<style id="rev12-curso-historico-seguro">
+.year-bar{flex-wrap:wrap!important}
+.year-mode-label{font-size:12px;font-weight:700;color:#173d69}
+.year-mode-label[data-mode="historic"]{color:#8b4b11}
+#historicalModeNotice{display:none;margin:5px 0 14px;padding:12px 14px;border:1px solid #d3a34b;border-left:4px solid #bd771a;border-radius:11px;background:#fff5df;color:#593609;font-size:13px;line-height:1.5}
+body.historical-only #historicalModeNotice{display:block}
+body.historical-only #lessonCard,body.historical-only #weeklyCard,body.historical-only #studentsCard,body.historical-only #configCard{display:none!important}
+body.historical-only #historyCard .profile-actions,body.historical-only #historyCard button.danger,body.historical-only #historyCard button[onclick*="editLesson"],body.historical-only #historyCard button[onclick*="deleteLesson"]{display:none!important}
+body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40}
+@media(max-width:600px){#historicalModeNotice{font-size:12px}}
+</style>
 </head><body><div class="wrap">
 <div id="buildVersionBanner" role="status" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
-  <strong>V11.2.6 · REVISIÓN 10</strong>
-  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> activación protegida del nuevo curso académico, promoción editable, comprobación de horarios y copia previa de seguridad.</div>
+  <strong>V11.2.6 · REVISIÓN 12</strong>
+  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> un único curso activo; consulta histórica en modo solo lectura; bloqueo de edición y altas fuera del curso activo; eliminado el recuadro vacío de Configuración.</div>
   <div class="build-version-changes"><b>FUNCIONES ACUMULADAS:</b> altas y bajas de alumnos, borrado definitivo protegido, festivos, tareas anteriores, informes de sincronización y sincronización automática opcional.</div>
-  <div class="build-version-caution">⚠️ La activación del nuevo curso modifica datos reales. Úsala solo tras comprobar la propuesta y disponer de una copia de seguridad. Función pendiente de prueba completa entre PC y móvil.</div>
+  <div class="build-version-caution">⚠️ Versión de prueba: seleccionar un curso anterior NO cambia el curso activo ni modifica la nube. La activación de curso sigue pendiente de validación con datos ficticios.</div>
 </div>
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 10 · Activación protegida de curso + mejoras de sincronización</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 12 · Curso activo protegido e historial solo lectura</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -610,12 +637,8 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
   </div>
 
 
-  <div class="config-section-block">
-    <h3>📅 Curso académico</h3>
-    <label>Curso escolar</label>
-    <select id="schoolYear"></select>
-    <p class="muted">Las clases e historial corresponden al curso seleccionado.</p>
-  </div>
+  <!-- El selector de consulta se sitúa en la cabecera durante la inicialización. -->
+  <select id="schoolYear" hidden aria-label="Curso académico que se consulta"></select>
 
   <div class="config-section-block" id="nonTeachingCalendar">
     <h3>📅 Calendario no lectivo</h3>
@@ -697,6 +720,13 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
 
 
 
+<section class="card" id="weeklyOverviewCard" aria-label="Resumen semanal">
+ <div class="weekly-overview-heading"><h2>📋 Resumen semanal</h2><button type="button" class="secondary" id="weeklyOverviewRefresh">↻ Actualizar</button></div>
+ <p class="muted" id="weeklyOverviewDates">Semana actual · Lunes a jueves</p>
+ <div class="weekly-overview-stats" id="weeklyOverviewStats" aria-live="polite">Calculando…</div>
+ <details id="weeklyOverviewDetails"><summary>Ver alumnos pendientes de registrar</summary><div id="weeklyOverviewMissing"></div></details>
+ <p class="muted" id="weeklyOverviewNote">Se compara el horario actual con los registros del curso seleccionado. Los festivos y periodos no lectivos no se cuentan como clases impartidas.</p>
+</section>
 <section class="card weekly-card collapsed" id="weeklyCard">
   <div class="weekly-head"><h2>📅 Agenda semanal</h2><button type="button" class="secondary" id="toggleWeekly">Abrir agenda</button></div>
   <p class="muted" id="weeklyHelp">Vista rápida de los alumnos y sus franjas horarias.</p>
@@ -1598,7 +1628,7 @@ async function doLogin(email,password,automatic=false){
 q("loginBtn").onclick=()=>doLogin(q("authEmail").value.trim(),q("authPassword").value,false);
 q("logoutBtn").onclick=()=>{clearTokens();updateAuthUI(null);syncMsg("Sesión cerrada.");};
 q("rememberAccess").onchange=()=>{if(!q("rememberAccess").checked)localStorage.removeItem(AUTH_STORAGE);};
-function localSyncSettings(){return {appSettings:{...appSettings},settingsUpdatedAt:settingsUpdatedAt(),schoolYear:year()};}
+function localSyncSettings(){return {appSettings:{...appSettings},settingsUpdatedAt:settingsUpdatedAt(),schoolYear:localStorage.getItem("registroOboeCursoActivoV1")||localStorage.getItem(YK)||year()};}
 function applyCloudSettings(cloud){
   if(!cloud||typeof cloud!=="object"||!cloud.appSettings||typeof cloud.appSettings!=="object")return false;
   const localTs=settingsUpdatedAt(),remoteTs=Number(cloud.settingsUpdatedAt||0);
@@ -3028,6 +3058,7 @@ archivePanel();
      const oldStudentsRaw=localStorage.getItem(SK),oldPrefsRaw=localStorage.getItem(SETK),oldDelRaw=localStorage.getItem(DEL_STUDENTS_KEY),oldYearRaw=localStorage.getItem(YK),oldMeta=localStorage.getItem(SETTINGS_META_KEY);
      const archiveKey='oboeArchivoCursosV1_'+proposal.current;
      const oldArchive=localStorage.getItem(archiveKey);
+     const oldActiveYear=localStorage.getItem('registroOboeCursoActivoV1');
      try{
        // Local historic roster snapshot; also retained inside synchronized app settings.
        const historical={year:proposal.current,nextYear:proposal.target,at:new Date(now).toISOString(),students:beforeS.map(s=>({id:s.id,name:s.name,course:s.course,scheduleDay:s.scheduleDay||'',scheduleTime:s.scheduleTime||'',archived:!!s.archived}))};
@@ -3044,10 +3075,11 @@ archivePanel();
        if(!saveS())throw new Error('No se pudieron guardar las fichas actualizadas.');
        document.getElementById('schoolYear').value=proposal.target;
        localStorage.setItem(YK,proposal.target);
+       localStorage.setItem('registroOboeCursoActivoV1',proposal.target);
        recordSyncChange('students','updated');recordSyncChange('settings','updated');markLocalSyncDirty();
      }catch(e){
        students=beforeS;appSettings=beforePrefs;document.getElementById('schoolYear').value=beforeYear;deletedStudentKeys=beforeDel;
-       for(const [key,old] of [[SK,oldStudentsRaw],[SETK,oldPrefsRaw],[DEL_STUDENTS_KEY,oldDelRaw],[YK,oldYearRaw],[SETTINGS_META_KEY,oldMeta],[archiveKey,oldArchive]]){try{old===null?localStorage.removeItem(key):localStorage.setItem(key,old)}catch(_){} }
+       for(const [key,old] of [[SK,oldStudentsRaw],[SETK,oldPrefsRaw],[DEL_STUDENTS_KEY,oldDelRaw],[YK,oldYearRaw],[SETTINGS_META_KEY,oldMeta],[archiveKey,oldArchive],['registroOboeCursoActivoV1',oldActiveYear]]){try{old===null?localStorage.removeItem(key):localStorage.setItem(key,old)}catch(_){} }
        throw e;
      }
      renderStudents();renderSelect();render();updateProfessorUI();renderHistoryStudents();applySettings();
@@ -3058,6 +3090,158 @@ archivePanel();
    }catch(e){status.textContent='NO SE HA ACTIVADO: '+(e?.message||e);}
    finally{btn.disabled=false;}
  });
+})();
+</script>
+<script id="rev11-weekly-controller">
+/* Read-only weekly overview: does not mutate lesson, student, sync or settings data. */
+(function(){
+  const $=id=>document.getElementById(id);
+  const days=['Lunes','Martes','Miércoles','Jueves'];
+  function isoLocal(dt){return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0')}
+  function weekMonday(date){const d=new Date(date.getFullYear(),date.getMonth(),date.getDate());d.setDate(d.getDate()-((d.getDay()+6)%7));return d}
+  function format(d){return d.toLocaleDateString('es-ES',{day:'2-digit',month:'short'})}
+  function escapeHtml(x){return String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+  function run(){
+    if(!$('weeklyOverviewStats'))return;
+    const base=$('date')?.value;
+    const parsed=/^\d{4}-\d{2}-\d{2}$/.test(base||'')?new Date(base+'T12:00:00'):new Date();
+    const monday=weekMonday(parsed);
+    const thursday=new Date(monday);thursday.setDate(monday.getDate()+3);
+    const today=isoLocal(new Date());
+    const selectedYear=typeof year==='function'?year():'';
+    const active=typeof students!=='undefined'?students.filter(s=>!s.archived):[];
+    const current=typeof lessons!=='undefined'?lessons.filter(l=>(typeof lessonYear==='function'?lessonYear(l):l.schoolYear)===selectedYear):[];
+    const weekly=current.filter(l=>l.date>=isoLocal(monday)&&l.date<=isoLocal(thursday));
+    const completed=weekly.filter(l=>l.attendance==='asiste').length;
+    const absent=weekly.filter(l=>l.attendance==='falta').length;
+    const holidays=weekly.filter(l=>l.attendance==='festivo').length;
+    const planned=[];
+    for(let i=0;i<4;i++){
+      const date=new Date(monday);date.setDate(monday.getDate()+i);
+      const key=isoLocal(date);
+      if(key>today)continue; // Future sessions are not overdue.
+      for(const s of active){
+        if(s.scheduleDay!==days[i]||!s.scheduleTime)continue;
+        // A registered class or a scheduled holiday counts as covered.
+        if(weekly.some(l=>l.date===key&&l.studentId===s.id))continue;
+        let nonTeaching=false;
+        try{nonTeaching=Array.isArray(appSettings.nonTeachingPeriods)&&appSettings.nonTeachingPeriods.some(p=>p.start<=key&&key<=p.end)}catch(_){}
+        if(nonTeaching)continue;
+        planned.push({date:key,name:s.name,time:s.scheduleTime});
+      }
+    }
+    $('weeklyOverviewDates').textContent='Semana del '+format(monday)+' al '+format(thursday)+' · '+selectedYear;
+    const values=[['Impartidas',completed],['Faltas',absent],['Festivos',holidays],['Pendientes',planned.length]];
+    $('weeklyOverviewStats').innerHTML=values.map(([title,num])=>'<div class="weekly-overview-stat"><strong>'+num+'</strong><span>'+title+'</span></div>').join('');
+    $('weeklyOverviewMissing').innerHTML=planned.length?planned.map(p=>'<div class="weekly-overview-missing-row">'+escapeHtml(p.date)+' · '+escapeHtml(p.time)+' · '+escapeHtml(p.name)+'</div>').join(''):'<div>No hay clases pendientes según el horario actual y los registros disponibles.</div>';
+  }
+  $('weeklyOverviewRefresh')?.addEventListener('click',run);
+  $('date')?.addEventListener('change',run);
+  $('schoolYear')?.addEventListener('change',run);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)run()});
+  // Non-destructive refresh after any local saves or incoming sync data.
+  document.addEventListener('click',e=>{if(e.target.closest('#save,#syncBtn,#saveStudent,#importBtn'))setTimeout(run,500)});
+  setTimeout(run,150);
+  window.refreshWeeklyOverview=run;
+})();
+</script>
+<script id="rev12-curso-activo-historico">
+(function(){
+ 'use strict';
+ const select=document.getElementById('schoolYear');
+ const bar=document.querySelector('.year-bar');
+ if(!select||!bar)return;
+ const ACTIVE_KEY='registroOboeCursoActivoV1';
+ // Desde el inicio de uso en 2026-27. Si un curso posterior ya fue activado
+ // con el asistente, se recupera el último año activado del archivo de matrículas.
+ const archive=Array.isArray(appSettings?.academicYearArchives)?appSettings.academicYearArchives:[];
+ const activated=archive.filter(x=>/^\d{4}-\d{2}$/.test(x?.nextYear||'')).slice(-1)[0]?.nextYear;
+ let active=activated||localStorage.getItem(ACTIVE_KEY)||'2026-27';
+ if(activated||!localStorage.getItem(ACTIVE_KEY))localStorage.setItem(ACTIVE_KEY,active);
+ // El selector deja de ser el origen de verdad del curso activo.
+ localStorage.setItem(YK,active);
+ if(![...select.options].some(o=>o.value===active))select.add(new Option(active,active));
+ select.value=active;
+ select.hidden=false;
+ const tag=document.createElement('span');tag.className='year-mode-label';tag.setAttribute('role','status');bar.append(tag);
+ const notice=document.createElement('div');notice.id='historicalModeNotice';notice.setAttribute('role','status');
+ bar.after(notice);
+ const getActive=()=>localStorage.getItem(ACTIVE_KEY)||active;
+ let historic=false;
+ const originalShowView=showView;
+ showView=function(id){
+   if(historic && id!=='historyCard')id='historyCard';
+   return originalShowView(id);
+ };
+ const update=()=>{
+   active=getActive();
+   historic=select.value!==active;
+   document.body.classList.toggle('historical-only',historic);
+   tag.dataset.mode=historic?'historic':'active';
+   tag.textContent=historic?'Consulta histórica · solo lectura':'Curso activo · edición permitida';
+   notice.textContent=historic?'Consultando '+select.value+'. No se pueden crear, modificar ni eliminar clases o alumnos. Curso de trabajo: '+active+'. Para volver a registrar clases, selecciona '+active+'.':'';
+   if(historic){
+     // Ninguna acción editable debe quedar visible; conserva el historial consultable.
+     selectedStudentHistory=null;
+     originalShowView('historyCard');
+     if(typeof renderHistoryStudents==='function')renderHistoryStudents();
+   }else{
+     originalShowView('lessonCard');
+     if(typeof renderStudents==='function')renderStudents();
+     if(typeof renderSelect==='function')renderSelect();
+     if(typeof render==='function')render();
+   }
+   if(document.getElementById('visibleYear'))document.getElementById('visibleYear').textContent=select.value;
+ };
+ // Evita TODOS los manejadores antiguos de onchange: guardaban el año consultado
+ // en la clave sincronizada y convertían una consulta en un cambio de configuración.
+ select.addEventListener('change',ev=>{
+   ev.stopImmediatePropagation();
+   if(window.__lessonDirty){
+     select.value=active;
+     alert('Guarda o cancela la clase antes de consultar otro curso.');
+     return;
+   }
+   const picked=select.value;
+   if(picked>active){select.value=active;alert('El curso '+picked+' todavía no está activo. Prepara el siguiente curso desde Configuración.');return;}
+   update();
+ },true);
+ // Protección adicional incluso ante pulsaciones o funciones de navegación antiguas.
+ document.addEventListener('click',ev=>{
+   if(!historic)return;
+   const el=ev.target.closest('button,a,[role="button"]');if(!el)return;
+   if(el.closest('#historyCard')){
+     const unsafe=el.matches('.danger,[onclick*="editLesson"],[onclick*="deleteLesson"],[onclick*="save"]')||/\b(editar|eliminar|borrar|guardar|reactivar|archivar)\b/i.test(el.textContent||'');
+     if(!unsafe)return;
+   }else if(el.closest('.mobile-bottom-nav')){
+     if(el.getAttribute('href')==='#historyCard')return;
+   }else if(el.closest('#buildVersionBanner')||el.closest('.year-bar'))return;
+   else if(!el.closest('#lessonCard,#weeklyCard,#studentsCard,#configCard,#openAdmin,#openSync,.sync-drawer'))return;
+   ev.preventDefault();ev.stopImmediatePropagation();
+   alert('Modo consulta histórica: vuelve al curso '+active+' para realizar cambios.');
+ },true);
+ // Bloqueo de teclado y otros disparadores de formularios históricos.
+ document.addEventListener('submit',ev=>{if(historic){ev.preventDefault();ev.stopImmediatePropagation();}},true);
+ // Protege contra guardados que se intenten programáticamente por los controles del formulario.
+ const originalSave=document.getElementById('save')?.onclick;
+ if(originalSave){document.getElementById('save').onclick=function(ev){if(historic)return alert('No se pueden guardar clases de cursos históricos.');return originalSave.call(this,ev);};}
+ // Consultar otro año jamás debe enviar ese año a Supabase como curso activo.
+ const previousSettings=localSyncSettings;
+ localSyncSettings=function(){const p=previousSettings();p.schoolYear=getActive();return p;};
+ // Indicación inicial + sincronizaciones que activen legítimamente un curso nuevo.
+ const refreshActive=()=>{
+   const latest=Array.isArray(appSettings?.academicYearArchives)?appSettings.academicYearArchives:[];
+   const last=latest.filter(x=>/^\d{4}-\d{2}$/.test(x?.nextYear||'')).slice(-1)[0]?.nextYear;
+   if(last&&last!==getActive()){
+     active=last;localStorage.setItem(ACTIVE_KEY,last);localStorage.setItem(YK,last);
+     if(![...select.options].some(o=>o.value===last))select.add(new Option(last,last));
+     if(!historic)select.value=last;
+     update();
+   }
+ };
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshActive()});
+ window.__academicYearProtection={getActive,isHistorical:()=>historic};
+ tag.textContent='Curso activo · edición permitida';
 })();
 </script>
 </body></html>
