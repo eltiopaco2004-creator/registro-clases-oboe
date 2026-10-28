@@ -526,24 +526,27 @@ body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40
 .integral-preview input{max-width:230px;margin:8px 0}
 .integral-preview button:disabled{opacity:.55;cursor:not-allowed}
 @media(max-width:600px){.integral-backup{padding:12px}.integral-backup>button{width:100%;margin:5px 0}}
-</style><style id="gmail-rev16-style">
+</style><style id="gmail-rev17-style">
 #gmailPreferences .gmail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 #gmailPreferences .gmail-grid label{margin:5px 0}
 #gmailPreferences .gmail-grid input{display:block;width:100%;margin-top:6px}
 #gmailSavePreferences{margin-top:10px}
 .gmail-profile-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.gmail-profile-actions button{margin:0;min-height:42px}
+.gmail-profile-actions button,.gmail-profile-actions a{margin:0;min-height:42px}
+.gmail-direct-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border:1px solid #aabdd4;border-radius:8px;padding:10px 13px;color:#174b7e;font-weight:600;background:#f3f7fc}
+.gmail-fallback{display:inline-block;margin-top:8px;color:#185caa;text-decoration:underline}
+.gmail-fallback[hidden]{display:none}
 .gmail-profile-message{margin-top:7px;font-size:12px;color:#334d69;line-height:1.45}
 @media(max-width:600px){#gmailPreferences .gmail-grid{grid-template-columns:1fr}.gmail-profile-actions button{flex:1 1 150px}}
 </style></head><body><div class="wrap">
 <div id="buildVersionBanner" role="status" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
-  <strong>V11.2.6 · REVISIÓN 16</strong>
-  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> Gmail desde la ficha del alumno: correo normal o tareas de la próxima clase; selección de cuenta personal o del conservatorio. Se conserva la copia integral y el resto de funciones.</div>
+  <strong>V11.2.6 · REVISIÓN 18</strong>
+  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> Gmail abre la sesión seleccionada mediante /u/N/, con selección explícita de cuenta y enlace de comprobación. Evita el envío accidental desde la cuenta personal. Se conservan las mejoras anteriores.</div>
   <div class="build-version-changes"><b>FUNCIONES ACUMULADAS:</b> altas y bajas de alumnos, borrado definitivo protegido, festivos, tareas anteriores, informes de sincronización y sincronización automática opcional.</div>
   <div class="build-version-caution">⚠️ PRUEBA: Gmail prepara el mensaje, pero NO lo envía. Revisa la cuenta remitente y el destinatario antes de pulsar Enviar. La restauración integral y el cambio de curso siguen sujetos a pruebas.</div>
 </div>
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 16 · Gmail y envío de tareas</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 18 · Selección de cuenta Gmail corregida</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -648,7 +651,13 @@ body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40
   <select id="gmailPreferred"><option value="personal">Personal</option><option value="school">Conservatorio</option></select>
   <button type="button" class="secondary" id="gmailSavePreferences">Guardar preferencia de correo</button>
   <div id="gmailPreferencesStatus" class="muted" role="status" aria-live="polite"></div>
-  <p class="muted">Estas preferencias solo se guardan en este navegador. No guardamos contraseñas ni autorizaciones de Gmail.</p>
+  <div class="gmail-grid" style="margin-top:10px">
+    <label>Sesión de Gmail personal <select id="gmailPersonalSlot"><option value="">Sin identificar</option><option value="0">Cuenta 0</option><option value="1">Cuenta 1</option><option value="2">Cuenta 2</option><option value="3">Cuenta 3</option><option value="4">Cuenta 4</option><option value="5">Cuenta 5</option></select></label>
+    <label>Sesión de Gmail del conservatorio <select id="gmailSchoolSlot"><option value="">Sin identificar</option><option value="0">Cuenta 0</option><option value="1">Cuenta 1</option><option value="2">Cuenta 2</option><option value="3">Cuenta 3</option><option value="4">Cuenta 4</option><option value="5">Cuenta 5</option></select></label>
+  </div>
+  <p class="muted">Para saber el número de cada cuenta: abre Gmail, cambia a la cuenta deseada y mira la dirección del navegador. Si pone <b>mail.google.com/mail/u/1/</b>, selecciona <b>Cuenta 1</b>. No supongas que el conservatorio es la 1: compruébalo.</p>
+  <button type="button" class="secondary" id="gmailTestSelected">🔎 Comprobar cuenta preferida en Gmail</button>
+  <p class="muted">Si el correo se abre en una cuenta distinta, vuelve a Configuración y corrige el número. Nunca envíes sin comprobar el campo «De». Las preferencias solo se guardan en este navegador; no guardamos contraseñas.</p>
 </div>
 
   <div class="config-section-block" id="syncBlock">
@@ -3577,20 +3586,22 @@ fileInput.addEventListener('change',async()=>{
 });
 })();
 </script>
-<script id="gmail-rev16-js">
+<script id="gmail-rev17-js">
 (function(){
   'use strict';
   const KEY='registroOboeGmailPrefsV1';
   const byId=id=>document.getElementById(id);
-  function prefs(){try{const p=JSON.parse(localStorage.getItem(KEY)||'{}');return {personal:String(p.personal||''),school:String(p.school||''),preferred:p.preferred==='school'?'school':'personal'};}catch(_){return {personal:'',school:'',preferred:'personal'};}}
+  function slot(v){return /^(0|1|2|3|4|5)$/.test(String(v??''))?String(v):'';}
+  function prefs(){try{const p=JSON.parse(localStorage.getItem(KEY)||'{}');return {personal:String(p.personal||''),school:String(p.school||''),preferred:p.preferred==='school'?'school':'personal',personalSlot:slot(p.personalSlot),schoolSlot:slot(p.schoolSlot)};}catch(_){return {personal:'',school:'',preferred:'personal',personalSlot:'',schoolSlot:''};}}
   function setup(){
-    const p=prefs();byId('gmailPersonalAddress').value=p.personal;byId('gmailSchoolAddress').value=p.school;byId('gmailPreferred').value=p.preferred;
+    const p=prefs();byId('gmailPersonalAddress').value=p.personal;byId('gmailSchoolAddress').value=p.school;byId('gmailPreferred').value=p.preferred;byId('gmailPersonalSlot').value=p.personalSlot;byId('gmailSchoolSlot').value=p.schoolSlot;
     byId('gmailSavePreferences').addEventListener('click',()=>{
-      const personal=byId('gmailPersonalAddress').value.trim(),school=byId('gmailSchoolAddress').value.trim(),preferred=byId('gmailPreferred').value;
+      const personal=byId('gmailPersonalAddress').value.trim(),school=byId('gmailSchoolAddress').value.trim(),preferred=byId('gmailPreferred').value,personalSlot=slot(byId('gmailPersonalSlot').value),schoolSlot=slot(byId('gmailSchoolSlot').value);
       const valid=v=>!v||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
       if(!valid(personal)||!valid(school)){byId('gmailPreferencesStatus').textContent='Revisa el formato de las direcciones de correo.';return;}
-      try{localStorage.setItem(KEY,JSON.stringify({personal,school,preferred}));byId('gmailPreferencesStatus').textContent='Preferencia guardada en este dispositivo.';}catch(_){byId('gmailPreferencesStatus').textContent='No se pudo guardar la preferencia. Comprueba el almacenamiento del navegador.';}
+      try{localStorage.setItem(KEY,JSON.stringify({personal,school,preferred,personalSlot,schoolSlot}));byId('gmailPreferencesStatus').textContent='Preferencia guardada en este dispositivo.';}catch(_){byId('gmailPreferencesStatus').textContent='No se pudo guardar la preferencia. Comprueba el almacenamiento del navegador.';}
     });
+    byId('gmailTestSelected').addEventListener('click',()=>{const p=prefs(),n=p.preferred==='school'?p.schoolSlot:p.personalSlot;if(!n){byId('gmailPreferencesStatus').textContent='Primero asigna el número de sesión Gmail y guarda los cambios.';return;}window.open('https://mail.google.com/mail/u/'+n+'/#inbox','_blank','noopener,noreferrer');byId('gmailPreferencesStatus').textContent='Comprueba que Gmail muestra la cuenta '+(p.preferred==='school'?'del conservatorio.':'personal.')+' Si no coincide, cambia el número asignado.';});
     const body=byId('studentProfileBody');
     if(!body)return;
     let scheduled=false;
@@ -3617,12 +3628,22 @@ fileInput.addEventListener('change',async()=>{
     const block=document.createElement('div');block.className='profile-block';
     const h=document.createElement('h3');h.textContent='✉️ Comunicación por Gmail';block.appendChild(h);
     const row=document.createElement('div');row.className='gmail-profile-actions';
-    const b1=document.createElement('button');b1.type='button';b1.className='secondary';b1.textContent='✉️ Preparar correo';
-    const b2=document.createElement('button');b2.type='button';b2.className='secondary';b2.textContent='📚 Enviar tareas próximas';
+    const b1=document.createElement('a');b1.className='secondary gmail-direct-link';b1.textContent='✉️ Preparar correo';
+    const b2=document.createElement('a');b2.className='secondary gmail-direct-link';b2.textContent='📚 Enviar tareas próximas';
+    for(const [link,kind] of [[b1,'general'],[b2,'tasks']]){
+      link.target='_blank';link.rel='noopener noreferrer';
+      link.href=composeUrl(s,kind)||'#';
+      link.addEventListener('click',e=>{
+        const url=composeUrl(s,kind);
+        if(!url){e.preventDefault();msg.textContent=!selectedSlot()?'No se abrirá Gmail: selecciona y guarda antes el número de sesión de la cuenta preferida en Configuración → Correo de alumnos.':(kind==='tasks'?'No hay tareas registradas para este alumno o falta un correo válido.':'El alumno no tiene una dirección de correo válida; añádela en «Editar ficha».');return;}
+        link.href=url;
+        msg.textContent='Si no se abre Gmail, pulsa «Abrir Gmail aquí». Comprueba que el campo «De» muestra la cuenta correcta.';
+        fallback.href=url;fallback.hidden=false;
+      });
+    }
     row.append(b1,b2);block.appendChild(row);
-    const msg=document.createElement('div');msg.className='gmail-profile-message';msg.textContent='Se abrirá Gmail con un borrador; revisa el remitente y envíalo tú.';block.appendChild(msg);
-    b1.addEventListener('click',()=>openCompose(s,'general',msg));
-    b2.addEventListener('click',()=>openCompose(s,'tasks',msg));
+    const msg=document.createElement('div');msg.className='gmail-profile-message';msg.textContent='Se abrirá la sesión Gmail configurada; comprueba el campo «De» antes de enviar.';block.appendChild(msg);
+    const fallback=document.createElement('a');fallback.className='gmail-fallback';fallback.textContent='↗ Abrir Gmail aquí (misma pestaña)';fallback.hidden=true;block.appendChild(fallback);
     // Append to the original profile, without modifying its renderer.
     container.appendChild(block);
   }
@@ -3632,22 +3653,20 @@ fileInput.addEventListener('change',async()=>{
     return all.filter(x=>x.studentId===s.id&&x.nextClass&&(!y||typeof lessonYear!=='function'||lessonYear(x)===y))
       .sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')))[0]?.nextClass||'';
   }
-  function openCompose(s,kind,status){
+  function selectedSlot(){const p=prefs();return p.preferred==='school'?p.schoolSlot:p.personalSlot;}
+  function composeUrl(s,kind){
     const to=String(s.email||'').trim();
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)){status.textContent='El alumno no tiene un correo válido. Añádelo en «Editar ficha» antes de preparar el mensaje.';return;}
-    const p=prefs();const sender=p[p.preferred]||'';
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to))return '';
+    const session=selectedSlot();if(!session)return ''; // No abrir la cuenta por defecto por accidente
     const subject=kind==='tasks'?'Indicaciones para la próxima clase':'Clase de oboe';
     let body='';
     if(kind==='tasks'){
       const tasks=recentTasks(s);
-      if(!tasks){status.textContent='Este alumno no tiene indicaciones para la próxima clase registradas en el curso consultado.';return;}
+      if(!tasks)return '';
       body='Hola,\n\nEstas son las indicaciones para la próxima clase:\n\n'+tasks+'\n\nUn saludo.';
     }
-    const q=new URLSearchParams({view:'cm',fs:'1',to, su:subject, body});
-    if(sender)q.set('authuser',sender);
-    const url='https://mail.google.com/mail/?'+q.toString();
-    const win=window.open(url,'_blank','noopener,noreferrer');
-    status.textContent=win?'Gmail abierto. Comprueba la dirección «De:» antes de enviarlo.':'Si Gmail no se ha abierto, permite las ventanas emergentes para esta página. El mensaje no se ha enviado.';
+    const q=new URLSearchParams({to,su:subject,body,tf:'cm'});
+    return 'https://mail.google.com/mail/u/'+session+'/?'+q.toString();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
 })();
