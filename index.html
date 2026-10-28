@@ -541,12 +541,13 @@ body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40
 </style></head><body><div class="wrap">
 <div id="buildVersionBanner" role="status" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
-  <strong>V11.2.6 · REVISIÓN 18</strong>
-  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> Gmail abre la sesión seleccionada mediante /u/N/, con selección explícita de cuenta y enlace de comprobación. Evita el envío accidental desde la cuenta personal. Se conservan las mejoras anteriores.</div>
+  <strong>V11.2.6 · REVISIÓN 19</strong>
+  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> Supabase sincroniza ahora también cuentas de correo, ajustes de horario, borradores y archivos académicos. Recuperación segura en otros navegadores y verificación de datos auxiliares.</div>
   <div class="build-version-changes"><b>FUNCIONES ACUMULADAS:</b> altas y bajas de alumnos, borrado definitivo protegido, festivos, tareas anteriores, informes de sincronización y sincronización automática opcional.</div>
-  <div class="build-version-caution">⚠️ PRUEBA: Gmail prepara el mensaje, pero NO lo envía. Revisa la cuenta remitente y el destinatario antes de pulsar Enviar. La restauración integral y el cambio de curso siguen sujetos a pruebas.</div>
+  <div class="build-version-caution">⚠️ PRUEBA: antes de sincronizar crea una copia integral del navegador con más información. No sincronices aún desde versiones anteriores. Después de recuperar datos en otro navegador, recarga la página.</div>
 </div>
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 18 · Selección de cuenta Gmail corregida</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<div id="rev19AuxStatus" role="status" style="font-size:12px;color:#15416b;margin:6px 0 12px"></div>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 19 · Sincronización ampliada de datos</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -1690,7 +1691,7 @@ function applyCloudSettings(cloud){
   appSettings={...defaultSettings,...cloud.appSettings};
   localStorage.setItem(SETK,JSON.stringify(appSettings));
   localStorage.setItem(SETTINGS_META_KEY,String(remoteTs||Date.now()));
-  if(cloud.schoolYear){localStorage.setItem(YK,String(cloud.schoolYear));if(q("schoolYear"))q("schoolYear").value=String(cloud.schoolYear);}
+  if(cloud.schoolYear){localStorage.setItem(YK,String(cloud.schoolYear));localStorage.setItem("registroOboeCursoActivoV1",String(cloud.schoolYear));if(q("schoolYear"))q("schoolYear").value=String(cloud.schoolYear);}
   applySettings();
   updateConfigView();
   q("toggleSettings").textContent=q("configCard").classList.contains("collapsed")?"⚙️ Abrir configuración":"⚙️ Cerrar configuración";
@@ -2205,6 +2206,84 @@ function updateForToday(){
   payload.lessons=[...mergedLessons.values()];return payload;
  }
  mergedSyncPayload=function(cloud){return mergeIdentityAliases(previousMergedPayload(cloud),cloud);};
+
+ // Rev19: user-owned auxiliary state travels with the SAME authenticated Supabase record.
+ // Excludes credentials, auth/session/device metadata, transient sync logs and local backups.
+ const AUX_META='registroCloudAuxMetaV1';
+ const AUX_KEYS=new Set(['registroOboeGmailPrefsV1','registroClasesScheduleModeV1','registroClasesScheduleSimulationV1']);
+ const AUX_PREFIX=['oboeArchivoCursosV1_','oboeCambioCursoBorradorRev04_','registroOboeCierreAcademicoBorradorV1_',
+                   'registroCierre','registroCurso','registroProximoCurso','registroAcademic','registroHoliday','registroNonTeaching','registroYear'];
+ const AUX_DENY=/(?:token|password|passwd|secret|supabase|auth|session|credential|refresh|accesskey|apikey|jwt)/i;
+ function auxAllowed(key){return typeof key==='string'&&key.length<180&&!AUX_DENY.test(key)&&(AUX_KEYS.has(key)||AUX_PREFIX.some(p=>key.startsWith(p)));}
+ function auxCurrent(){const result={};for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(auxAllowed(key))result[key]=localStorage.getItem(key);}return result;}
+ function auxMeta(){try{const x=JSON.parse(localStorage.getItem(AUX_META)||'{}');return x&&typeof x==='object'&&!Array.isArray(x)?x:{};}catch(_){return {};}}
+ function saveAuxMeta(x){localStorage.setItem(AUX_META,JSON.stringify(x));}
+ let auxSuspended=false;
+ function auxScan(markDirty){
+  if(auxSuspended)return;
+  const current=auxCurrent(),meta=auxMeta(),keys=new Set([...Object.keys(current),...Object.keys(meta)]);
+  let changed=false;
+  const now=Date.now();
+  for(const key of keys){
+   if(!auxAllowed(key))continue;
+   const value=Object.prototype.hasOwnProperty.call(current,key)?current[key]:null;
+   const old=meta[key];
+   if(!old||old.value!==value){
+    // The first scan on an empty browser must never create empty keys or remote deletions.
+    if(!old&&value===null)continue;
+    meta[key]={value,updatedAt:Math.max(now,Number(old?.updatedAt||0)+1)};changed=true;
+   }
+  }
+  if(changed){saveAuxMeta(meta);if(markDirty&&typeof markLocalSyncDirty==='function')markLocalSyncDirty();}
+ }
+ function auxMerge(cloud){
+  auxScan(false);
+  const local=auxMeta(),remote=cloud?.auxiliaryState&&typeof cloud.auxiliaryState==='object'?cloud.auxiliaryState:{};
+  const result={};
+  for(const key of new Set([...Object.keys(remote),...Object.keys(local)])){
+   if(!auxAllowed(key))continue;
+   const a=local[key],b=remote[key];
+   function valid(x){return x&&typeof x==='object'&&(typeof x.value==='string'||x.value===null)&&Number.isFinite(Number(x.updatedAt))&&Number(x.updatedAt)>0;}
+   if(b&&!valid(b))throw new Error('La nube contiene una preferencia auxiliar no válida: '+key);
+   if(a&&!valid(a))throw new Error('Una preferencia local no es válida: '+key);
+   if(a&&b&&Number(a.updatedAt)===Number(b.updatedAt)&&a.value!==b.value)
+     throw new Error('Conflicto de preferencias en «'+key+'». No se sobrescribe. Exporta la copia integral y revisa ambos navegadores.');
+   const chosen=!a?b:!b?a:Number(a.updatedAt)>=Number(b.updatedAt)?a:b;
+   if(chosen)result[key]={value:chosen.value,updatedAt:Number(chosen.updatedAt)};
+  }
+  return result;
+ }
+ function auxApply(remote){
+  if(!remote||typeof remote!=='object')return;
+  auxScan(false);
+  const local=auxMeta(),next={...local};let received=0;
+  // Apply ONLY values newer than this browser's values. Never delete a key that cloud omits.
+  auxSuspended=true;
+  try{
+   for(const [key,item] of Object.entries(remote)){
+    if(!auxAllowed(key)||!item||typeof item!=='object')continue;
+    if(!(typeof item.value==='string'||item.value===null)||!Number.isFinite(Number(item.updatedAt)))continue;
+    const stamp=Number(item.updatedAt),prior=local[key];
+    if(prior&&Number(prior.updatedAt)>=stamp)continue;
+    if(item.value===null)localStorage.removeItem(key);else localStorage.setItem(key,item.value);
+    next[key]={value:item.value,updatedAt:stamp};received++;
+   }
+   saveAuxMeta(next);
+  }finally{auxSuspended=false;}
+  if(received){
+   const label=document.getElementById('rev19AuxStatus');
+   if(label)label.textContent='☁️ '+received+' preferencias o datos académicos recuperados. Recarga la página para actualizar todas las pantallas.';
+  }
+ }
+ const rev19PreviousMerge=mergedSyncPayload;
+ mergedSyncPayload=function(cloud){const combined=rev19PreviousMerge(cloud);combined.auxiliaryState=auxMerge(cloud);return combined;};
+ const rev19PreviousApply=mergeSyncData;
+ mergeSyncData=function(cloud){const result=rev19PreviousApply(cloud);auxApply(cloud?.auxiliaryState);return result;};
+ // Detect modified drafts, Gmail preferences and schedule choices even if core students/lessons are unchanged.
+ auxScan(false);
+ setInterval(()=>{try{auxScan(true);}catch(e){console.warn('No se pudo comprobar la configuración auxiliar:',e);}},2500);
+ window.__rev19AuxProbe={snapshot:()=>auxCurrent(),merge:auxMerge,apply:auxApply,scan:auxScan};
+
  function verify(expected,actual){
   if(!actual||actual.version!==16)return {ok:false,reason:'La nube no ha devuelto el registro v16 esperado.'};
   for(const group of ['students','lessons']){
@@ -2217,6 +2296,7 @@ function updateForToday(){
    const values=new Set(actual[group]||[]);if((expected[group]||[]).some(x=>!values.has(x)))return {ok:false,reason:'No se han confirmado todas las bajas.'};
   }
   for(const group of ['appSettings','settingsUpdatedAt','schoolYear'])if(encode(expected[group])!==encode(actual[group]))return {ok:false,reason:'La configuración de curso no coincide con lo enviado.'};
+  if(encode(expected.auxiliaryState||{})!==encode(actual.auxiliaryState||{}))return {ok:false,reason:'Los datos auxiliares no se han guardado íntegramente en Supabase.'};
   return {ok:true};
  }
  window.__verifySyncIntegrity=verify;
@@ -3489,7 +3569,8 @@ const DATA_KEYS=['oboeLessonsV2','oboeStudentsV1','oboeSchoolYearV1','registroCl
 'registroClasesScheduleSimulationV1','registroOboeCursoActivoV1','registroSyncAliasesV11',
 'registroSyncBaseV11','registroSyncChangesV1','registroSyncDeletedLessonsV1',
 'registroSyncDeletedStudentsV1','registroSyncHistoryV1126','registroUltimoInformeSyncV1126',
-'registroSyncAuditV1126Rev14','registroSyncMetaV1','registroAutoSyncEnabledV1126'];
+'registroSyncAuditV1126Rev14','registroSyncMetaV1','registroAutoSyncEnabledV1126',
+'registroOboeGmailPrefsV1','registroCloudAuxMetaV1'];
 // Las claves variables pertenecen a borradores y archivos académicos.
 const EXTRA_KEY_PREFIXES=['oboeArchivoCursosV1_','registroCierre','registroCurso','registroProximoCurso',
 'registroAcademic','registroHoliday','registroNonTeaching','registroYear','registroSyncLog','oboeCambioCursoBorradorRev04_','registroOboeCierreAcademicoBorradorV1_'];
