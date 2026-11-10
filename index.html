@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV16</title><style>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV23 · Pendientes con acceso directo</title><style>
 body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-width:720px;margin:auto;padding:16px}.card{background:white;border:1px solid #ddd;border-radius:16px;padding:16px;margin:12px 0}label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:10px;font:inherit}textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{border:0;border-radius:10px;padding:10px 13px;margin:6px 4px 0 0;font-weight:700;max-width:100%;white-space:normal}.primary{background:#2f5d50;color:#fff}.secondary{background:#dfe9e4;color:#2f5d50}.danger{background:#f3dddd;color:#a44242}.item{border-top:1px solid #ddd;padding:12px 0}.muted{color:#69716d;font-size:12px}.grade{float:right;font-size:20px;font-weight:800;color:#2f5d50}.hidden{display:none}.rec{padding:10px;background:#f7f7f4;border-radius:10px;margin-top:8px}
 .rating-group{margin:12px 0}.rating-title{font-weight:700;font-size:13px;margin-bottom:6px}
 .rating-buttons{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;width:100%}
@@ -432,6 +432,8 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
   line-height: 1.35;
 }
 </style><style>
+.weekly-pending-open{display:block;text-align:left;width:100%;margin:3px 0;padding:9px 12px;white-space:normal;cursor:pointer}
+.weekly-pending-open:hover,.weekly-pending-open:focus-visible{outline:2px solid #2b69a4;outline-offset:1px}
 /* V11.2.6 — recordatorio de tareas, adaptable y compacto */
 #forToday.lesson-prev-note[hidden]{display:none!important}
 #forToday.lesson-prev-note{margin:6px 0 3px;padding:0;border:1px solid #a9c2db;border-left:3px solid #205a91;border-radius:8px;background:#f0f6fc;color:#143852;font-size:13px;overflow:hidden}
@@ -555,7 +557,7 @@ body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40
 .pending-calendar-day[aria-pressed="true"]{outline:2px solid #225e9d;outline-offset:1px}
 .pending-calendar-day small{font-size:10px;line-height:1.1;font-weight:700}
 #pendingDayDetails{margin-top:12px;border:1px solid #d5e2ef;padding:10px;border-radius:10px}
-.pending-row{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #e3ebf2;padding:8px 0;font-size:13px}
+.pending-hour{font-variant-numeric:tabular-nums;display:inline-flex;align-items:center;justify-content:center;min-width:57px;padding:5px 7px;background:#e8f0fa;color:#183e66;font-weight:800;border-radius:7px;margin-right:8px}.pending-day-line{display:flex;align-items:center;flex-wrap:wrap;gap:4px}.pending-state{font-weight:700}.pending-state[data-status="ok"]{color:#227245}.pending-state[data-status="warning"]{color:#ab4b28}.pending-state[data-status="muted"]{color:#597083}.pending-row{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #e3ebf2;padding:8px 0;font-size:13px}
 .pending-row:last-child{border-bottom:0}
 .pending-row button{margin:0;padding:7px 10px;min-height:34px}
 .pending-row-actions{display:flex;flex-wrap:wrap;gap:6px}
@@ -565,13 +567,13 @@ body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40
 </head><body><div class="wrap">
 <div id="buildVersionBanner" role="status" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
-  <strong>V11.2.6 · REVISIÓN 19</strong>
-  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> Supabase sincroniza ahora también cuentas de correo, ajustes de horario, borradores y archivos académicos. Recuperación segura en otros navegadores y verificación de datos auxiliares.</div>
+  <strong>V11.2.6 · REVISIÓN 24</strong>
+  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> el resumen semanal, calendario mensual y avisos se muestran solo en «Clase»; «Agenda» e «Historial» quedan despejados. Al guardar o corregir una clase se actualizan automáticamente los pendientes y desaparecen los avisos resueltos. Sin cambios en Supabase.</div>
   <div class="build-version-changes"><b>FUNCIONES ACUMULADAS:</b> altas y bajas de alumnos, borrado definitivo protegido, festivos, tareas anteriores, informes de sincronización y sincronización automática opcional.</div>
   <div class="build-version-caution">⚠️ PRUEBA: antes de sincronizar crea una copia integral del navegador con más información. No sincronices aún desde versiones anteriores. Después de recuperar datos en otro navegador, recarga la página.</div>
 </div>
 <div id="rev19AuxStatus" role="status" style="font-size:12px;color:#15416b;margin:6px 0 12px"></div>
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Rev. 19 + Calendario y avisos de notas pendientes · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Rev. 24 · Resumen solo en Clase y avisos automáticos · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -800,7 +802,7 @@ body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40
  <p class="muted" id="weeklyOverviewDates">Semana actual · Lunes a jueves</p>
  <div class="weekly-overview-stats" id="weeklyOverviewStats" aria-live="polite">Calculando…</div>
  <details id="weeklyOverviewDetails"><summary>Ver alumnos pendientes de registrar</summary><div id="weeklyOverviewMissing"></div></details>
- <details id="pendingTracker"><summary>🗓️ Calendario mensual de seguimiento <span id="pendingSummary" class="pending-summary"></span></summary><div class="pending-calendar-tools"><button type="button" class="secondary" id="pendingPrevMonth" aria-label="Mes anterior">‹</button><strong id="pendingMonthLabel"></strong><button type="button" class="secondary" id="pendingNextMonth" aria-label="Mes siguiente">›</button></div><div id="pendingMonthGrid" class="pending-calendar-grid"></div><div class="pending-legend">Verde: completo · Rojo: pendiente · Ámbar: hoy · Gris: sin clases o no lectivo. Los avisos descartados no eliminan registros.</div><div id="pendingDayDetails" hidden></div></details><p class="muted" id="weeklyOverviewNote">Se compara el horario actual con los registros del curso seleccionado. Los festivos y periodos no lectivos no se cuentan como clases impartidas.</p>
+ <details id="pendingTracker"><summary>🗓️ Calendario mensual de seguimiento <span id="pendingSummary" class="pending-summary"></span></summary><div class="pending-calendar-tools"><button type="button" class="secondary" id="pendingPrevMonth" aria-label="Mes anterior">‹</button><strong id="pendingMonthLabel"></strong><button type="button" class="secondary" id="pendingNextMonth" aria-label="Mes siguiente">›</button></div><div id="pendingMonthGrid" class="pending-calendar-grid"></div><div class="pending-legend">Pulsa una fecha para ver la agenda por horas. Verde: completo · Rojo: pendiente · Ámbar: hoy · Gris: sin clases o no lectivo. Descartar un aviso no borra la clase.</div><div id="pendingDayDetails" hidden></div></details><p class="muted" id="weeklyOverviewNote">Se compara el horario actual con los registros del curso seleccionado. Los festivos y periodos no lectivos no se cuentan como clases impartidas.</p>
 </section>
 <section class="card weekly-card collapsed" id="weeklyCard">
   <div class="weekly-head"><h2>📅 Agenda semanal</h2><button type="button" class="secondary" id="toggleWeekly">Abrir agenda</button></div>
@@ -1198,6 +1200,8 @@ setScheduleMode=function(mode){_oldSetScheduleMode(mode);updateProfessorUI();};
 function saveL(){
   try{
     localStorage.setItem(LK,JSON.stringify(lessons));
+    // Refresca exclusivamente las vistas de seguimiento, sin alterar los datos ni Supabase.
+    document.dispatchEvent(new Event('registro-oboe-lecciones-actualizadas'));
     return true;
   }catch(e){
     console.error("No se pudo guardar el registro de clases",e);
@@ -1972,6 +1976,8 @@ function showView(id){
  q('openAdmin').setAttribute('aria-expanded',String(admin));
  q('openAdmin').setAttribute('aria-label',admin?'Cerrar ajustes':'Abrir ajustes');
  for(const key of ['lessonCard','weeklyCard','historyCard','studentsCard','configCard'])q(key).classList.toggle('view-hidden',admin?!['studentsCard','configCard'].includes(key):key!==id);
+ // El resumen y el calendario pertenecen exclusivamente a la pantalla «Clase».
+ q('weeklyOverviewCard').classList.toggle('view-hidden',id!=='lessonCard');
  if(id==='lessonCard')setLessonCardOpen(true);
  if(id==='weeklyCard'){q(id).classList.remove('collapsed');renderWeeklyAgenda();}
  if(id==='weeklyCard')q('toggleWeekly').textContent='Cerrar agenda';
@@ -3281,15 +3287,39 @@ archivePanel();
         let nonTeaching=false;
         try{nonTeaching=Array.isArray(appSettings.nonTeachingPeriods)&&appSettings.nonTeachingPeriods.some(p=>p.start<=key&&key<=p.end)}catch(_){}
         if(nonTeaching)continue;
-        planned.push({date:key,name:s.name,time:s.scheduleTime});
+        planned.push({date:key,name:s.name,time:s.scheduleTime,studentId:s.id});
       }
     }
     $('weeklyOverviewDates').textContent='Semana del '+format(monday)+' al '+format(thursday)+' · '+selectedYear;
     const values=[['Impartidas',completed],['Faltas',absent],['Festivos',holidays],['Pendientes',planned.length]];
     $('weeklyOverviewStats').innerHTML=values.map(([title,num])=>'<div class="weekly-overview-stat"><strong>'+num+'</strong><span>'+title+'</span></div>').join('');
-    $('weeklyOverviewMissing').innerHTML=planned.length?planned.map(p=>'<div class="weekly-overview-missing-row">'+escapeHtml(p.date)+' · '+escapeHtml(p.time)+' · '+escapeHtml(p.name)+'</div>').join(''):'<div>No hay clases pendientes según el horario actual y los registros disponibles.</div>';
+    $('weeklyOverviewMissing').innerHTML=planned.length?planned.map(p=>'<div class="weekly-overview-missing-row"><button type="button" class="secondary weekly-pending-open" data-pending-student="'+escapeHtml(p.studentId)+'" data-pending-date="'+escapeHtml(p.date)+'" aria-label="Abrir clase pendiente: '+escapeHtml(p.name)+' · '+escapeHtml(p.date)+'">'+escapeHtml(p.date)+' · '+escapeHtml(p.time)+' · '+escapeHtml(p.name)+' <span aria-hidden="true">↗</span></button></div>').join(''):'<div>No hay clases pendientes según el horario actual y los registros disponibles.</div>';
   }
+  // Los pendientes son enlaces a la ficha de la clase, no simples textos.
+  // No se guarda ni se modifica nada hasta que el docente pulse Guardar.
+  $('weeklyOverviewMissing')?.addEventListener('click',event=>{
+    const button=event.target.closest('button[data-pending-student][data-pending-date]');
+    if(!button)return;
+    const studentId=button.dataset.pendingStudent;
+    const selectedDate=button.dataset.pendingDate;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(selectedDate))return;
+    if(typeof students==='undefined'||!students.some(s=>String(s.id)===studentId&&!s.archived))return;
+    if(typeof year==='function'&&typeof isHistoricalReadOnly==='function'&&isHistoricalReadOnly())return;
+    const existing=(typeof lessons!=='undefined'?lessons:[]).find(l=>String(l.studentId)===studentId&&l.date===selectedDate&&(typeof lessonYear!=='function'||lessonYear(l)===year()));
+    if(existing&&typeof window.editLesson==='function'){window.editLesson(existing.id);return;}
+    if(typeof editingLessonId!=='undefined'&&editingLessonId){$('cancelLessonEdit')?.click();}
+    if(typeof showView==='function')showView('lessonCard');
+    const studentInput=$('student'),dateInput=$('date'),attendanceInput=$('attendance'),gradeInput=$('grade');
+    if(!studentInput||!dateInput)return;
+    studentInput.value=studentId;
+    dateInput.value=selectedDate;
+    dateInput.dispatchEvent(new Event('change',{bubbles:true}));
+    if(attendanceInput){attendanceInput.value='asiste';attendanceInput.dispatchEvent(new Event('change',{bubbles:true}));}
+    if(gradeInput){gradeInput.disabled=false;gradeInput.focus();}
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
   $('weeklyOverviewRefresh')?.addEventListener('click',run);
+  document.addEventListener('registro-oboe-lecciones-actualizadas',()=>setTimeout(run,0));
   $('date')?.addEventListener('change',run);
   $('schoolYear')?.addEventListener('change',run);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)run()});
@@ -3587,7 +3617,7 @@ archivePanel();
 'use strict';
 const $=id=>document.getElementById(id);
 const status=$('integralBackupStatus'),preview=$('integralRestorePreview'),fileInput=$('integralRestoreFile');
-const VERSION='V11.2.6 · Revisión 15';
+const VERSION='V11.2.6 · Revisión 24';
 const DATA_KEYS=['oboeLessonsV2','oboeStudentsV1','oboeSchoolYearV1','registroClasesSettingsV1',
 'registroClasesSettingsMetaV1','registroClasesArchivosV1','registroClasesScheduleModeV1',
 'registroClasesScheduleSimulationV1','registroOboeCursoActivoV1','registroSyncAliasesV11',
@@ -3810,13 +3840,50 @@ let month=new Date();month.setDate(1);let selected=null;
 function labelIssues(x){const dismissed=new Set(read());return x.filter(a=>!dismissed.has(dismissKey(a)))}
 function renderDay(date){
  selected=date;const box=by('pendingDayDetails');box.hidden=false;
- const all=issues(date),dismissed=new Set(read());const recs=lessons.filter(l=>l.date===date&&lessonYear(l)===year());
+ const all=issues(date),dismissed=new Set(read());
+ const recs=lessons.filter(l=>l.date===date&&lessonYear(l)===year());
  const fmt=dget(date).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
- const rows=all.map(x=>{
- const key=dismissKey(x),off=dismissed.has(key);
- return `<div class="pending-row"><span>${esc(x.name)} · ${esc(x.time)} — <strong>${esc(x.caption)}</strong>${off?' · <em>descartado</em>':''}</span><div class="pending-row-actions">${off?`<button type="button" class="secondary" data-restore="${esc(key)}">Reactivar aviso</button>`:`<button type="button" class="secondary" data-open="${esc(key)}">Completar</button><button type="button" class="secondary" data-dismiss="${esc(key)}">Descartar aviso</button>`}</div></div>`;
+ const scheduled=students.filter(st=>!st.archived&&st.scheduleDay===weekName[dget(date).getDay()]&&st.scheduleTime);
+ const people=new Map();
+ // Mostrar también las clases registradas fuera del horario habitual o de alumnos archivados.
+ for(const st of scheduled)people.set(st.id,{student:st,records:[]});
+ for(const rec of recs){
+  const st=students.find(s=>s.id===rec.studentId)||{id:rec.studentId,name:rec.student||'Alumno sin ficha',scheduleTime:rec.time||''};
+  if(!people.has(st.id))people.set(st.id,{student:st,records:[]});
+  people.get(st.id).records.push(rec);
+ }
+ const entries=[];
+ for(const {student:st,records} of people.values()){
+  const time=String(st.scheduleTime||records[0]?.time||'').trim();
+  if(!records.length)entries.push({time,st,rec:null});
+  else records.forEach(rec=>entries.push({time,st,rec}));
+ }
+ function minutes(t){const m=String(t).match(/^(\d{1,2})[:.](\d{2})/);return m?Number(m[1])*60+Number(m[2]):9999}
+ entries.sort((a,b)=>minutes(a.time)-minutes(b.time)||String(a.st.name).localeCompare(String(b.st.name),'es'));
+ const holiday=recs.some(r=>r.attendance==='festivo');
+ const off=excluded(date)||holiday;
+ const future=date>today();
+ const rows=entries.map(({time,st,rec})=>{
+  const issue=all.find(x=>x.studentId===st.id&&(rec?x.lessonId===rec.id:x.kind==='missing'));
+  const key=issue?dismissKey(issue):'';
+  const ignored=issue&&dismissed.has(key);
+  let state='';let status='muted';
+  if(rec){
+   const attendance=rec.attendance;
+   if(attendance==='festivo'){state='Festivo';status='muted'}
+   else if(attendance==='falta'){state='Falta registrada';status='ok'}
+   else if(attendance==='asiste'){state=rec.grade===null||rec.grade===undefined||rec.grade===''?'Asiste · nota pendiente':`Asiste · nota ${esc(rec.grade)}`;status=issue?'warning':'ok'}
+   else {state=attendance||'Clase registrada';status='ok'}
+  }else if(off){state='No lectivo';status='muted'}
+  else if(future){state='Clase prevista';status='muted'}
+  else if(issue){state='Sin registrar';status='warning'}
+  else {state='Sin registro';status='muted'}
+  const buttons=rec?`<button type="button" class="secondary" data-edit-lesson="${esc(rec.id)}">Ver / editar clase</button>`:
+   (!off&&!future?`<button type="button" class="secondary" data-new-student="${esc(st.id)}">Registrar clase</button>`:'');
+  const dismissal=issue?(ignored?`<button type="button" class="secondary" data-restore="${esc(key)}">Reactivar aviso</button>`:`<button type="button" class="secondary" data-dismiss="${esc(key)}">Descartar aviso</button>`):'';
+  return `<div class="pending-row"><div class="pending-day-line"><span class="pending-hour">${esc(time||'—')}</span><strong>${esc(st.name)}</strong><span class="pending-state" data-status="${status}">· ${state}${ignored?' · aviso descartado':''}</span></div><div class="pending-row-actions">${buttons}${dismissal}</div></div>`;
  }).join('');
- box.innerHTML=`<strong>${esc(fmt)}</strong><div class="muted">${recs.length} clase(s) registrada(s) · ${labelIssues(all).length} aviso(s) activo(s)</div>${rows||'<p class="muted">No hay avisos pendientes para esta fecha.</p>'}`;
+ box.innerHTML=`<strong>Agenda del ${esc(fmt)}</strong><div class="muted">${recs.length} clase(s) registrada(s) · ${labelIssues(all).length} aviso(s) activo(s) · Orden horario</div>${rows||'<p class="muted">No hay alumnos programados ni clases registradas para esta fecha.</p>'}`;
 }
 function refresh(){
  if(!by('pendingTracker'))return;
@@ -3842,7 +3909,14 @@ by('pendingPrevMonth')?.addEventListener('click',()=>{month.setMonth(month.getMo
 by('pendingNextMonth')?.addEventListener('click',()=>{month.setMonth(month.getMonth()+1);selected=null;refresh()});
 by('pendingMonthGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-date]');if(b){renderDay(b.dataset.date);refresh()}});
 by('pendingDayDetails')?.addEventListener('click',e=>{
- const button=e.target.closest('[data-dismiss],[data-restore],[data-open]');if(!button)return;
+ const button=e.target.closest('[data-dismiss],[data-restore],[data-open],[data-edit-lesson],[data-new-student]');if(!button)return;
+ if(button.dataset.editLesson){if(typeof window.editLesson==='function')window.editLesson(button.dataset.editLesson);return;}
+ if(button.dataset.newStudent){
+  if(typeof window.showView==='function')window.showView('lessonCard');
+  by('student').value=button.dataset.newStudent;by('date').value=selected;
+  by('attendance').value='asiste';by('grade').disabled=false;by('grade').focus();
+  window.scrollTo({top:0,behavior:'smooth'});return;
+ }
  const key=button.dataset.dismiss||button.dataset.restore||button.dataset.open;
  const item=issues(selected).find(x=>dismissKey(x)===key);if(!item)return;
  if(button.dataset.open){
@@ -3858,6 +3932,7 @@ by('pendingTracker')?.addEventListener('toggle',()=>{if(by('pendingTracker').ope
 by('schoolYear')?.addEventListener('change',()=>{selected=null;refresh()});
 window.addEventListener('storage',e=>{if(e.key===KEY||e.key===LK||e.key===SK)refresh()});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
+document.addEventListener('registro-oboe-lecciones-actualizadas',()=>setTimeout(refresh,0));
 document.addEventListener('click',e=>{if(e.target.closest('#save,#syncBtn,#saveStudent,#holidayApply,#holidayUndoList,#importBtn'))setTimeout(refresh,800)});
 setTimeout(refresh,500);window.refreshPendingCalendar=refresh;
 })();
