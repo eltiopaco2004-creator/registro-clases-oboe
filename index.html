@@ -567,13 +567,13 @@ body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40
 </head><body><div class="wrap">
 <div id="buildVersionBanner" role="status" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
-  <strong>V11.2.6 · REVISIÓN 25</strong>
-  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> pendientes semanales en orden cronológico (fecha y hora); el calendario muestra únicamente el número de avisos pendientes activos de todo el curso, sin límite de 42 días. Los avisos corregidos o descartados desaparecen del contador. Se mantienen el acceso directo a la clase y la agenda por horas. Sin cambios en Supabase.</div>
+  <strong>V11.2.6 · REVISIÓN 26</strong>
+  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> se añaden fechas de inicio y fin de clases por curso académico en Configuración. Para 2026-27 se propone el 1 de octubre como inicio. El calendario y el resumen semanal no generan pendientes fuera del intervalo lectivo. Las fechas se almacenan en la configuración incluida en la sincronización existente. Se mantiene el orden horario y el acceso directo a cada clase.</div>
   <div class="build-version-changes"><b>FUNCIONES ACUMULADAS:</b> altas y bajas de alumnos, borrado definitivo protegido, festivos, tareas anteriores, informes de sincronización y sincronización automática opcional.</div>
   <div class="build-version-caution">⚠️ PRUEBA: antes de sincronizar crea una copia integral del navegador con más información. No sincronices aún desde versiones anteriores. Después de recuperar datos en otro navegador, recarga la página.</div>
 </div>
 <div id="rev19AuxStatus" role="status" style="font-size:12px;color:#15416b;margin:6px 0 12px"></div>
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Rev. 25 · Orden horario y solo avisos pendientes · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Rev. 26 · Fechas lectivas y avisos reales · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -706,6 +706,18 @@ body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40
 
   <!-- El selector de consulta se sitúa en la cabecera durante la inicialización. -->
   <select id="schoolYear" hidden aria-label="Curso académico que se consulta"></select>
+
+  <div class="config-section-block" id="academicTeachingDates">
+    <h3>📆 Inicio y fin de clases</h3>
+    <p class="muted">Define desde qué fecha deben contarse las clases pendientes de cada curso. Los días anteriores al inicio y posteriores al fin no generan avisos. No modifica ni elimina clases guardadas.</p>
+    <div class="holiday-grid">
+      <div><label for="academicClassesStart">Inicio de clases</label><input type="date" id="academicClassesStart"></div>
+      <div><label for="academicClassesEnd">Fin de clases (opcional)</label><input type="date" id="academicClassesEnd"></div>
+    </div>
+    <button type="button" class="primary" id="saveAcademicTeachingDates">💾 Guardar fechas del curso</button>
+    <div id="academicTeachingDatesStatus" class="muted" role="status" aria-live="polite"></div>
+    <p class="muted" style="font-size:12px">Se guarda por curso académico y se incluye en la configuración sincronizada con Supabase. Los avisos descartados no se borran al cambiar estas fechas.</p>
+  </div>
 
   <div class="config-section-block" id="nonTeachingCalendar">
     <h3>📅 Calendario no lectivo</h3>
@@ -3279,7 +3291,7 @@ archivePanel();
     for(let i=0;i<4;i++){
       const date=new Date(monday);date.setDate(monday.getDate()+i);
       const key=isoLocal(date);
-      if(key>today)continue; // Future sessions are not overdue.
+      if(key>today||(typeof window.registroIsInTeachingRange==='function'&&!window.registroIsInTeachingRange(key)))continue; // Fuera de fechas lectivas o futuro.
       for(const s of active){
         if(s.scheduleDay!==days[i]||!s.scheduleTime)continue;
         // A registered class or a scheduled holiday counts as covered.
@@ -3812,7 +3824,55 @@ fileInput.addEventListener('change',async()=>{
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
 })();
-</script><script id="pending-calendar-controller">
+</script><script id="academic-teaching-dates-controller">
+/* Fechas lectivas por curso. appSettings es parte de la sincronización existente.
+   Nunca alterar la nube ni los registros automáticamente al abrir la página. */
+(function(){'use strict';
+ const $=id=>document.getElementById(id);
+ const YEAR=/^\d{4}-\d{2}$/;
+ const DATE=/^\d{4}-\d{2}-\d{2}$/;
+ const valid=v=>DATE.test(String(v||''))&&!Number.isNaN(Date.parse(v+'T12:00:00'));
+ function yearKey(){return typeof year==='function'?String(year()):$('schoolYear')?.value||'';}
+ function defaults(y){const start=Number(y.slice(0,4));return {start:y==='2026-27'?'2026-10-01':`${start}-09-01`,end:''};}
+ function config(y){const d=defaults(y),entries=appSettings?.academicTeachingDates;
+   const c=(entries&&typeof entries==='object'&&!Array.isArray(entries))?entries[y]:null;
+   return {start:valid(c?.start)?c.start:d.start,end:valid(c?.end)?c.end:''};
+ }
+ window.registroAcademicTeachingDates=()=>config(yearKey());
+ window.registroIsInTeachingRange=date=>{if(!valid(date))return false;const c=config(yearKey());return date>=c.start&&(!c.end||date<=c.end)};
+ function historical(){return typeof isHistoricalReadOnly==='function'&&isHistoricalReadOnly()}
+ function fill(){const y=yearKey();if(!YEAR.test(y))return;const c=config(y);
+   $('academicClassesStart').value=c.start;$('academicClassesEnd').value=c.end;
+   const locked=historical();for(const id of ['academicClassesStart','academicClassesEnd','saveAcademicTeachingDates'])$(id).disabled=locked;
+   $('academicTeachingDatesStatus').textContent=locked?'Consulta histórica: fechas de solo lectura.':'Fechas del curso '+y+'. El inicio de 2026-27 se propone como 01/10/2026; confirma al guardar.';
+ }
+ $('saveAcademicTeachingDates')?.addEventListener('click',()=>{
+   if(historical())return alert('El curso histórico está protegido contra modificaciones.');
+   const y=yearKey(),start=$('academicClassesStart').value,end=$('academicClassesEnd').value;
+   if(!YEAR.test(y)||!valid(start)||end&&!valid(end)||end&&end<start)return alert('Comprueba las fechas de inicio y fin.');
+   const first=Number(y.slice(0,4));const min=`${first}-09-01`,max=`${first+1}-08-31`;
+   if(start<min||start>max||end&&(end<min||end>max))return alert('Las fechas deben pertenecer al curso académico '+y+'.');
+   const oldSettings=appSettings,oldMeta=localStorage.getItem(SETTINGS_META_KEY);
+   try{
+     const existing=appSettings.academicTeachingDates&&typeof appSettings.academicTeachingDates==='object'&&!Array.isArray(appSettings.academicTeachingDates)?appSettings.academicTeachingDates:{};
+     const updated={...appSettings,academicTeachingDates:{...existing,[y]:{start,end}}};
+     localStorage.setItem(SETK,JSON.stringify(updated));appSettings=updated;markSettingsUpdated();
+     if(typeof recordSyncChange==='function')recordSyncChange('settings','updated');
+     if(typeof markLocalSyncDirty==='function')markLocalSyncDirty();
+     $('academicTeachingDatesStatus').textContent='Fechas guardadas. El calendario ya utiliza el intervalo lectivo del curso '+y+'.';
+     if(typeof window.refreshPendingCalendar==='function')window.refreshPendingCalendar();
+     if(typeof window.refreshWeeklyOverview==='function')window.refreshWeeklyOverview();
+   }catch(e){appSettings=oldSettings;try{localStorage.setItem(SETK,JSON.stringify(oldSettings));if(oldMeta===null)localStorage.removeItem(SETTINGS_META_KEY);else localStorage.setItem(SETTINGS_META_KEY,oldMeta)}catch(_){}
+     alert('No se han podido guardar las fechas: '+e.message)}
+ });
+ $('schoolYear')?.addEventListener('change',()=>setTimeout(fill,0));
+ // Al recibir configuración de la nube o reactivar ventana, actualizar el formulario sin modificarla.
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)fill()});
+ document.addEventListener('click',e=>{if(e.target.closest('#syncBtn'))setTimeout(fill,1200)});
+ fill();
+})();
+</script>
+<script id="pending-calendar-controller">
 /* Añadido no destructivo sobre Rev19: sólo escribe el estado de avisos descartados.
    Prefix registroHoliday* se sincroniza mediante Rev19 auxiliaryState. */
 (function(){
@@ -3829,7 +3889,7 @@ function excluded(date){return Array.isArray(appSettings.nonTeachingPeriods)&&ap
 function read(){try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(x)?x:[]}catch(_){return []}}
 function dismissKey(x){return [x.date,x.studentId,x.kind].join('|')}
 function issues(date){
- if(date>today()||yearOf(date)!==year()||excluded(date))return [];
+ if(date>today()||yearOf(date)!==year()||excluded(date)||(typeof window.registroIsInTeachingRange==='function'&&!window.registroIsInTeachingRange(date)))return [];
  const active=students.filter(s=>!s.archived&&s.scheduleDay===weekName[dget(date).getDay()]&&s.scheduleTime);
  const records=lessons.filter(l=>l.date===date&&lessonYear(l)===year());
  const holidayDay=records.some(l=>l.attendance==='festivo');
@@ -3842,7 +3902,7 @@ function issues(date){
  }
  return results;
 }
-function isWorkingDay(date){return ['Lunes','Martes','Miércoles','Jueves'].includes(weekName[dget(date).getDay()])&&!excluded(date)}
+function isWorkingDay(date){return ['Lunes','Martes','Miércoles','Jueves'].includes(weekName[dget(date).getDay()])&&!excluded(date)&&(typeof window.registroIsInTeachingRange!=='function'||window.registroIsInTeachingRange(date))}
 let month=new Date();month.setDate(1);let selected=null;
 function labelIssues(x){const dismissed=new Set(read());return x.filter(a=>!dismissed.has(dismissKey(a)))}
 function renderDay(date){
@@ -3898,7 +3958,8 @@ function refresh(){
  // El contador representa pendientes activos de todo el curso, no los últimos 42 días.
  // Para el curso ordinario en España se parte del 1 de septiembre.
  const firstYear=Number(String(currentYear).slice(0,4));
- const courseStart=Number.isFinite(firstYear)&&firstYear>2000?new Date(firstYear,8,1):new Date();
+ const startSetting=typeof window.registroAcademicTeachingDates==='function'?window.registroAcademicTeachingDates().start:`${firstYear}-09-01`;
+ const courseStart=/^\d{4}-\d{2}-\d{2}$/.test(startSetting)?dget(startSetting):new Date(firstYear,8,1);
  let count=0;
  for(let d=new Date(courseStart);iso(d)<=today();d.setDate(d.getDate()+1)){
   const date=iso(d);if(yearOf(date)===currentYear&&isWorkingDay(date))count+=labelIssues(issues(date)).length;
