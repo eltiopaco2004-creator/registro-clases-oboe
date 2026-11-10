@@ -538,7 +538,31 @@ body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40
 .gmail-fallback[hidden]{display:none}
 .gmail-profile-message{margin-top:7px;font-size:12px;color:#334d69;line-height:1.45}
 @media(max-width:600px){#gmailPreferences .gmail-grid{grid-template-columns:1fr}.gmail-profile-actions button{flex:1 1 150px}}
-</style></head><body><div class="wrap">
+</style><style id="pending-calendar-styles">
+#pendingTracker{border-top:1px solid #d7e3ef;margin-top:14px;padding-top:12px}
+#pendingTracker summary{cursor:pointer;color:#164a7c;font-weight:750}
+.pending-summary{display:inline-block;margin-left:8px;font-weight:600;color:#a13a20}
+.pending-calendar-tools{display:flex;align-items:center;justify-content:center;gap:12px;margin:12px 0}
+.pending-calendar-tools button{min-height:36px;padding:5px 12px}
+.pending-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.pending-calendar-head{text-align:center;font-size:11px;font-weight:700;color:#536c84;padding:5px 0}
+.pending-calendar-day{min-height:45px!important;padding:5px 2px!important;border:1px solid #ced9e5!important;border-radius:9px!important;background:#fff!important;color:#1b3955!important;font-size:13px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+.pending-calendar-day[data-state="done"]{background:#e3f4e9!important;border-color:#83c69a!important}
+.pending-calendar-day[data-state="pending"]{background:#ffebe8!important;border-color:#e99a91!important}
+.pending-calendar-day[data-state="today"]{background:#fff2d9!important;border-color:#e6ba65!important}
+.pending-calendar-day[data-state="off"]{background:#eff2f5!important;color:#718090!important}
+.pending-calendar-day[data-state="future"]{background:#fff!important;color:#95a3b2!important}
+.pending-calendar-day[aria-pressed="true"]{outline:2px solid #225e9d;outline-offset:1px}
+.pending-calendar-day small{font-size:10px;line-height:1.1;font-weight:700}
+#pendingDayDetails{margin-top:12px;border:1px solid #d5e2ef;padding:10px;border-radius:10px}
+.pending-row{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #e3ebf2;padding:8px 0;font-size:13px}
+.pending-row:last-child{border-bottom:0}
+.pending-row button{margin:0;padding:7px 10px;min-height:34px}
+.pending-row-actions{display:flex;flex-wrap:wrap;gap:6px}
+.pending-legend{font-size:11px;color:#526b82;margin-top:8px;line-height:1.5}
+@media(max-width:550px){.pending-calendar-grid{gap:3px}.pending-calendar-day{min-height:42px!important}.pending-row{align-items:flex-start;flex-direction:column}}
+</style>
+</head><body><div class="wrap">
 <div id="buildVersionBanner" role="status" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
   <strong>V11.2.6 · REVISIÓN 19</strong>
@@ -547,7 +571,7 @@ body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40
   <div class="build-version-caution">⚠️ PRUEBA: antes de sincronizar crea una copia integral del navegador con más información. No sincronices aún desde versiones anteriores. Después de recuperar datos en otro navegador, recarga la página.</div>
 </div>
 <div id="rev19AuxStatus" role="status" style="font-size:12px;color:#15416b;margin:6px 0 12px"></div>
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 19 · Sincronización ampliada de datos</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Rev. 19 + Calendario y avisos de notas pendientes · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -776,7 +800,7 @@ body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40
  <p class="muted" id="weeklyOverviewDates">Semana actual · Lunes a jueves</p>
  <div class="weekly-overview-stats" id="weeklyOverviewStats" aria-live="polite">Calculando…</div>
  <details id="weeklyOverviewDetails"><summary>Ver alumnos pendientes de registrar</summary><div id="weeklyOverviewMissing"></div></details>
- <p class="muted" id="weeklyOverviewNote">Se compara el horario actual con los registros del curso seleccionado. Los festivos y periodos no lectivos no se cuentan como clases impartidas.</p>
+ <details id="pendingTracker"><summary>🗓️ Calendario mensual de seguimiento <span id="pendingSummary" class="pending-summary"></span></summary><div class="pending-calendar-tools"><button type="button" class="secondary" id="pendingPrevMonth" aria-label="Mes anterior">‹</button><strong id="pendingMonthLabel"></strong><button type="button" class="secondary" id="pendingNextMonth" aria-label="Mes siguiente">›</button></div><div id="pendingMonthGrid" class="pending-calendar-grid"></div><div class="pending-legend">Verde: completo · Rojo: pendiente · Ámbar: hoy · Gris: sin clases o no lectivo. Los avisos descartados no eliminan registros.</div><div id="pendingDayDetails" hidden></div></details><p class="muted" id="weeklyOverviewNote">Se compara el horario actual con los registros del curso seleccionado. Los festivos y periodos no lectivos no se cuentan como clases impartidas.</p>
 </section>
 <section class="card weekly-card collapsed" id="weeklyCard">
   <div class="weekly-head"><h2>📅 Agenda semanal</h2><button type="button" class="secondary" id="toggleWeekly">Abrir agenda</button></div>
@@ -3751,4 +3775,91 @@ fileInput.addEventListener('change',async()=>{
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
 })();
-</script></body></html>
+</script><script id="pending-calendar-controller">
+/* Añadido no destructivo sobre Rev19: sólo escribe el estado de avisos descartados.
+   Prefix registroHoliday* se sincroniza mediante Rev19 auxiliaryState. */
+(function(){
+'use strict';
+const by=id=>document.getElementById(id);
+const KEY='registroHolidayPendingDismissalsV1';
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const dget=v=>new Date(v+'T12:00:00');
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const yearOf=v=>{const y=Number(v.slice(0,4))-(Number(v.slice(5,7))<9?1:0);return `${y}-${String(y+1).slice(-2)}`};
+const weekName=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+function excluded(date){return Array.isArray(appSettings.nonTeachingPeriods)&&appSettings.nonTeachingPeriods.some(p=>p.start<=date&&date<=p.end)}
+function read(){try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(x)?x:[]}catch(_){return []}}
+function dismissKey(x){return [x.date,x.studentId,x.kind].join('|')}
+function issues(date){
+ if(date>today()||yearOf(date)!==year()||excluded(date))return [];
+ const active=students.filter(s=>!s.archived&&s.scheduleDay===weekName[dget(date).getDay()]&&s.scheduleTime);
+ const records=lessons.filter(l=>l.date===date&&lessonYear(l)===year());
+ const holidayDay=records.some(l=>l.attendance==='festivo');
+ if(holidayDay)return [];
+ const results=[];
+ for(const st of active){
+  const own=records.filter(l=>l.studentId===st.id);
+  if(!own.length)results.push({date,studentId:st.id,name:st.name,time:st.scheduleTime,kind:'missing',caption:'Clase sin registrar'});
+  else for(const l of own)if(l.attendance==='asiste'&&(l.grade===null||l.grade===undefined||l.grade===''))results.push({date,studentId:st.id,name:st.name,time:st.scheduleTime,kind:'grade:'+l.id,lessonId:l.id,caption:'Nota pendiente'});
+ }
+ return results;
+}
+function isWorkingDay(date){return ['Lunes','Martes','Miércoles','Jueves'].includes(weekName[dget(date).getDay()])&&!excluded(date)}
+let month=new Date();month.setDate(1);let selected=null;
+function labelIssues(x){const dismissed=new Set(read());return x.filter(a=>!dismissed.has(dismissKey(a)))}
+function renderDay(date){
+ selected=date;const box=by('pendingDayDetails');box.hidden=false;
+ const all=issues(date),dismissed=new Set(read());const recs=lessons.filter(l=>l.date===date&&lessonYear(l)===year());
+ const fmt=dget(date).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ const rows=all.map(x=>{
+ const key=dismissKey(x),off=dismissed.has(key);
+ return `<div class="pending-row"><span>${esc(x.name)} · ${esc(x.time)} — <strong>${esc(x.caption)}</strong>${off?' · <em>descartado</em>':''}</span><div class="pending-row-actions">${off?`<button type="button" class="secondary" data-restore="${esc(key)}">Reactivar aviso</button>`:`<button type="button" class="secondary" data-open="${esc(key)}">Completar</button><button type="button" class="secondary" data-dismiss="${esc(key)}">Descartar aviso</button>`}</div></div>`;
+ }).join('');
+ box.innerHTML=`<strong>${esc(fmt)}</strong><div class="muted">${recs.length} clase(s) registrada(s) · ${labelIssues(all).length} aviso(s) activo(s)</div>${rows||'<p class="muted">No hay avisos pendientes para esta fecha.</p>'}`;
+}
+function refresh(){
+ if(!by('pendingTracker'))return;
+ const currentYear=year(); const cut=new Date();cut.setDate(cut.getDate()-42);
+ let count=0;for(let d=new Date(cut);iso(d)<=today();d.setDate(d.getDate()+1)){const date=iso(d);if(yearOf(date)===currentYear&&isWorkingDay(date))count+=labelIssues(issues(date)).length}
+ by('pendingSummary').textContent=count?`${count} aviso(s) recientes`:'Sin avisos recientes';
+ by('pendingSummary').style.color=count?'#a13a20':'#267241';
+ by('pendingMonthLabel').textContent=month.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
+ const grid=by('pendingMonthGrid');let html=['L','M','X','J','V','S','D'].map(d=>`<div class="pending-calendar-head">${d}</div>`).join('');
+ const first=(month.getDay()+6)%7,days=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();
+ for(let i=0;i<first;i++)html+='<div></div>';
+ for(let n=1;n<=days;n++){
+ const date=iso(new Date(month.getFullYear(),month.getMonth(),n));const total=labelIssues(issues(date)).length;
+ const work=isWorkingDay(date)&&yearOf(date)===currentYear;
+ const state=!work?'off':date>today()?'future':date===today()?'today':total?'pending':'done';
+ html+=`<button type="button" class="pending-calendar-day" data-date="${date}" data-state="${state}" aria-pressed="${date===selected}"><strong>${n}</strong>${total?`<small>${total} pendiente${total>1?'s':''}</small>`:''}</button>`;
+ }
+ grid.innerHTML=html;
+ if(selected&&selected.startsWith(iso(month).slice(0,7)))renderDay(selected);
+ else by('pendingDayDetails').hidden=true;
+}
+by('pendingPrevMonth')?.addEventListener('click',()=>{month.setMonth(month.getMonth()-1);selected=null;refresh()});
+by('pendingNextMonth')?.addEventListener('click',()=>{month.setMonth(month.getMonth()+1);selected=null;refresh()});
+by('pendingMonthGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-date]');if(b){renderDay(b.dataset.date);refresh()}});
+by('pendingDayDetails')?.addEventListener('click',e=>{
+ const button=e.target.closest('[data-dismiss],[data-restore],[data-open]');if(!button)return;
+ const key=button.dataset.dismiss||button.dataset.restore||button.dataset.open;
+ const item=issues(selected).find(x=>dismissKey(x)===key);if(!item)return;
+ if(button.dataset.open){
+  if(item.lessonId&&typeof window.editLesson==='function')window.editLesson(item.lessonId);
+  else {if(typeof window.showView==='function')window.showView('lessonCard');by('student').value=item.studentId;by('date').value=item.date;by('attendance').value='asiste';by('grade').disabled=false;by('grade').focus();window.scrollTo({top:0,behavior:'smooth'})}
+  return;
+ }
+ const set=new Set(read());if(button.dataset.dismiss)set.add(key);else set.delete(key);
+ try{localStorage.setItem(KEY,JSON.stringify([...set]));if(typeof markLocalSyncDirty==='function')markLocalSyncDirty();refresh()}
+ catch(err){alert('No se ha podido guardar el cambio del aviso: '+err.message)}
+});
+by('pendingTracker')?.addEventListener('toggle',()=>{if(by('pendingTracker').open)refresh()});
+by('schoolYear')?.addEventListener('change',()=>{selected=null;refresh()});
+window.addEventListener('storage',e=>{if(e.key===KEY||e.key===LK||e.key===SK)refresh()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
+document.addEventListener('click',e=>{if(e.target.closest('#save,#syncBtn,#saveStudent,#holidayApply,#holidayUndoList,#importBtn'))setTimeout(refresh,800)});
+setTimeout(refresh,500);window.refreshPendingCalendar=refresh;
+})();
+</script>
+</body></html>
