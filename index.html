@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV23 · Pendientes con acceso directo</title><style>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV25 · Pendientes ordenados y activos</title><style>
 body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-width:720px;margin:auto;padding:16px}.card{background:white;border:1px solid #ddd;border-radius:16px;padding:16px;margin:12px 0}label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:10px;font:inherit}textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{border:0;border-radius:10px;padding:10px 13px;margin:6px 4px 0 0;font-weight:700;max-width:100%;white-space:normal}.primary{background:#2f5d50;color:#fff}.secondary{background:#dfe9e4;color:#2f5d50}.danger{background:#f3dddd;color:#a44242}.item{border-top:1px solid #ddd;padding:12px 0}.muted{color:#69716d;font-size:12px}.grade{float:right;font-size:20px;font-weight:800;color:#2f5d50}.hidden{display:none}.rec{padding:10px;background:#f7f7f4;border-radius:10px;margin-top:8px}
 .rating-group{margin:12px 0}.rating-title{font-weight:700;font-size:13px;margin-bottom:6px}
 .rating-buttons{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;width:100%}
@@ -567,13 +567,13 @@ body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40
 </head><body><div class="wrap">
 <div id="buildVersionBanner" role="status" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
-  <strong>V11.2.6 · REVISIÓN 24</strong>
-  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> el resumen semanal, calendario mensual y avisos se muestran solo en «Clase»; «Agenda» e «Historial» quedan despejados. Al guardar o corregir una clase se actualizan automáticamente los pendientes y desaparecen los avisos resueltos. Sin cambios en Supabase.</div>
+  <strong>V11.2.6 · REVISIÓN 25</strong>
+  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> pendientes semanales en orden cronológico (fecha y hora); el calendario muestra únicamente el número de avisos pendientes activos de todo el curso, sin límite de 42 días. Los avisos corregidos o descartados desaparecen del contador. Se mantienen el acceso directo a la clase y la agenda por horas. Sin cambios en Supabase.</div>
   <div class="build-version-changes"><b>FUNCIONES ACUMULADAS:</b> altas y bajas de alumnos, borrado definitivo protegido, festivos, tareas anteriores, informes de sincronización y sincronización automática opcional.</div>
   <div class="build-version-caution">⚠️ PRUEBA: antes de sincronizar crea una copia integral del navegador con más información. No sincronices aún desde versiones anteriores. Después de recuperar datos en otro navegador, recarga la página.</div>
 </div>
 <div id="rev19AuxStatus" role="status" style="font-size:12px;color:#15416b;margin:6px 0 12px"></div>
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Rev. 24 · Resumen solo en Clase y avisos automáticos · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Rev. 25 · Orden horario y solo avisos pendientes · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -3290,10 +3290,17 @@ archivePanel();
         planned.push({date:key,name:s.name,time:s.scheduleTime,studentId:s.id});
       }
     }
+    // El orden debe ser por fecha, después hora (no por el orden de almacenamiento de alumnos).
+    function minutes(time){const m=String(time||'').match(/^(\d{1,2})[:.](\d{2})/);return m?Number(m[1])*60+Number(m[2]):9999;}
+    planned.sort((a,b)=>a.date.localeCompare(b.date)||minutes(a.time)-minutes(b.time)||a.name.localeCompare(b.name,'es'));
+    // Un aviso descartado no se debe contabilizar como aviso pendiente activo.
+    let dismissed=new Set();
+    try{const data=JSON.parse(localStorage.getItem('registroHolidayPendingDismissalsV1')||'[]');if(Array.isArray(data))dismissed=new Set(data)}catch(_){}
+    const activePlanned=planned.filter(p=>!dismissed.has([p.date,p.studentId,'missing'].join('|')));
     $('weeklyOverviewDates').textContent='Semana del '+format(monday)+' al '+format(thursday)+' · '+selectedYear;
-    const values=[['Impartidas',completed],['Faltas',absent],['Festivos',holidays],['Pendientes',planned.length]];
+    const values=[['Impartidas',completed],['Faltas',absent],['Festivos',holidays],['Pendientes',activePlanned.length]];
     $('weeklyOverviewStats').innerHTML=values.map(([title,num])=>'<div class="weekly-overview-stat"><strong>'+num+'</strong><span>'+title+'</span></div>').join('');
-    $('weeklyOverviewMissing').innerHTML=planned.length?planned.map(p=>'<div class="weekly-overview-missing-row"><button type="button" class="secondary weekly-pending-open" data-pending-student="'+escapeHtml(p.studentId)+'" data-pending-date="'+escapeHtml(p.date)+'" aria-label="Abrir clase pendiente: '+escapeHtml(p.name)+' · '+escapeHtml(p.date)+'">'+escapeHtml(p.date)+' · '+escapeHtml(p.time)+' · '+escapeHtml(p.name)+' <span aria-hidden="true">↗</span></button></div>').join(''):'<div>No hay clases pendientes según el horario actual y los registros disponibles.</div>';
+    $('weeklyOverviewMissing').innerHTML=activePlanned.length?activePlanned.map(p=>'<div class="weekly-overview-missing-row"><button type="button" class="secondary weekly-pending-open" data-pending-student="'+escapeHtml(p.studentId)+'" data-pending-date="'+escapeHtml(p.date)+'" aria-label="Abrir clase pendiente: '+escapeHtml(p.name)+' · '+escapeHtml(p.date)+'">'+escapeHtml(p.date)+' · '+escapeHtml(p.time)+' · '+escapeHtml(p.name)+' <span aria-hidden="true">↗</span></button></div>').join(''):'<div>No hay avisos pendientes activos en esta semana.</div>';
   }
   // Los pendientes son enlaces a la ficha de la clase, no simples textos.
   // No se guarda ni se modifica nada hasta que el docente pulse Guardar.
@@ -3617,7 +3624,7 @@ archivePanel();
 'use strict';
 const $=id=>document.getElementById(id);
 const status=$('integralBackupStatus'),preview=$('integralRestorePreview'),fileInput=$('integralRestoreFile');
-const VERSION='V11.2.6 · Revisión 24';
+const VERSION='V11.2.6 · Revisión 25';
 const DATA_KEYS=['oboeLessonsV2','oboeStudentsV1','oboeSchoolYearV1','registroClasesSettingsV1',
 'registroClasesSettingsMetaV1','registroClasesArchivosV1','registroClasesScheduleModeV1',
 'registroClasesScheduleSimulationV1','registroOboeCursoActivoV1','registroSyncAliasesV11',
@@ -3887,9 +3894,16 @@ function renderDay(date){
 }
 function refresh(){
  if(!by('pendingTracker'))return;
- const currentYear=year(); const cut=new Date();cut.setDate(cut.getDate()-42);
- let count=0;for(let d=new Date(cut);iso(d)<=today();d.setDate(d.getDate()+1)){const date=iso(d);if(yearOf(date)===currentYear&&isWorkingDay(date))count+=labelIssues(issues(date)).length}
- by('pendingSummary').textContent=count?`${count} aviso(s) recientes`:'Sin avisos recientes';
+ const currentYear=year();
+ // El contador representa pendientes activos de todo el curso, no los últimos 42 días.
+ // Para el curso ordinario en España se parte del 1 de septiembre.
+ const firstYear=Number(String(currentYear).slice(0,4));
+ const courseStart=Number.isFinite(firstYear)&&firstYear>2000?new Date(firstYear,8,1):new Date();
+ let count=0;
+ for(let d=new Date(courseStart);iso(d)<=today();d.setDate(d.getDate()+1)){
+  const date=iso(d);if(yearOf(date)===currentYear&&isWorkingDay(date))count+=labelIssues(issues(date)).length;
+ }
+ by('pendingSummary').textContent=count?`${count} aviso(s) pendiente(s)`:'Sin avisos pendientes';
  by('pendingSummary').style.color=count?'#a13a20':'#267241';
  by('pendingMonthLabel').textContent=month.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
  const grid=by('pendingMonthGrid');let html=['L','M','X','J','V','S','D'].map(d=>`<div class="pending-calendar-head">${d}</div>`).join('');
@@ -3925,7 +3939,7 @@ by('pendingDayDetails')?.addEventListener('click',e=>{
   return;
  }
  const set=new Set(read());if(button.dataset.dismiss)set.add(key);else set.delete(key);
- try{localStorage.setItem(KEY,JSON.stringify([...set]));if(typeof markLocalSyncDirty==='function')markLocalSyncDirty();refresh()}
+ try{localStorage.setItem(KEY,JSON.stringify([...set]));if(typeof markLocalSyncDirty==='function')markLocalSyncDirty();refresh();if(typeof window.refreshWeeklyOverview==='function')window.refreshWeeklyOverview()}
  catch(err){alert('No se ha podido guardar el cambio del aviso: '+err.message)}
 });
 by('pendingTracker')?.addEventListener('toggle',()=>{if(by('pendingTracker').open)refresh()});
