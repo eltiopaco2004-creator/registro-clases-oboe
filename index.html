@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV29 · Informe detallado de cambios</title><style>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV30 · Cartel de versión plegable</title><style>
 body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-width:720px;margin:auto;padding:16px}.card{background:white;border:1px solid #ddd;border-radius:16px;padding:16px;margin:12px 0}label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:10px;font:inherit}textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{border:0;border-radius:10px;padding:10px 13px;margin:6px 4px 0 0;font-weight:700;max-width:100%;white-space:normal}.primary{background:#2f5d50;color:#fff}.secondary{background:#dfe9e4;color:#2f5d50}.danger{background:#f3dddd;color:#a44242}.item{border-top:1px solid #ddd;padding:12px 0}.muted{color:#69716d;font-size:12px}.grade{float:right;font-size:20px;font-weight:800;color:#2f5d50}.hidden{display:none}.rec{padding:10px;background:#f7f7f4;border-radius:10px;margin-top:8px}
 .rating-group{margin:12px 0}.rating-title{font-weight:700;font-size:13px;margin-bottom:6px}
 .rating-buttons{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;width:100%}
@@ -564,16 +564,25 @@ body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40
 .pending-legend{font-size:11px;color:#526b82;margin-top:8px;line-height:1.5}
 @media(max-width:550px){.pending-calendar-grid{gap:3px}.pending-calendar-day{min-height:42px!important}.pending-row{align-items:flex-start;flex-direction:column}}
 </style>
+<style id="rev30-version-banner-state">
+#buildVersionBanner .rev30-banner-close{grid-column:1/-1!important;justify-self:end!important;grid-row:auto!important;background:#e4efff!important;color:#10365a!important;border:1px solid #94b8df!important;border-radius:8px!important;padding:7px 13px!important;font-weight:750!important;cursor:pointer!important;min-height:38px!important}
+#rev30VersionReopen{display:none;align-items:center;justify-content:flex-start;margin:0 0 10px;padding:0}
+#rev30VersionReopen button{background:#edf4fc;color:#17436d;border:1px solid #9db9d5;border-radius:9px;padding:7px 12px;min-height:36px;font-weight:700;cursor:pointer}
+body.rev30-banner-collapsed #buildVersionBanner{display:none!important}
+body.rev30-banner-collapsed #rev30VersionReopen{display:flex!important}
+</style>
 </head><body><div class="wrap">
-<div id="buildVersionBanner" role="status" aria-label="Versión de prueba y novedades incluidas">
+<div id="rev30VersionReopen"><button type="button" id="rev30BannerOpen" aria-controls="buildVersionBanner" aria-expanded="false">▸ Ver versión y novedades</button></div>
+<div id="buildVersionBanner" role="region" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
-  <strong>V11.2.6 · REVISIÓN 27</strong>
-  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> informe detallado de cambios enviados y recibidos: alumnos, clases, notas, asistencia, fichas, calendario, ajustes, cursos y eliminaciones. Muestra registros y campos modificados; permite descargar el detalle. Mantiene la Revisión 28 y requiere validación real entre dispositivos.</div>
+  <strong>V11.2.6 · REVISIÓN 30</strong>
+  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> cartel azul desplegado al estrenarse; botón para cerrarlo y recordar la preferencia hasta volver a abrirlo. Se conserva el informe detallado de cambios enviados y recibidos: alumnos, clases, notas, asistencia, fichas, calendario, ajustes, cursos y eliminaciones. Muestra registros y campos modificados; permite descargar el detalle. Mantiene la Revisión 28 y requiere validación real entre dispositivos.</div>
   <div class="build-version-changes"><b>FUNCIONES ACUMULADAS:</b> altas y bajas de alumnos, borrado definitivo protegido, festivos, tareas anteriores, informes de sincronización y sincronización automática opcional.</div>
   <div class="build-version-caution">⚠️ PRUEBA: antes de sincronizar crea una copia integral del navegador con más información. No sincronices aún desde versiones anteriores. Después de recuperar datos en otro navegador, recarga la página.</div>
+  <button type="button" class="rev30-banner-close" id="rev30BannerClose" aria-controls="buildVersionBanner" aria-expanded="true">✕ Cerrar este aviso</button>
 </div>
 <div id="rev19AuxStatus" role="status" style="font-size:12px;color:#15416b;margin:6px 0 12px"></div>
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Rev. 29 · Informe completo de cambios · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Rev. 30 · Cartel de novedades plegable · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -2437,7 +2446,7 @@ function updateForToday(){
  function rev29WriteReport(localBefore,cloudBefore,verified){
   const outgoing=rev29Difference(cloudBefore,verified,'Enviados a Supabase');
   const incoming=rev29Difference(localBefore,verified,'Recibidos en este dispositivo');
-  const report={at:new Date().toISOString(),version:'V11.2.6 REV29',outgoing,incoming};
+  const report={at:new Date().toISOString(),version:'V11.2.6 REV30',outgoing,incoming};
   try{localStorage.setItem(REV29_REPORT_KEY,JSON.stringify(report));}catch(err){console.warn('El informe detallado excede el almacenamiento disponible:',err);}
   return report;
  }
@@ -3744,7 +3753,7 @@ archivePanel();
 'use strict';
 const $=id=>document.getElementById(id);
 const status=$('integralBackupStatus'),preview=$('integralRestorePreview'),fileInput=$('integralRestoreFile');
-const VERSION='V11.2.6 · Revisión 25';
+const VERSION='V11.2.6 · Revisión 30';
 const DATA_KEYS=['oboeLessonsV2','oboeStudentsV1','oboeSchoolYearV1','registroClasesSettingsV1',
 'registroClasesSettingsMetaV1','registroClasesArchivosV1','registroClasesScheduleModeV1',
 'registroClasesScheduleSimulationV1','registroOboeCursoActivoV1','registroSyncAliasesV11',
@@ -4159,6 +4168,32 @@ setTimeout(refresh,500);window.refreshPendingCalendar=refresh;
  window.__showDetailedSyncV29=(r)=>{current=r;content.textContent=format(r);title.textContent='🔎 Cambios de esta sincronización ('+(r.outgoing.entries.length+r.incoming.entries.length)+' detalles)';};
  download.onclick=()=>{const data=format(current);const blob=new Blob([data],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Informe_Sincronizacion_Registro_Oboe_'+(current?.at||new Date().toISOString()).slice(0,10)+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);};
  if(current)window.__showDetailedSyncV29(current);
+})();
+</script>
+<script id="rev30-banner-persistence">
+(function(){
+  'use strict';
+  const key='registroOboeBannerCerradoV1';
+  const banner=document.getElementById('buildVersionBanner');
+  const closeBtn=document.getElementById('rev30BannerClose');
+  const openBtn=document.getElementById('rev30BannerOpen');
+  if(!banner||!closeBtn||!openBtn)return;
+  let closed=false;
+  try{closed=window.localStorage.getItem(key)==='1';}catch(e){}
+  function paint(){
+    document.body.classList.toggle('rev30-banner-collapsed',closed);
+    banner.setAttribute('aria-hidden',String(closed));
+    closeBtn.setAttribute('aria-expanded',String(!closed));
+    openBtn.setAttribute('aria-expanded',String(!closed));
+  }
+  function setClosed(value){
+    closed=value;
+    try{window.localStorage.setItem(key,closed?'1':'0');}catch(e){}
+    paint();
+  }
+  closeBtn.addEventListener('click',()=>setClosed(true));
+  openBtn.addEventListener('click',()=>setClosed(false));
+  paint();
 })();
 </script>
 </body></html>
