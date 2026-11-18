@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV30 · Cartel de versión plegable</title><style>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV31 · Verificación y recuperación</title><style>
 body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-width:720px;margin:auto;padding:16px}.card{background:white;border:1px solid #ddd;border-radius:16px;padding:16px;margin:12px 0}label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:10px;font:inherit}textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{border:0;border-radius:10px;padding:10px 13px;margin:6px 4px 0 0;font-weight:700;max-width:100%;white-space:normal}.primary{background:#2f5d50;color:#fff}.secondary{background:#dfe9e4;color:#2f5d50}.danger{background:#f3dddd;color:#a44242}.item{border-top:1px solid #ddd;padding:12px 0}.muted{color:#69716d;font-size:12px}.grade{float:right;font-size:20px;font-weight:800;color:#2f5d50}.hidden{display:none}.rec{padding:10px;background:#f7f7f4;border-radius:10px;margin-top:8px}
 .rating-group{margin:12px 0}.rating-title{font-weight:700;font-size:13px;margin-bottom:6px}
 .rating-buttons{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;width:100%}
@@ -575,8 +575,8 @@ body.rev30-banner-collapsed #rev30VersionReopen{display:flex!important}
 <div id="rev30VersionReopen"><button type="button" id="rev30BannerOpen" aria-controls="buildVersionBanner" aria-expanded="false">▸ Ver versión y novedades</button></div>
 <div id="buildVersionBanner" role="region" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
-  <strong>V11.2.6 · REVISIÓN 30</strong>
-  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> cartel azul desplegado al estrenarse; botón para cerrarlo y recordar la preferencia hasta volver a abrirlo. Se conserva el informe detallado de cambios enviados y recibidos: alumnos, clases, notas, asistencia, fichas, calendario, ajustes, cursos y eliminaciones. Muestra registros y campos modificados; permite descargar el detalle. Mantiene la Revisión 28 y requiere validación real entre dispositivos.</div>
+  <strong>V11.2.6 · REVISIÓN 31</strong>
+  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> cartel azul desplegado al estrenarse; botón para cerrarlo y recordar la preferencia hasta volver a abrirlo. Se conserva el sincronización verificada e historial de copias recuperables; control de integridad y restauración protegida: alumnos, clases, notas, asistencia, fichas, calendario, ajustes, cursos y eliminaciones. Muestra registros y campos modificados; permite descargar el detalle. Mantiene la Revisión 28 y requiere validación real entre dispositivos.</div>
   <div class="build-version-changes"><b>FUNCIONES ACUMULADAS:</b> altas y bajas de alumnos, borrado definitivo protegido, festivos, tareas anteriores, informes de sincronización y sincronización automática opcional.</div>
   <div class="build-version-caution">⚠️ PRUEBA: antes de sincronizar crea una copia integral del navegador con más información. No sincronices aún desde versiones anteriores. Después de recuperar datos en otro navegador, recarga la página.</div>
   <button type="button" class="rev30-banner-close" id="rev30BannerClose" aria-controls="buildVersionBanner" aria-expanded="true">✕ Cerrar este aviso</button>
@@ -2351,6 +2351,46 @@ function updateForToday(){
  // Rev29: compare verified complete states, not merely button counters.
  // Field-level report deliberately excludes values of private notes, contact details
  // and passwords: it identifies the record and fields that changed.
+ const REV31_HISTORY_LIMIT=3;
+ const REV31_EPOCH_KEY='registroCloudRestoreEpochV31';
+ function rev31Core(payload){
+  const x=JSON.parse(JSON.stringify(payload||{}));delete x.recoveryHistory;delete x.recoverySnapshots;return x;
+ }
+ function rev31Stable(x){
+  if(Array.isArray(x))return x.map(rev31Stable);
+  if(x&&typeof x==='object')return Object.fromEntries(Object.keys(x).sort().map(k=>[k,rev31Stable(x[k])]));
+  return x;
+ }
+ async function rev31Sha(data){
+  if(!globalThis.crypto?.subtle)throw Error('Se necesita HTTPS y un navegador que admita SHA-256 para el historial.');
+  const bytes=new TextEncoder().encode(JSON.stringify(rev31Stable(data)));
+  const digest=await crypto.subtle.digest('SHA-256',bytes);
+  return Array.from(new Uint8Array(digest),x=>x.toString(16).padStart(2,'0')).join('');
+ }
+ async function rev31Snapshot(payload,at){
+  const data=rev31Core(payload);
+  return {at:at||new Date().toISOString(),sha256:await rev31Sha(data),counts:{students:data.students?.length||0,lessons:data.lessons?.length||0,festivos:Object.keys(data.auxiliaryState||{}).filter(k=>/holiday/i.test(k)).length},data};
+ }
+ function rev31SameData(a,b){return JSON.stringify(rev31Stable(rev31Core(a)))===JSON.stringify(rev31Stable(rev31Core(b)));}
+ async function rev31PrepareHistory(cloud,combined){
+  const previous=Array.isArray(cloud?.recoveryHistory)?cloud.recoveryHistory.slice(0,REV31_HISTORY_LIMIT):[];
+  if(cloud&&!rev31SameData(cloud,combined)){
+   const snapshot=await rev31Snapshot(cloud);
+   const filtered=previous.filter(x=>x?.sha256!==snapshot.sha256);
+   combined.recoveryHistory=[snapshot,...filtered].slice(0,REV31_HISTORY_LIMIT);
+  }else combined.recoveryHistory=previous;
+  if(cloud?.rev31RestoreEpoch)combined.rev31RestoreEpoch=cloud.rev31RestoreEpoch;
+  return combined;
+ }
+ async function rev31VerifyHistory(expected,actual){
+  if(!Array.isArray(actual?.recoveryHistory)||actual.recoveryHistory.length!==(expected.recoveryHistory||[]).length)
+   throw Error('Supabase no ha confirmado el historial de versiones completo.');
+  for(const item of actual.recoveryHistory){
+   if(!item?.data||await rev31Sha(item.data)!==item.sha256)throw Error('Una versión histórica no pasa la verificación SHA-256.');
+  }
+  if(expected.rev31RestoreEpoch!==actual.rev31RestoreEpoch)throw Error('No coincide la marca de recuperación.');
+ }
+ window.__rev31Recovery={sha:rev31Sha,snapshot:rev31Snapshot,prepare:rev31PrepareHistory,verify:rev31VerifyHistory,core:rev31Core};
  const REV29_REPORT_KEY='registroSyncDetailedReportV29';
  function rev29Shape(x){
   if(Array.isArray(x))return x.map(rev29Shape);
@@ -2446,7 +2486,7 @@ function updateForToday(){
  function rev29WriteReport(localBefore,cloudBefore,verified){
   const outgoing=rev29Difference(cloudBefore,verified,'Enviados a Supabase');
   const incoming=rev29Difference(localBefore,verified,'Recibidos en este dispositivo');
-  const report={at:new Date().toISOString(),version:'V11.2.6 REV30',outgoing,incoming};
+  const report={at:new Date().toISOString(),version:'V11.2.6 REV31',outgoing,incoming};
   try{localStorage.setItem(REV29_REPORT_KEY,JSON.stringify(report));}catch(err){console.warn('El informe detallado excede el almacenamiento disponible:',err);}
   return report;
  }
@@ -2479,6 +2519,7 @@ function updateForToday(){
     const get=await syncRequest('GET',path+'&select=data,updated_at&limit=2');
     if(!get.ok)throw new Error('No se ha podido descargar el registro ('+get.status+').');
     const rows=await get.json();if(!Array.isArray(rows)||rows.length>1)throw new Error('La nube devuelve más de un registro para esta cuenta. Es necesaria una revisión de la tabla.');const remote=rows[0]||null,cloud=remote?.data||null;
+    if(cloud?.rev31RestoreEpoch&&localStorage.getItem(REV31_EPOCH_KEY)!==cloud.rev31RestoreEpoch&&(students.length||lessons.length)&&localStorage.getItem('registroSyncBaseV11'))throw Error('La nube fue restaurada desde una versión anterior en otro dispositivo. Este navegador conserva datos anteriores: no se enviarán. Haz una copia integral y utiliza «Recuperar versión actual de la nube» en el historial.');
     validateCollections(syncPayload());if(cloud)validateCollections(cloud);
     // Recover an already-known lesson linkage only from its stable lesson ID
     // and matching pupil name; never infer a different pupil from level alone.
@@ -2505,6 +2546,7 @@ function updateForToday(){
     const auxItemsCloudBefore=cloud?.auxiliaryState||{};
     const savedStudents=students,savedLessons=lessons;let combined;
     try{students=students.map(x=>resolveRecord('students',x));lessons=lessons.map(x=>resolveRecord('lessons',x));const resolvedCloud=cloud?{...cloud,students:cloud.students.map(x=>resolveRecord('students',x)),lessons:cloud.lessons.map(x=>resolveRecord('lessons',x))}:null;combined=mergedSyncPayload(resolvedCloud);}finally{students=savedStudents;lessons=savedLessons;}
+    await rev31PrepareHistory(cloud,combined);
     const nextStamp=new Date(Math.max(Date.now(),(Date.parse(remote?.updated_at)||0)+1)).toISOString();
     const filter=remote?(remote.updated_at?'&updated_at=eq.'+encodeURIComponent(remote.updated_at):'&updated_at=is.null'):'';
     const response=remote
@@ -2519,6 +2561,7 @@ function updateForToday(){
     if(!check.ok)throw new Error('La escritura no se ha podido verificar.');
     const checked=await check.json();if(!Array.isArray(checked)||checked.length!==1)throw new Error('La nube no ha confirmado un único registro de esta cuenta.');const after=checked[0];const result=verify(combined,after?.data);
     if(!result.ok)throw new Error(result.reason+' No se marca la sincronización como completada.');
+    await rev31VerifyHistory(combined,after.data);
     if(fingerprint!==localFingerprint()){
      markLocalSyncDirty();syncMsg('La copia enviada se ha verificado. Hay cambios nuevos en este dispositivo; vuelve a sincronizar.');return;
     }
@@ -2529,6 +2572,7 @@ function updateForToday(){
     if(localStorage.getItem(SK)!==JSON.stringify(students)||localStorage.getItem(LK)!==JSON.stringify(lessons))throw new Error('La copia remota se ha verificado, pero el navegador no ha podido guardar toda la copia local. No cierres esta pestaña hasta exportarla o volver a sincronizar.');
     const identityAliases=aliases();for(const s of students){const remoteStudent=after.data.students.find(r=>String(r.id)===wireId(s.id)||mergeKey(r.name,r.course)===mergeKey(s.name,s.course));if(remoteStudent)identityAliases[String(s.id)]=String(remoteStudent.id);}localStorage.setItem('registroSyncAliasesV11',JSON.stringify(identityAliases));
     localStorage.setItem('registroSyncBaseV11',JSON.stringify(after.data));
+    if(after.data.rev31RestoreEpoch)localStorage.setItem(REV31_EPOCH_KEY,after.data.rev31RestoreEpoch);
     decisions.clear();document.getElementById('syncConflictReview')?.remove();
     // Preserve the checked change summary BEFORE clearing local pending counters.
     const syncDiff=(before,items)=>({added:items.filter(x=>!before.has(String(x.id))).length,removed:[...before].filter(id=>!items.some(x=>String(x.id)===id)).length});
@@ -3753,7 +3797,7 @@ archivePanel();
 'use strict';
 const $=id=>document.getElementById(id);
 const status=$('integralBackupStatus'),preview=$('integralRestorePreview'),fileInput=$('integralRestoreFile');
-const VERSION='V11.2.6 · Revisión 30';
+const VERSION='V11.2.6 · Revisión 31';
 const DATA_KEYS=['oboeLessonsV2','oboeStudentsV1','oboeSchoolYearV1','registroClasesSettingsV1',
 'registroClasesSettingsMetaV1','registroClasesArchivosV1','registroClasesScheduleModeV1',
 'registroClasesScheduleSimulationV1','registroOboeCursoActivoV1','registroSyncAliasesV11',
@@ -4168,6 +4212,128 @@ setTimeout(refresh,500);window.refreshPendingCalendar=refresh;
  window.__showDetailedSyncV29=(r)=>{current=r;content.textContent=format(r);title.textContent='🔎 Cambios de esta sincronización ('+(r.outgoing.entries.length+r.incoming.entries.length)+' detalles)';};
  download.onclick=()=>{const data=format(current);const blob=new Blob([data],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Informe_Sincronizacion_Registro_Oboe_'+(current?.at||new Date().toISOString()).slice(0,10)+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);};
  if(current)window.__showDetailedSyncV29(current);
+})();
+</script>
+<style id="rev31-recovery-style">
+#rev31Panel{margin:12px 0;padding:14px;border:1px solid #abc4de;border-radius:12px;background:#f7fbff;color:#183a5d}
+#rev31Panel button{margin:5px 5px 5px 0;min-height:38px}
+#rev31Panel .rev31-entry{padding:10px;margin-top:8px;background:#fff;border:1px solid #d6e1ef;border-radius:9px}
+#rev31Panel .rev31-status{font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere}
+#rev31Panel .rev31-warning{color:#8a321e;font-weight:650}
+</style>
+<script id="rev31-recovery-ui">
+(function(){
+ 'use strict';
+ const anchor=document.getElementById('syncDetails');if(!anchor)return;
+ const panel=document.createElement('section');panel.id='rev31Panel';panel.setAttribute('aria-label','Copias verificadas de Supabase');
+ panel.innerHTML='<strong>🛡️ Estado de la nube y recuperación de versiones</strong><p>Consulta versiones completas guardadas en Supabase. La recuperación requiere confirmación y conserva una copia preventiva.</p><button type="button" id="rev31HistoryBtn" class="secondary">🔎 Comprobar nube y ver versiones</button><div class="rev31-status" id="rev31Status" role="status"></div><div id="rev31Entries"></div>';
+ anchor.after(panel);
+ const status=panel.querySelector('#rev31Status'),entries=panel.querySelector('#rev31Entries');
+ const $=id=>document.getElementById(id);
+ const core=x=>window.__rev31Recovery.core(x);
+ const sha=x=>window.__rev31Recovery.sha(x);
+ const snapshot=(x,t)=>window.__rev31Recovery.snapshot(x,t);
+ const date=s=>new Date(s).toLocaleString('es-ES');
+ const path=()=>`/rest/v1/${SYNC_TABLE}?user_id=eq.${encodeURIComponent(currentUserId())}`;
+ const clone=x=>JSON.parse(JSON.stringify(x));
+ function dl(data,name){const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(b),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(url)},4000);}
+ async function fetchOne(){
+  if(!currentUserId()||!accessToken)throw Error('Inicia sesión antes de consultar versiones.');
+  const r=await syncRequest('GET',path()+'&select=data,updated_at&limit=2');
+  if(!r.ok)throw Error('No se ha podido leer Supabase (HTTP '+r.status+').');
+  const rows=await r.json();if(!Array.isArray(rows)||rows.length!==1)throw Error('No existe un registro único verificado en esta cuenta.');
+  return rows[0];
+ }
+ async function fetchVersions(){
+  const row=await fetchOne(),latest=await snapshot(row.data,row.updated_at);
+  const history=Array.isArray(row.data.recoveryHistory)?row.data.recoveryHistory:[];
+  for(const v of history){if(!v?.data||!v?.sha256||await sha(v.data)!==v.sha256)throw Error('El historial contiene una copia dañada: no se permite restaurar.');}
+  return {row,versions:[latest,...history],latest};
+ }
+ function forceLocal(payload,epoch){
+  // Exact replacement is intentional only after a user-approved server restoration.
+  const x=core(payload),required=['students','lessons','appSettings','deletedStudentKeys','deletedLessonIds'];
+  for(const k of required)if(!(k in x))throw Error('Falta un dato obligatorio en la copia: '+k);
+  if(!Array.isArray(x.students)||!Array.isArray(x.lessons)||!Array.isArray(x.deletedStudentKeys)||!Array.isArray(x.deletedLessonIds)||!x.appSettings||typeof x.appSettings!=='object')throw Error('Formato de copia incorrecto.');
+  const aux=x.auxiliaryState||{};
+  const prior=JSON.parse(localStorage.getItem('registroCloudAuxMetaV1')||'{}');
+  for(const k of new Set([...Object.keys(prior),...Object.keys(aux)])){
+   if(!(/^(registroOboeGmailPrefsV1|registroClasesScheduleModeV1|registroClasesScheduleSimulationV1|oboeArchivoCursosV1_|oboeCambioCursoBorradorRev04_|registroOboeCierreAcademicoBorradorV1_|registroCierre|registroCurso|registroProximoCurso|registroAcademic|registroHoliday|registroNonTeaching|registroYear)/.test(k)))continue;
+   if(/token|password|secret|auth|session|supabase/i.test(k))continue;
+   if(!Object.prototype.hasOwnProperty.call(aux,k)||aux[k].value===null)localStorage.removeItem(k);
+   else localStorage.setItem(k,String(aux[k].value));
+  }
+  localStorage.setItem('registroCloudAuxMetaV1',JSON.stringify(aux));
+  localStorage.setItem(SK,JSON.stringify(x.students));localStorage.setItem(LK,JSON.stringify(x.lessons));
+  localStorage.setItem(SETK,JSON.stringify(x.appSettings));localStorage.setItem('registroClasesSettingsMetaV1',String(x.settingsUpdatedAt||0));
+  localStorage.setItem('registroSyncDeletedStudentsV1',JSON.stringify(x.deletedStudentKeys));
+  localStorage.setItem('registroSyncDeletedLessonsV1',JSON.stringify(x.deletedLessonIds));
+  if(x.schoolYear){localStorage.setItem('oboeSchoolYearV1',x.schoolYear);localStorage.setItem('registroOboeCursoActivoV1',x.schoolYear);}
+  localStorage.setItem('registroSyncBaseV11',JSON.stringify(payload));
+  localStorage.setItem('registroCloudRestoreEpochV31',epoch||'');
+  localStorage.setItem('registroAutoSyncEnabledV1126','0');
+  localStorage.setItem('registroSyncMetaV1',JSON.stringify({lastSyncAt:new Date().toISOString(),localDirty:false}));
+  localStorage.removeItem('registroSyncChangesV1');
+ }
+ async function show(){
+  entries.replaceChildren();status.textContent='Consultando Supabase y verificando integridad…';
+  const {row,versions}=await fetchVersions();
+  status.textContent=`Nube verificada: ${date(row.updated_at)} · ${row.data.students.length} alumnos · ${row.data.lessons.length} clases · ${versions.length} estados recuperables (incluido el actual).`;
+  for(const [i,item] of versions.entries()){
+   const div=document.createElement('div');div.className='rev31-entry';
+   const heading=document.createElement('div');heading.textContent=`${i===0?'Estado actual':'Versión anterior '+i} · ${date(item.at)} · ${item.counts.students} alumnos · ${item.counts.lessons} clases`;div.append(heading);
+   const hash=document.createElement('small');hash.textContent='SHA-256 '+item.sha256.slice(0,16)+'…';div.append(hash,document.createElement('br'));
+   const dlBtn=document.createElement('button');dlBtn.type='button';dlBtn.className='secondary';dlBtn.textContent='⬇ Descargar copia verificada';
+   dlBtn.onclick=async()=>{try{if(await sha(item.data)!==item.sha256)throw Error('Error de integridad.');dl({format:'oboe-cloud-snapshot-v31',at:item.at,sha256:item.sha256,payload:item.data},'Registro_Oboe_NUBE_'+item.at.slice(0,10)+'_'+i+'.json');}catch(err){status.textContent='❌ '+err.message;}};div.append(dlBtn);
+   if(i>0){const restore=document.createElement('button');restore.type='button';restore.textContent='↩ Restaurar esta versión';restore.className='secondary';restore.onclick=()=>restoreVersion(item);div.append(restore);}
+   entries.append(div);
+  }
+  if(row.data.rev31RestoreEpoch&&localStorage.getItem('registroCloudRestoreEpochV31')!==row.data.rev31RestoreEpoch){
+   const recover=document.createElement('button');recover.type='button';recover.textContent='Recuperar versión actual de la nube';recover.onclick=()=>adoptCurrent();entries.prepend(recover);
+   status.textContent+='\n⚠️ Este dispositivo conserva un estado anterior a una restauración. No sincronices hasta recuperarlo.';
+  }
+ }
+ async function adoptCurrent(){
+  try{
+   if($('syncBtn').disabled)throw Error('Hay una sincronización en marcha.');
+   const {row}=await fetchVersions();
+   if(!row.data.rev31RestoreEpoch)throw Error('No hay una restauración pendiente.');
+   const local={students:JSON.parse(localStorage.getItem(SK)||'[]'),lessons:JSON.parse(localStorage.getItem(LK)||'[]')};
+   if(!confirm('Se sustituirán los datos locales de este navegador por el estado actual de Supabase. Se descargará antes una copia local. ¿Continuar?'))return;
+   dl(local,'Registro_Oboe_LOCAL_ANTES_DE_RECUPERAR.json');
+   forceLocal(row.data,row.data.rev31RestoreEpoch);
+   status.textContent='Estado recuperado. Recargando…';location.reload();
+  }catch(e){status.textContent='❌ '+e.message;}
+ }
+ async function restoreVersion(item){
+  try{
+   if($('syncBtn').disabled)throw Error('Espera a que termine la sincronización.');
+   if(syncDirty())throw Error('Tienes cambios locales pendientes. Descarga la copia integral y sincroniza antes de restaurar.');
+   status.textContent='Comprobando que la copia histórica es válida…';
+   if(await sha(item.data)!==item.sha256)throw Error('La copia no supera SHA-256.');
+   const {row,versions,latest}=await fetchVersions();
+   if(!versions.some(v=>v.sha256===item.sha256&&v.at===item.at))throw Error('El historial ha cambiado. Vuelve a consultar las versiones.');
+   if(item.sha256===latest.sha256)throw Error('Esa ya es la versión actual.');
+   const answer=prompt('ATENCIÓN: sustituirá el registro EN SUPABASE y en este dispositivo por el estado del '+date(item.at)+'. Se conserva el estado actual en el historial. Otros dispositivos deben actualizarse. Escribe RESTAURAR para continuar:');
+   if(answer!=='RESTAURAR'){status.textContent='Restauración cancelada. No se ha modificado nada.';return;}
+   const safety=await snapshot(row.data,row.updated_at);
+   dl({format:'oboe-cloud-snapshot-v31',at:safety.at,sha256:safety.sha256,payload:safety.data},'Registro_Oboe_ANTES_DE_RESTAURAR_NUBE.json');
+   const epoch=crypto.randomUUID?.()||String(Date.now());
+   const next=clone(core(item.data));next.rev31RestoreEpoch=epoch;
+   next.recoveryHistory=[safety,...(row.data.recoveryHistory||[]).filter(v=>v.sha256!==safety.sha256)].slice(0,REV31_HISTORY_LIMIT);
+   const stamp=new Date(Math.max(Date.now(),Date.parse(row.updated_at)+1)).toISOString();
+   const patch=await syncRequest('PATCH',path()+'&updated_at=eq.'+encodeURIComponent(row.updated_at),{data:next,updated_at:stamp},{headers:{Prefer:'return=representation'}});
+   if(!patch.ok)throw Error('Supabase ha rechazado la restauración ('+patch.status+').');
+   const result=await patch.json();if(!Array.isArray(result)||result.length!==1)throw Error('El estado de la nube cambió; no se sobrescribió. Revisa antes de reintentar.');
+   const check=await fetchOne();
+   if(check.data.rev31RestoreEpoch!==epoch||await sha(core(check.data))!==await sha(core(next)))throw Error('La restauración no se ha podido verificar. Conserva la copia preventiva y no sincronices.');
+   for(const v of check.data.recoveryHistory||[])if(await sha(v.data)!==v.sha256)throw Error('Una versión del historial no supera la verificación.');
+   forceLocal(check.data,epoch);
+   status.textContent='✅ Restauración verificada en Supabase. Se ha desactivado la sincronización automática. Recargando…';
+   location.reload();
+  }catch(e){status.textContent='❌ '+e.message;}
+ }
+ panel.querySelector('#rev31HistoryBtn').onclick=()=>show().catch(e=>{status.textContent='❌ '+e.message;});
 })();
 </script>
 <script id="rev30-banner-persistence">
