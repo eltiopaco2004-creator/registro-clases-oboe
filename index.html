@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV31 · Verificación y recuperación</title><style>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV32 · Periodos e informes trimestrales</title><style>
 body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-width:720px;margin:auto;padding:16px}.card{background:white;border:1px solid #ddd;border-radius:16px;padding:16px;margin:12px 0}label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:10px;font:inherit}textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{border:0;border-radius:10px;padding:10px 13px;margin:6px 4px 0 0;font-weight:700;max-width:100%;white-space:normal}.primary{background:#2f5d50;color:#fff}.secondary{background:#dfe9e4;color:#2f5d50}.danger{background:#f3dddd;color:#a44242}.item{border-top:1px solid #ddd;padding:12px 0}.muted{color:#69716d;font-size:12px}.grade{float:right;font-size:20px;font-weight:800;color:#2f5d50}.hidden{display:none}.rec{padding:10px;background:#f7f7f4;border-radius:10px;margin-top:8px}
 .rating-group{margin:12px 0}.rating-title{font-weight:700;font-size:13px;margin-bottom:6px}
 .rating-buttons{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;width:100%}
@@ -575,14 +575,14 @@ body.rev30-banner-collapsed #rev30VersionReopen{display:flex!important}
 <div id="rev30VersionReopen"><button type="button" id="rev30BannerOpen" aria-controls="buildVersionBanner" aria-expanded="false">▸ Ver versión y novedades</button></div>
 <div id="buildVersionBanner" role="region" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
-  <strong>V11.2.6 · REVISIÓN 31</strong>
-  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> cartel azul desplegado al estrenarse; botón para cerrarlo y recordar la preferencia hasta volver a abrirlo. Se conserva el sincronización verificada e historial de copias recuperables; control de integridad y restauración protegida: alumnos, clases, notas, asistencia, fichas, calendario, ajustes, cursos y eliminaciones. Muestra registros y campos modificados; permite descargar el detalle. Mantiene la Revisión 28 y requiere validación real entre dispositivos.</div>
+  <strong>V11.2.6 · REVISIÓN 32</strong>
+  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> configuración de los tres trimestres por curso académico con validación de fechas, sin solapamientos y con sincronización mediante Supabase; informes trimestrales por alumno con notas, asistencias, observaciones y últimos objetivos, con vista previa, descarga e impresión. Se mantienen la sincronización verificada y el historial recuperable de Revisión 31.</div>
   <div class="build-version-changes"><b>FUNCIONES ACUMULADAS:</b> altas y bajas de alumnos, borrado definitivo protegido, festivos, tareas anteriores, informes de sincronización y sincronización automática opcional.</div>
   <div class="build-version-caution">⚠️ PRUEBA: antes de sincronizar crea una copia integral del navegador con más información. No sincronices aún desde versiones anteriores. Después de recuperar datos en otro navegador, recarga la página.</div>
   <button type="button" class="rev30-banner-close" id="rev30BannerClose" aria-controls="buildVersionBanner" aria-expanded="true">✕ Cerrar este aviso</button>
 </div>
 <div id="rev19AuxStatus" role="status" style="font-size:12px;color:#15416b;margin:6px 0 12px"></div>
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Rev. 30 · Cartel de novedades plegable · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Rev. 32 · Evaluaciones trimestrales · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -719,6 +719,30 @@ body.rev30-banner-collapsed #rev30VersionReopen{display:flex!important}
     <button type="button" class="primary" id="saveAcademicTeachingDates">💾 Guardar fechas del curso</button>
     <div id="academicTeachingDatesStatus" class="muted" role="status" aria-live="polite"></div>
     <p class="muted" style="font-size:12px">Se guarda por curso académico y se incluye en la configuración sincronizada con Supabase. Los avisos descartados no se borran al cambiar estas fechas.</p>
+  </div>
+
+  <div class="config-section-block" id="rev32Evaluations">
+    <h3>📊 Periodos e informes de evaluación trimestral</h3>
+    <p class="muted">Configura las fechas para el curso seleccionado. Se guardan por curso académico dentro de la configuración sincronizada con Supabase. No altera las clases ni calcula una nota final oficial.</p>
+    <div id="rev32PeriodFields"></div>
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+      <button type="button" class="primary" id="rev32SavePeriods">💾 Guardar periodos</button>
+      <button type="button" class="secondary" id="rev32FillPeriods">Proponer fechas orientativas</button>
+    </div>
+    <div class="muted" id="rev32PeriodStatus" role="status" aria-live="polite"></div>
+    <hr>
+    <h4>Informe trimestral de un alumno</h4>
+    <div class="holiday-grid">
+      <div><label for="rev32Student">Alumno</label><select id="rev32Student"></select></div>
+      <div><label for="rev32Quarter">Periodo</label><select id="rev32Quarter"><option value="0">1.º trimestre</option><option value="1">2.º trimestre</option><option value="2">3.º trimestre</option></select></div>
+    </div>
+    <button type="button" class="secondary" id="rev32Preview">📋 Generar vista previa</button>
+    <div id="rev32Report" hidden style="margin-top:12px;padding:12px;border:1px solid #adb9c9;border-radius:9px;white-space:pre-wrap;line-height:1.6"></div>
+    <div class="row" id="rev32ReportActions" hidden style="gap:8px;flex-wrap:wrap;margin-top:8px">
+      <button type="button" class="secondary" id="rev32Download">⬇️ Descargar informe TXT</button>
+      <button type="button" class="secondary" id="rev32Print">🖨️ Imprimir informe</button>
+    </div>
+    <p class="muted" style="font-size:12px">El informe muestra las observaciones y tareas ya registradas, sin generar juicios automáticos. Revisa el texto antes de utilizarlo en una evaluación.</p>
   </div>
 
   <div class="config-section-block" id="nonTeachingCalendar">
@@ -2486,7 +2510,7 @@ function updateForToday(){
  function rev29WriteReport(localBefore,cloudBefore,verified){
   const outgoing=rev29Difference(cloudBefore,verified,'Enviados a Supabase');
   const incoming=rev29Difference(localBefore,verified,'Recibidos en este dispositivo');
-  const report={at:new Date().toISOString(),version:'V11.2.6 REV31',outgoing,incoming};
+  const report={at:new Date().toISOString(),version:'V11.2.6 REV32',outgoing,incoming};
   try{localStorage.setItem(REV29_REPORT_KEY,JSON.stringify(report));}catch(err){console.warn('El informe detallado excede el almacenamiento disponible:',err);}
   return report;
  }
@@ -3797,7 +3821,7 @@ archivePanel();
 'use strict';
 const $=id=>document.getElementById(id);
 const status=$('integralBackupStatus'),preview=$('integralRestorePreview'),fileInput=$('integralRestoreFile');
-const VERSION='V11.2.6 · Revisión 31';
+const VERSION='V11.2.6 · Revisión 32';
 const DATA_KEYS=['oboeLessonsV2','oboeStudentsV1','oboeSchoolYearV1','registroClasesSettingsV1',
 'registroClasesSettingsMetaV1','registroClasesArchivosV1','registroClasesScheduleModeV1',
 'registroClasesScheduleSimulationV1','registroOboeCursoActivoV1','registroSyncAliasesV11',
@@ -4360,6 +4384,101 @@ setTimeout(refresh,500);window.refreshPendingCalendar=refresh;
   closeBtn.addEventListener('click',()=>setClosed(true));
   openBtn.addEventListener('click',()=>setClosed(false));
   paint();
+})();
+</script>
+<script id="rev32-evaluation-periods">
+(function(){'use strict';
+ const $=id=>document.getElementById(id);
+ const ids=['rev32PeriodFields','rev32SavePeriods','rev32Student','rev32Report'];if(ids.some(id=>!$(id)))return;
+ const labels=['1.º trimestre','2.º trimestre','3.º trimestre'];
+ const ykey=()=>typeof year==='function'?year():$('schoolYear')?.value||'';
+ const validDate=v=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(v||''))return false;const d=new Date(v+'T12:00:00Z');return !Number.isNaN(d.getTime())&&d.toISOString().slice(0,10)===v;};
+ const getMap=()=>appSettings.evaluationPeriods&&typeof appSettings.evaluationPeriods==='object'&&!Array.isArray(appSettings.evaluationPeriods)?appSettings.evaluationPeriods:{};
+ const stored=y=>Array.isArray(getMap()[y])?getMap()[y]:null;
+ const el=(tag,attrs={},text)=>{const e=document.createElement(tag);for(const [k,v] of Object.entries(attrs)){if(k==='className')e.className=v;else e.setAttribute(k,v)}if(text!==undefined)e.textContent=text;return e;};
+ const periodInputs=[];const box=$('rev32PeriodFields');
+ for(let i=0;i<3;i++){
+  const section=el('div',{className:'holiday-grid',style:'margin-bottom:8px'});
+  const wrap=el('div');wrap.append(el('label',{for:'rev32Start'+i},labels[i]+' · Inicio'));
+  const start=el('input',{id:'rev32Start'+i,type:'date'});wrap.append(start);
+  const endWrap=el('div');endWrap.append(el('label',{for:'rev32End'+i},'Fin'));
+  const end=el('input',{id:'rev32End'+i,type:'date'});endWrap.append(end);section.append(wrap,endWrap);box.append(section);periodInputs.push({start,end});
+ }
+ let currentReport='';
+ const notice=message=>$('rev32PeriodStatus').textContent=message;
+ const options=()=>{const sel=$('rev32Student'),before=sel.value;sel.replaceChildren(el('option',{value:''},'Selecciona un alumno…'));const list=students.filter(s=>!s.archived||lessons.some(l=>l.studentId===s.id&&lessonYear(l)===ykey())).slice().sort((a,b)=>a.name.localeCompare(b.name,'es'));for(const st of list)sel.append(el('option',{value:st.id},st.name+' · '+st.course));if(list.some(s=>s.id===before))sel.value=before;};
+ const current=()=>periodInputs.map(({start,end})=>({start:start.value,end:end.value}));
+ function validate(p,y){
+  if(!/^\d{4}-\d{2}$/.test(y))throw Error('Selecciona un curso académico válido.');
+  const first=Number(y.slice(0,4)),min=`${first}-09-01`,max=`${first+1}-08-31`;
+  for(let i=0;i<3;i++){
+   const a=p[i]?.start,b=p[i]?.end;
+   if(!validDate(a)||!validDate(b))throw Error('Indica las dos fechas válidas del '+labels[i]+'.');
+   if(a>b)throw Error('En el '+labels[i]+' la fecha final es anterior al inicio.');
+   if(a<min||b>max)throw Error('Las fechas deben estar dentro del curso '+y+' ('+min+' a '+max+').');
+   if(i&&a<=p[i-1].end)throw Error('Hay periodos solapados o desordenados entre '+labels[i-1]+' y '+labels[i]+'.');
+  }
+  const teaching=appSettings.academicTeachingDates?.[y];
+  if(teaching?.start&&p[0].start<teaching.start)throw Error('El primer trimestre comienza antes del inicio de clases configurado ('+teaching.start+').');
+  if(teaching?.end&&p[2].end>teaching.end)throw Error('El último trimestre termina después del fin de clases configurado ('+teaching.end+').');
+ }
+ function fill(){const y=ykey(),p=stored(y)||[];periodInputs.forEach(({start,end},i)=>{start.value=p[i]?.start||'';end.value=p[i]?.end||'';});
+  const locked=typeof isHistoricalReadOnly==='function'&&isHistoricalReadOnly();periodInputs.forEach(({start,end})=>{start.disabled=locked;end.disabled=locked;});$('rev32SavePeriods').disabled=locked;$('rev32FillPeriods').disabled=locked;
+  notice(locked?'Consulta histórica: los periodos son de solo lectura.':'Curso '+y+': '+(p.length===3?'periodos guardados.':'define y guarda los tres trimestres.'));
+  options();$('rev32Report').hidden=true;$('rev32ReportActions').hidden=true;
+ }
+ $('rev32FillPeriods').addEventListener('click',()=>{
+  const y=ykey(),n=Number(y.slice(0,4));if(!/^\d{4}-\d{2}$/.test(y))return;
+  const teaching=appSettings.academicTeachingDates?.[y]||{};
+  const p=[{start:teaching.start||`${n}-09-01`,end:`${n}-12-22`},{start:`${n}-12-23`,end:`${n+1}-03-31`},{start:`${n+1}-04-01`,end:teaching.end||`${n+1}-06-30`}];
+  periodInputs.forEach(({start,end},i)=>{start.value=p[i].start;end.value=p[i].end;});
+  notice('Fechas orientativas, NO oficiales ni guardadas. Ajusta las fechas y pulsa «Guardar periodos».');
+ });
+ $('rev32SavePeriods').addEventListener('click',()=>{
+  if(typeof isHistoricalReadOnly==='function'&&isHistoricalReadOnly())return notice('Este curso está cerrado y no se puede modificar.');
+  const y=ykey(),p=current();try{validate(p,y);}catch(e){notice('❌ '+e.message);return;}
+  const previous=appSettings,meta=localStorage.getItem(SETTINGS_META_KEY);
+  try{
+   const updated={...appSettings,evaluationPeriods:{...getMap(),[y]:p}};
+   localStorage.setItem(SETK,JSON.stringify(updated));appSettings=updated;markSettingsUpdated();
+   if(typeof recordSyncChange==='function')recordSyncChange('settings','updated');
+   if(typeof markLocalSyncDirty==='function')markLocalSyncDirty();
+   notice('✅ Periodos guardados localmente para '+y+'. Para confirmarlos en Supabase, utiliza «Sincronizar ahora».');
+  }catch(e){appSettings=previous;try{localStorage.setItem(SETK,JSON.stringify(previous));if(meta===null)localStorage.removeItem(SETTINGS_META_KEY);else localStorage.setItem(SETTINGS_META_KEY,meta);}catch(_){}notice('❌ No se pudo guardar: '+e.message);}
+ });
+ const number=v=>Number.isFinite(Number(v))&&v!==null&&v!==''?Number(v):null;
+ const safe=v=>String(v??'').trim();
+ $('rev32Preview').addEventListener('click',()=>{
+  const y=ykey(),idx=Number($('rev32Quarter').value),periods=stored(y),st=students.find(s=>s.id===$('rev32Student').value);
+  if(!st){notice('Selecciona un alumno para el informe.');return;}
+  if(!periods||!periods[idx]){notice('Primero guarda los periodos de evaluación de este curso.');return;}
+  try{validate(periods,y);}catch(e){notice('❌ '+e.message);return;}
+  const {start,end}=periods[idx];
+  const entries=lessons.filter(l=>l.studentId===st.id&&lessonYear(l)===y&&l.date>=start&&l.date<=end).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const attend=entries.filter(l=>l.attendance==='asiste'),missing=entries.filter(l=>l.attendance==='falta'),holiday=entries.filter(l=>l.attendance==='festivo');
+  const scores=attend.map(l=>number(l.grade)).filter(v=>v!==null),mean=scores.length?(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(2).replace('.',','):'Sin calificaciones';
+  const observations=entries.filter(l=>safe(l.obs)).map(l=>`${l.date} [${l.attendance||'sin estado'}]: ${safe(l.obs)}`);
+  const task=entries.filter(l=>safe(l.nextClass)).at(-1);
+  const lines=[
+   'INFORME DE EVALUACIÓN TRIMESTRAL · BORRADOR PARA REVISIÓN',
+   `Curso académico: ${y} · ${labels[idx]} (${start} a ${end})`,
+   `Alumno: ${st.name} · ${st.course||'Curso sin especificar'}`,
+   `Clases registradas en el periodo: ${entries.length}`,
+   `Asistencia: ${attend.length} asistencias; ${missing.length} faltas; ${holiday.length} festivos; ${entries.length-attend.length-missing.length-holiday.length} otros estados.`,
+   `Calificaciones: ${scores.length} notas; media aritmética ${mean}${scores.length?' (no equivale a nota oficial de evaluación)':''}.`,
+   `Evolución de notas registradas: ${attend.filter(l=>number(l.grade)!==null).map(l=>l.date+': '+number(l.grade)).join(' · ')||'Sin datos'}.`,
+   '', 'OBSERVACIONES REGISTRADAS',observations.join('\n')||'No hay observaciones registradas en el periodo.',
+   '', 'ÚLTIMOS OBJETIVOS / TAREAS ANOTADOS',task?`${task.date}: ${safe(task.nextClass)}`:'No se han registrado objetivos para la clase siguiente.',
+   '', 'Informe descriptivo basado exclusivamente en registros existentes. Revisar y completar por el docente antes de utilizar.'
+  ];
+  currentReport=lines.join('\n');$('rev32Report').textContent=currentReport;$('rev32Report').hidden=false;$('rev32ReportActions').hidden=false;notice('✅ Vista previa generada con '+entries.length+' registros. No se han modificado clases ni evaluaciones.');
+ });
+ $('rev32Download').addEventListener('click',()=>{if(!currentReport)return;const url=URL.createObjectURL(new Blob([currentReport],{type:'text/plain;charset=utf-8'})),a=el('a',{href:url,download:'Evaluacion_'+ykey()+'_'+$('rev32Quarter').value+'.txt'});a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+ $('rev32Print').addEventListener('click',()=>{if(!currentReport)return;const w=window.open('','_blank');if(!w){notice('El navegador ha bloqueado la ventana de impresión. Utiliza «Descargar informe TXT».');return;}w.document.open();w.document.write('<!doctype html><html lang="es"><meta charset="utf-8"><title>Informe de evaluación</title><body><pre id="report" style="white-space:pre-wrap;font:14px/1.5 Arial,sans-serif"></pre></body></html>');w.document.close();w.document.getElementById('report').textContent=currentReport;w.focus();w.print();});
+ $('schoolYear')?.addEventListener('change',()=>setTimeout(fill,0));
+ document.addEventListener('click',e=>{if(e.target.closest('#syncBtn'))setTimeout(fill,1500)});
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)options();});
+ fill();
 })();
 </script>
 </body></html>
