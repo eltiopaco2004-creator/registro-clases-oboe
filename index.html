@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV32 · Periodos e informes trimestrales</title><style>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV34 · Tareas vigentes de la última clase</title><style>
 body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-width:720px;margin:auto;padding:16px}.card{background:white;border:1px solid #ddd;border-radius:16px;padding:16px;margin:12px 0}label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:10px;font:inherit}textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{border:0;border-radius:10px;padding:10px 13px;margin:6px 4px 0 0;font-weight:700;max-width:100%;white-space:normal}.primary{background:#2f5d50;color:#fff}.secondary{background:#dfe9e4;color:#2f5d50}.danger{background:#f3dddd;color:#a44242}.item{border-top:1px solid #ddd;padding:12px 0}.muted{color:#69716d;font-size:12px}.grade{float:right;font-size:20px;font-weight:800;color:#2f5d50}.hidden{display:none}.rec{padding:10px;background:#f7f7f4;border-radius:10px;margin-top:8px}
 .rating-group{margin:12px 0}.rating-title{font-weight:700;font-size:13px;margin-bottom:6px}
 .rating-buttons{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;width:100%}
@@ -575,14 +575,14 @@ body.rev30-banner-collapsed #rev30VersionReopen{display:flex!important}
 <div id="rev30VersionReopen"><button type="button" id="rev30BannerOpen" aria-controls="buildVersionBanner" aria-expanded="false">▸ Ver versión y novedades</button></div>
 <div id="buildVersionBanner" role="region" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
-  <strong>V11.2.6 · REVISIÓN 32</strong>
-  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> configuración de los tres trimestres por curso académico con validación de fechas, sin solapamientos y con sincronización mediante Supabase; informes trimestrales por alumno con notas, asistencias, observaciones y últimos objetivos, con vista previa, descarga e impresión. Se mantienen la sincronización verificada y el historial recuperable de Revisión 31.</div>
+  <strong>V11.2.6 · REVISIÓN 33</strong>
+  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> historial de sincronización actualizado: cambios administrativos (incluidas fechas anteriores y nuevas de los trimestres), cambios de alumnos y clases; los registros antiguos sin desglose se identifican correctamente. Se conservan los informes trimestrales y las funciones de recuperación anteriores.</div>
   <div class="build-version-changes"><b>FUNCIONES ACUMULADAS:</b> altas y bajas de alumnos, borrado definitivo protegido, festivos, tareas anteriores, informes de sincronización y sincronización automática opcional.</div>
   <div class="build-version-caution">⚠️ PRUEBA: antes de sincronizar crea una copia integral del navegador con más información. No sincronices aún desde versiones anteriores. Después de recuperar datos en otro navegador, recarga la página.</div>
   <button type="button" class="rev30-banner-close" id="rev30BannerClose" aria-controls="buildVersionBanner" aria-expanded="true">✕ Cerrar este aviso</button>
 </div>
 <div id="rev19AuxStatus" role="status" style="font-size:12px;color:#15416b;margin:6px 0 12px"></div>
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Rev. 32 · Evaluaciones trimestrales · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Rev. 34 · Tareas sin arrastre · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -1362,10 +1362,10 @@ function renderHistoryStudents(){
     const av=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(1):"—";
     const last=ls.find(x=>x.attendance!=="festivo")||ls[0];
     const lastText=last?`Última: ${new Date(last.date+"T12:00:00").toLocaleDateString("es-ES")} · ${last.attendance==="falta"?"Falta":last.attendance==="festivo"?"Festivo":"Nota "+last.grade}`:"Sin clases registradas";
-    const next=ls.find(x=>x.nextClass);
+    const next=ls.find(x=>x.attendance==="asiste"); // Solo las tareas de la ultima clase impartida siguen vigentes.
     return `<div class="item student-card history-student" data-student-id="${esc(s.id)}" style="cursor:pointer">
       <div class="student-top">
-        <div><button type="button" class="student-link" onclick="openStudentProfile('${esc(s.id)}');event.stopPropagation()">${esc(displayName(s.name))}</button><div class="student-last">${esc(s.course)} · ${ls.filter(x=>x.attendance!=="festivo").length} clases · ${f} faltas · media ${av}</div><div class="student-last">${esc(lastText)}</div>${next?`<div class="student-last">➡️ ${esc(next.nextClass)}</div>`:""}</div>
+        <div><button type="button" class="student-link" onclick="openStudentProfile('${esc(s.id)}');event.stopPropagation()">${esc(displayName(s.name))}</button><div class="student-last">${esc(s.course)} · ${ls.filter(x=>x.attendance!=="festivo").length} clases · ${f} faltas · media ${av}</div><div class="student-last">${esc(lastText)}</div>${next&&next.nextClass?`<div class="student-last">➡️ ${esc(next.nextClass)}</div>`:""}</div>
         <button type="button" class="secondary history-open" data-student-id="${esc(s.id)}">📚 Ver ficha</button>
       </div>
     </div>`;
@@ -1395,7 +1395,7 @@ function renderStudentHistory(id){
   const notes=a.filter(x=>x.attendance==="asiste"&&x.grade!==null&&x.grade!=="").map(x=>Number(x.grade));
   const avg=notes.length?(notes.reduce((p,n)=>p+n,0)/notes.length).toFixed(1):"—";
   const last=a.find(x=>x.attendance!=="festivo")||a[0];
-  const next=a.find(x=>x.nextClass);
+  const next=a.find(x=>x.attendance==="asiste"); // No recuperar tareas de clases anteriores.
   const evolution=a.filter(x=>x.attendance==="asiste"&&x.ratings?.general).slice().reverse().slice(-10);
 
   const bars=evolution.length?evolution.map(x=>{
@@ -1414,7 +1414,7 @@ function renderStudentHistory(id){
       <div class="profile-stat"><b>${avg}</b><span>Media</span></div>
       <div class="profile-stat"><b>${last?new Date(last.date+"T12:00:00").toLocaleDateString("es-ES",{day:"2-digit",month:"2-digit"}):"—"}</b><span>Última clase</span></div>
     </div>
-    ${next?`<div class="profile-note"><b>➡️ Para la próxima clase</b><br>${esc(next.nextClass)}</div>`:""}
+    ${next&&next.nextClass?`<div class="profile-note"><b>➡️ Para la próxima clase</b><br>${esc(next.nextClass)}</div>`:""}
     <div class="profile-section-title">📈 Evolución de la valoración general</div>
     <div class="evolution">${bars}</div>
     ${recentNotes.length?`<div class="profile-section-title">📝 Últimas observaciones y tareas</div>${recentNotes.map(x=>`<div class="profile-note"><b>${new Date(x.date+"T12:00:00").toLocaleDateString("es-ES")}</b>${x.obs?`<br>${esc(x.obs)}`:""}${x.nextClass?`<br><span class="muted">➡️ ${esc(x.nextClass)}</span>`:""}</div>`).join("")}`:""}
@@ -2032,10 +2032,10 @@ q('previousNoteToggle').addEventListener('click',()=>{
 });
 function updateForToday(){
  const sid=q('student').value,date=q('date').value;
- const previous=lessons.filter(x=>x.studentId===sid&&lessonYear(x)===year()&&x.date<date&&x.nextClass&&x.id!==editingLessonId).sort((a,b)=>b.date.localeCompare(a.date))[0];
+ const previous=lessons.filter(x=>x.studentId===sid&&lessonYear(x)===year()&&x.date<date&&x.attendance==="asiste"&&x.id!==editingLessonId).sort((a,b)=>b.date.localeCompare(a.date)||(Number(b.created||0)-Number(a.created||0)))[0];
  const previousBox=q('forToday'),previousToggle=q('previousNoteToggle');
- previousBox.hidden=!previous;
- q('previousNoteText').textContent=previous?previous.nextClass:'';
+ previousBox.hidden=!(previous&&previous.nextClass);
+ q('previousNoteText').textContent=previous?.nextClass||'';
  previousBox.classList.remove('expanded');
  previousToggle.setAttribute('aria-expanded','false');
  const st=students.find(s=>s.id===sid);
@@ -2438,7 +2438,7 @@ function updateForToday(){
   date:'fecha',time:'hora',course:'curso/nivel',schoolYear:'curso académico',name:'nombre',firstName:'nombre',lastName:'apellidos',
   email:'correo electrónico',phone:'teléfono',scheduleDay:'día del horario',scheduleTime:'hora del horario',
   objectives:'objetivos',repertoire:'repertorio',generalNotes:'observaciones generales',status:'estado',archived:'archivo/baja',
-  instrument:'instrumento',teacher:'nombre del profesor',school:'centro',holidays:'festivos',vacations:'vacaciones',
+  instrument:'instrumento',teacher:'nombre del profesor',school:'centro',evaluationPeriods:'periodos de evaluación trimestral',holidays:'festivos',vacations:'vacaciones',
   nonTeachingPeriods:'periodos no lectivos',startDate:'inicio de curso',endDate:'fin de curso'
  };
  function rev29Fields(a,b){
@@ -2471,7 +2471,20 @@ function updateForToday(){
   const entries=[];
   for(const key of [...new Set([...Object.keys(old),...Object.keys(now)])].sort()){
    if(rev29Equal(old[key],now[key]))continue;
-   entries.push(`~ ${label}: ${REV29_FIELDS[key]||key}`);
+   if(key==='evaluationPeriods'){
+    const before=old[key]&&typeof old[key]==='object'?old[key]:{},after=now[key]&&typeof now[key]==='object'?now[key]:{};
+    const quarters=['1.º trimestre','2.º trimestre','3.º trimestre'];
+    for(const yr of [...new Set([...Object.keys(before),...Object.keys(after)])].sort()){
+     const prev=Array.isArray(before[yr])?before[yr]:[],next=Array.isArray(after[yr])?after[yr]:[];
+     for(let i=0;i<Math.max(prev.length,next.length);i++){
+      const a=prev[i]||{},b=next[i]||{};
+      for(const field of ['start','end'])if(!rev29Equal(a[field]??null,b[field]??null)){
+       const from=a[field]||'no definida',to=b[field]||'no definida';
+       entries.push(`~ ${label}: ${yr}, ${quarters[i]||'periodo '+(i+1)}, ${field==='start'?'inicio':'fin'}: ${from} → ${to}`);
+      }
+     }
+    }
+   }else entries.push(`~ ${label}: ${REV29_FIELDS[key]||key}`);
   }return entries;
  }
  const REV29_AUX_LABELS={
@@ -2510,7 +2523,7 @@ function updateForToday(){
  function rev29WriteReport(localBefore,cloudBefore,verified){
   const outgoing=rev29Difference(cloudBefore,verified,'Enviados a Supabase');
   const incoming=rev29Difference(localBefore,verified,'Recibidos en este dispositivo');
-  const report={at:new Date().toISOString(),version:'V11.2.6 REV32',outgoing,incoming};
+  const report={at:new Date().toISOString(),version:'V11.2.6 REV34',outgoing,incoming};
   try{localStorage.setItem(REV29_REPORT_KEY,JSON.stringify(report));}catch(err){console.warn('El informe detallado excede el almacenamiento disponible:',err);}
   return report;
  }
@@ -2622,6 +2635,7 @@ function updateForToday(){
     try{localStorage.setItem('registroUltimoInformeSyncV1126',syncReport);}catch(ignore){}
     window.__showSyncReportV08?.(syncReport);
     window.__showDetailedSyncV29?.(rev29Report);
+    window.__rev33AuditSave?.(rev29Report);
     saveSyncMeta({lastSyncAt:after.updated_at||nextStamp,localDirty:false});clearPendingSyncChanges();verified=after;
     const legacy=lessons.filter(x=>!x.schoolYear).length;
     syncMsg(syncReport+(legacy?'\n⚠️ Hay '+legacy+' clases sin curso académico explícito. Revisa su clasificación por fechas.':''));
@@ -3718,102 +3732,67 @@ archivePanel();
 #rev14SyncAudit .rev14-error{border-color:#d99595;background:#fff2f2}
 @media(max-width:560px){#rev14SyncAudit{padding:11px;font-size:12px}.rev14-stat{align-items:baseline}}
 </style>
-<script id="rev14-sync-audit-presentation">
-/* Presentation and per-device history only. No writes to cloud or sync data collections. */
+<style id="rev33-audit-style">
+#rev14SyncAudit{margin:12px 0;padding:14px;border:1px solid #b5c8df;border-radius:12px;background:#f7faff;color:#153958}
+#rev14SyncAudit h4{margin:0 0 8px}
+#rev14SyncAudit details{margin-top:12px}
+#rev14SyncAudit summary{cursor:pointer;font-weight:700;padding:6px 0}
+#rev14SyncAudit ol{max-height:350px;overflow:auto;padding-left:27px}
+#rev14SyncAudit li{margin:10px 0;padding:7px 0;border-bottom:1px solid #dce5ef}
+#rev14SyncAudit .rev33-entry{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.6;margin:5px 0}
+#rev14SyncAudit .rev33-quiet{font-size:12px;color:#4d6072}
+#rev14SyncAudit .rev33-heading{font-weight:700;margin-top:8px}
+</style>
+<script id="rev33-sync-audit-presentation">
+/* Read-only audit display, no mutations to students/lessons/cloud. */
 (function(){
  'use strict';
  const details=document.getElementById('syncDetails');
- const msg=document.getElementById('syncMsg');
- if(!details||!msg)return;
- const KEY='registroSyncAuditV1126Rev14';
+ if(!details)return;
+ const KEY='registroSyncAuditStructuredV33';
+ const LEGACY_KEY='registroSyncAuditV1126Rev14';
  const LIMIT=20;
- const box=document.createElement('section');box.id='rev14SyncAudit';box.setAttribute('aria-label','Informe claro de sincronización');
- details.after(box);
- const lineNumber=(report,pattern)=>{
-  const match=report.match(pattern);return match?Number(match[1]):null;
+ const box=document.createElement('section');box.id='rev14SyncAudit';box.setAttribute('aria-label','Historial verificado de sincronizaciones');details.after(box);
+ const element=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
+ const load=(key)=>{try{const a=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(a)?a:[]}catch(e){return []}};
+ let entries=load(KEY),legacy=load(LEGACY_KEY);
+ const formatTime=at=>{const d=new Date(at);return Number.isNaN(d.getTime())?'Fecha no disponible':d.toLocaleString('es-ES');};
+ const appendSummary=(parent,data,heading)=>{
+  parent.append(element('div',heading,'rev33-heading'));
+  const lines=Array.isArray(data?.entries)?data.entries:[];
+  const t=element('div',lines.length?lines.join('\n'):'Sin diferencias de contenido detectadas en esta comparación.','rev33-entry');
+  parent.append(t);
  };
- // Only measured quantities from the verified report emitted by the current sync engine.
- function parseReport(report){
-  if(!report.includes('SINCRONIZACIÓN COMPLETADA Y VERIFICADA'))return null;
-  const get=(section,pattern)=>{
-   const block=report.split(section)[1]?.split(/📤|📥|☁️/)[0]||'';
-   return lineNumber(block,pattern);
-  };
-  const local=report.split('📤 CAMBIOS LOCALES REGISTRADOS:')[1]?.split('📥')[0]||'';
-  const received=report.split('📥 CAMBIOS EN ESTE DISPOSITIVO TRAS SINCRONIZAR:')[1]?.split('☁️')[0]||'';
-  const checked=report.split('☁️ BAJAS CONFIRMADAS POR LA SINCRONIZACIÓN:')[1]||'';
-  const changes=(group)=>{
-   const m=local.match(new RegExp('• '+group+': (\\d+) altas · (\\d+) modificaciones · (\\d+) bajas'));
-   return m?m.slice(1,4).map(Number):null;
-  };
-  const diff=(group)=>{
-   const m=received.match(new RegExp('• '+group+': (\\d+) incorporad[oa]s · (\\d+) retirad[oa]s'));
-   return m?m.slice(1,3).map(Number):null;
-  };
-  const sent=checked.match(/Nuevas marcas enviadas a la nube: (\d+) alumnos · (\d+) clases/);
-  const incoming=checked.match(/Marcas de baja recibidas en este dispositivo: (\d+) alumnos · (\d+) clases/);
-  return {localStudents:changes('Alumnos'),localLessons:changes('Clases'),receivedStudents:diff('Alumnos'),receivedLessons:diff('Clases'),cloudNew:sent?sent.slice(1).map(Number):null,cloudReceived:incoming?incoming.slice(1).map(Number):null};
- }
- function read(){try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(x)?x:[]}catch(e){return []}}
- let entries=read();
- const last=entries[0]||null;
- const el=(tag,txt,cls)=>{const node=document.createElement(tag);if(txt!==undefined)node.textContent=txt;if(cls)node.className=cls;return node};
- const number=v=>v===null||v===undefined?'Sin dato':String(v);
- function stat(root,label,value){const row=el('div',undefined,'rev14-stat');row.append(el('span',label),el('strong',number(value)));root.append(row)}
- function group(root,title,values){const panel=el('div',undefined,'rev14-group');panel.append(el('b',title));for(const pair of values)stat(panel,pair[0],pair[1]);root.append(panel)}
- function summary(result){
-  if(!result)return 'Informe previo sin desglose verificable.';
-  const l=result.localLessons||[null,null,null],s=result.localStudents||[null,null,null];
-  const r=result.receivedLessons||[null,null],rs=result.receivedStudents||[null,null];
-  return 'Local: '+number(s[0])+' altas, '+number(s[1])+' cambios y '+number(s[2])+' bajas de alumnos; '+number(l[0])+' altas, '+number(l[1])+' cambios y '+number(l[2])+' bajas de clases. Recibidos: '+number(rs[1])+' alumnos y '+number(r[1])+' clases retirados.';
- }
  function render(){
-  box.replaceChildren();box.append(el('h4','Última sincronización · informe claro'));
+  box.replaceChildren();
+  box.append(element('h4','Última sincronización · informe de cambios'));
   const current=entries[0];
-  if(!current){box.append(el('p','Todavía no hay una sincronización verificada registrada con la Revisión 14. Las operaciones anteriores no pueden reconstruirse con precisión.','rev14-muted'));}
-  else{
-   box.append(el('p',new Date(current.at).toLocaleString('es-ES')+' · Sincronización verificada en este dispositivo','rev14-muted'));
-   const r=current.result;
-   if(r){
-    const s=r.localStudents||[],l=r.localLessons||[],rs=r.receivedStudents||[],rl=r.receivedLessons||[],sent=r.cloudNew||[],incoming=r.cloudReceived||[];
-    group(box,'📤 Cambios que este dispositivo tenía registrados antes de sincronizar',[
-      ['Alumnos: altas · modificaciones · bajas',s.length?s.join(' · '):'Sin dato'],
-      ['Clases: altas · modificaciones · bajas',l.length?l.join(' · '):'Sin dato']]);
-    group(box,'📥 Cambios aplicados a los registros de este dispositivo',[
-      ['Alumnos incorporados',rs[0]],['Alumnos retirados',rs[1]],
-      ['Clases incorporadas',rl[0]],['Clases retiradas',rl[1]]]);
-    group(box,'☁️ Marcas de eliminación comprobadas',[
-      ['Nuevas marcas en nube: alumnos · clases',sent.length?sent.join(' · '):'Sin dato'],
-      ['Marcas presentes en nube que antes no tenía este dispositivo: alumnos · clases',incoming.length?incoming.join(' · '):'Sin dato']]);
-   }
-   box.append(el('p','Los contadores locales indican operaciones registradas antes de sincronizar; no garantizan que cada cambio sea exclusivo de esta ejecución. Las bajas recibidas se miden comparando el estado anterior del dispositivo con el posterior.','rev14-muted'));
+  if(current){
+   box.append(element('div',formatTime(current.at)+' · Datos confirmados mediante lectura de Supabase','rev33-quiet'));
+   appendSummary(box,current.outgoing,'☁️ Diferencias confirmadas en Supabase respecto a su estado previo');
+   appendSummary(box,current.incoming,'💻 Diferencias respecto al estado anterior de este dispositivo');
+  }else box.append(element('p','Todavía no se ha registrado una sincronización con el nuevo informe estructurado.','rev33-quiet'));
+  const hist=element('details'),head=element('summary','Historial de sincronizaciones verificadas ('+(entries.length+legacy.length)+')');hist.append(head);
+  const ol=element('ol');
+  const joined=[...entries.map(x=>({...x,kind:'current'})),...legacy.map(x=>({...x,kind:'legacy'}))].sort((a,b)=>(Date.parse(b.at)||0)-(Date.parse(a.at)||0)).slice(0,LIMIT);
+  if(!joined.length)ol.append(element('li','Todavía no hay operaciones verificadas.'));
+  for(const item of joined){
+   const li=element('li');li.append(element('strong',formatTime(item.at)));
+   if(item.kind==='legacy')li.append(element('div','Registro de una revisión anterior. Su formato no permite reconstruir los cambios concretos; no significa que faltaran datos en Supabase.','rev33-quiet'));
+   else{appendSummary(li,item.outgoing,'☁️ Diferencias en nube');appendSummary(li,item.incoming,'💻 Diferencias en dispositivo');}
+   ol.append(li);
   }
-  const history=el('details');const head=el('summary','Historial de sincronizaciones verificadas ('+entries.length+')');history.append(head);
-  const list=el('ol');if(!entries.length)list.append(el('li','Sin operaciones registradas todavía.'));
-  for(const entry of entries){const item=el('li');item.append(el('strong',new Date(entry.at).toLocaleString('es-ES')));item.append(el('div',summary(entry.result)));list.append(item)}
-  history.append(list);box.append(history);
-  box.append(el('p','Este historial se conserva únicamente en este navegador. No cambia las clases ni los datos de Supabase.','rev14-muted'));
+  hist.append(ol);box.append(hist);
+  box.append(element('p','Este registro de auditoría es local y conserva hasta 20 operaciones nuevas. Compara estados antes y después de sincronizar; no atribuye con certeza quién editó cada dato. No guarda contenidos de observaciones ni contactos.','rev33-quiet'));
  }
- const previousShow=window.__showSyncReportV08;
- window.__showSyncReportV08=function(report){
-  if(typeof previousShow==='function')previousShow(report);
-  const result=parseReport(String(report||''));if(!result)return;
-  const entry={at:new Date().toISOString(),result};
-  entries=[entry,...entries].slice(0,LIMIT);
-  try{localStorage.setItem(KEY,JSON.stringify(entries))}catch(e){}
-  msg.classList.add('rev14-report-detailed');
+ window.__rev33AuditSave=(report)=>{
+  if(!report||!report.outgoing||!report.incoming)return;
+  const compact=side=>({entries:Array.isArray(side.entries)?side.entries.slice(0,200):[]});
+  entries=[{at:report.at||new Date().toISOString(),outgoing:compact(report.outgoing),incoming:compact(report.incoming)},...entries].slice(0,LIMIT);
+  try{localStorage.setItem(KEY,JSON.stringify(entries))}catch(e){console.warn('No hay espacio para el historial de auditoría:',e)}
   render();
  };
- const observer=new MutationObserver(()=>{
-  const value=msg.textContent||'';
-  if(/^❌/.test(value)){msg.classList.remove('rev14-report-detailed');}
-  else if(value.includes('SINCRONIZACIÓN COMPLETADA Y VERIFICADA'))msg.classList.add('rev14-report-detailed');
-  else msg.classList.remove('rev14-report-detailed');
- });
- observer.observe(msg,{subtree:true,childList:true,characterData:true});
  render();
- // Exposed only for non-destructive automated UI checks.
- window.__rev14AuditProbe={parseReport,read};
 })();
 </script>
 <script id="integral-backup-v15-script">
@@ -3821,7 +3800,7 @@ archivePanel();
 'use strict';
 const $=id=>document.getElementById(id);
 const status=$('integralBackupStatus'),preview=$('integralRestorePreview'),fileInput=$('integralRestoreFile');
-const VERSION='V11.2.6 · Revisión 32';
+const VERSION='V11.2.6 · Revisión 34';
 const DATA_KEYS=['oboeLessonsV2','oboeStudentsV1','oboeSchoolYearV1','registroClasesSettingsV1',
 'registroClasesSettingsMetaV1','registroClasesArchivosV1','registroClasesScheduleModeV1',
 'registroClasesScheduleSimulationV1','registroOboeCursoActivoV1','registroSyncAliasesV11',
@@ -3981,8 +3960,8 @@ fileInput.addEventListener('change',async()=>{
  function recentTasks(s){
   const all=typeof lessons!=='undefined'?lessons:[];
   const y=typeof year==='function'?year():'';
-  return all.filter(x=>x.studentId===s.id&&x.nextClass&&(!y||typeof lessonYear!=='function'||lessonYear(x)===y))
-   .sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')))[0]?.nextClass||'';
+  return all.filter(x=>x.studentId===s.id&&x.attendance==='asiste'&&(!y||typeof lessonYear!=='function'||lessonYear(x)===y))
+   .sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||(Number(b.created||0)-Number(a.created||0)))[0]?.nextClass||'';
  }
  function composeUrl(s,kind){
   const to=String(s.email||'').trim();if(!isEmail(to))return '';
