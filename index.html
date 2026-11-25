@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV34 · Tareas vigentes de la última clase</title><style>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV35 · Corrección 2 · Versión unificada</title><style>
 body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-width:720px;margin:auto;padding:16px}.card{background:white;border:1px solid #ddd;border-radius:16px;padding:16px;margin:12px 0}label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:10px;font:inherit}textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{border:0;border-radius:10px;padding:10px 13px;margin:6px 4px 0 0;font-weight:700;max-width:100%;white-space:normal}.primary{background:#2f5d50;color:#fff}.secondary{background:#dfe9e4;color:#2f5d50}.danger{background:#f3dddd;color:#a44242}.item{border-top:1px solid #ddd;padding:12px 0}.muted{color:#69716d;font-size:12px}.grade{float:right;font-size:20px;font-weight:800;color:#2f5d50}.hidden{display:none}.rec{padding:10px;background:#f7f7f4;border-radius:10px;margin-top:8px}
 .rating-group{margin:12px 0}.rating-title{font-weight:700;font-size:13px;margin-bottom:6px}
 .rating-buttons{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;width:100%}
@@ -575,14 +575,14 @@ body.rev30-banner-collapsed #rev30VersionReopen{display:flex!important}
 <div id="rev30VersionReopen"><button type="button" id="rev30BannerOpen" aria-controls="buildVersionBanner" aria-expanded="false">▸ Ver versión y novedades</button></div>
 <div id="buildVersionBanner" role="region" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
-  <strong>V11.2.6 · REVISIÓN 33</strong>
-  <div class="build-version-detail"><b>NOVEDADES DE ESTA REVISIÓN:</b> historial de sincronización actualizado: cambios administrativos (incluidas fechas anteriores y nuevas de los trimestres), cambios de alumnos y clases; los registros antiguos sin desglose se identifican correctamente. Se conservan los informes trimestrales y las funciones de recuperación anteriores.</div>
+  <strong id="canonicalBuildBannerVersion">V11.2.6 · REVISIÓN 35 · CONSOLIDADA · PRUEBA</strong>
+  <div class="build-version-detail"><b>NOVEDADES:</b> Centro de control de datos, auditoría de Supabase, revisión de registros antiguos, festivos recuperables, evaluaciones editables e indicador de sincronización. No se eliminan datos automáticamente.</div>
   <div class="build-version-changes"><b>FUNCIONES ACUMULADAS:</b> altas y bajas de alumnos, borrado definitivo protegido, festivos, tareas anteriores, informes de sincronización y sincronización automática opcional.</div>
   <div class="build-version-caution">⚠️ PRUEBA: antes de sincronizar crea una copia integral del navegador con más información. No sincronices aún desde versiones anteriores. Después de recuperar datos en otro navegador, recarga la página.</div>
   <button type="button" class="rev30-banner-close" id="rev30BannerClose" aria-controls="buildVersionBanner" aria-expanded="true">✕ Cerrar este aviso</button>
 </div>
 <div id="rev19AuxStatus" role="status" style="font-size:12px;color:#15416b;margin:6px 0 12px"></div>
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Rev. 34 · Tareas sin arrastre · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 35 · Corrección 2 · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -2523,7 +2523,7 @@ function updateForToday(){
  function rev29WriteReport(localBefore,cloudBefore,verified){
   const outgoing=rev29Difference(cloudBefore,verified,'Enviados a Supabase');
   const incoming=rev29Difference(localBefore,verified,'Recibidos en este dispositivo');
-  const report={at:new Date().toISOString(),version:'V11.2.6 REV34',outgoing,incoming};
+  const report={at:new Date().toISOString(),version:'V11.2.6 REV35',outgoing,incoming};
   try{localStorage.setItem(REV29_REPORT_KEY,JSON.stringify(report));}catch(err){console.warn('El informe detallado excede el almacenamiento disponible:',err);}
   return report;
  }
@@ -3800,7 +3800,7 @@ archivePanel();
 'use strict';
 const $=id=>document.getElementById(id);
 const status=$('integralBackupStatus'),preview=$('integralRestorePreview'),fileInput=$('integralRestoreFile');
-const VERSION='V11.2.6 · Revisión 34';
+const VERSION='V11.2.6 · Revisión 35';
 const DATA_KEYS=['oboeLessonsV2','oboeStudentsV1','oboeSchoolYearV1','registroClasesSettingsV1',
 'registroClasesSettingsMetaV1','registroClasesArchivosV1','registroClasesScheduleModeV1',
 'registroClasesScheduleSimulationV1','registroOboeCursoActivoV1','registroSyncAliasesV11',
@@ -4339,6 +4339,25 @@ setTimeout(refresh,500);window.refreshPendingCalendar=refresh;
  panel.querySelector('#rev31HistoryBtn').onclick=()=>show().catch(e=>{status.textContent='❌ '+e.message;});
 })();
 </script>
+<script id="rev34-canonical-version">
+(function(){
+  'use strict';
+  // UNA sola identificación visible para el aviso y la cabecera.
+  const BUILD=Object.freeze({version:'V11.2.6',revision:'35',correction:'consolidada',status:'PRUEBA'});
+  const caption=BUILD.version+' · Revisión '+BUILD.revision+' · '+BUILD.correction.toUpperCase()+' · '+BUILD.status;
+  function updateVersion(){
+    const banner=document.getElementById('canonicalBuildBannerVersion');
+    const header=document.getElementById('appVersion');
+    if(banner)banner.textContent=caption;
+    if(header)header.textContent=caption;
+    document.documentElement.dataset.registroBuild='rev35-consolidada';
+  }
+  window.__registroCurrentBuild=BUILD;
+  updateVersion();
+  document.addEventListener('DOMContentLoaded',updateVersion,{once:true});
+  window.addEventListener('load',updateVersion,{once:true});
+})();
+</script>
 <script id="rev30-banner-persistence">
 (function(){
   'use strict';
@@ -4452,12 +4471,167 @@ setTimeout(refresh,500);window.refreshPendingCalendar=refresh;
   ];
   currentReport=lines.join('\n');$('rev32Report').textContent=currentReport;$('rev32Report').hidden=false;$('rev32ReportActions').hidden=false;notice('✅ Vista previa generada con '+entries.length+' registros. No se han modificado clases ni evaluaciones.');
  });
- $('rev32Download').addEventListener('click',()=>{if(!currentReport)return;const url=URL.createObjectURL(new Blob([currentReport],{type:'text/plain;charset=utf-8'})),a=el('a',{href:url,download:'Evaluacion_'+ykey()+'_'+$('rev32Quarter').value+'.txt'});a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
- $('rev32Print').addEventListener('click',()=>{if(!currentReport)return;const w=window.open('','_blank');if(!w){notice('El navegador ha bloqueado la ventana de impresión. Utiliza «Descargar informe TXT».');return;}w.document.open();w.document.write('<!doctype html><html lang="es"><meta charset="utf-8"><title>Informe de evaluación</title><body><pre id="report" style="white-space:pre-wrap;font:14px/1.5 Arial,sans-serif"></pre></body></html>');w.document.close();w.document.getElementById('report').textContent=currentReport;w.focus();w.print();});
+ $('rev32Download').addEventListener('click',()=>{if(!currentReport)return;const url=URL.createObjectURL(new Blob([document.getElementById('rev35EvalEditor')?.value||currentReport],{type:'text/plain;charset=utf-8'})),a=el('a',{href:url,download:'Evaluacion_'+ykey()+'_'+$('rev32Quarter').value+'.txt'});a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+ $('rev32Print').addEventListener('click',()=>{if(!currentReport)return;const w=window.open('','_blank');if(!w){notice('El navegador ha bloqueado la ventana de impresión. Utiliza «Descargar informe TXT».');return;}w.document.open();w.document.write('<!doctype html><html lang="es"><meta charset="utf-8"><title>Informe de evaluación</title><body><pre id="report" style="white-space:pre-wrap;font:14px/1.5 Arial,sans-serif"></pre></body></html>');w.document.close();w.document.getElementById('report').textContent=document.getElementById('rev35EvalEditor')?.value||currentReport;w.focus();w.print();});
  $('schoolYear')?.addEventListener('change',()=>setTimeout(fill,0));
  document.addEventListener('click',e=>{if(e.target.closest('#syncBtn'))setTimeout(fill,1500)});
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)options();});
  fill();
+})();
+</script>
+
+<style id="rev35-control-css">
+#rev35Control{margin:12px 0;border:1px solid #b7c7da;background:#f8fbff;border-radius:12px;padding:12px;color:#173354}
+#rev35Control h3{margin:0 0 8px;font-size:17px}
+#rev35Control .rev35-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+#rev35Control button{min-height:38px}
+#rev35Control pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.5 ui-monospace,monospace;max-height:260px;overflow:auto;border:1px solid #d0dce9;background:white;padding:8px;border-radius:8px}
+#rev35Control .rev35-info{font-size:12px;color:#415771}
+#rev35Control .rev35-item{display:block;margin:8px 0;padding:7px;background:#fff;border:1px solid #d6e0ec;border-radius:7px}
+#rev35Signal{font-size:12px;font-weight:700}
+#rev35EvalEditor{display:block;width:100%;min-height:190px;padding:10px;border:1px solid #7c9abc;border-radius:8px;box-sizing:border-box;font-family:inherit;line-height:1.5}
+</style>
+<script id="rev35-consolidated-tools">
+(function(){'use strict';
+const $=id=>document.getElementById(id), esc35=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const target=$('syncBtn')?.closest('.config-section-block')||$('syncBtn')?.parentElement||$('configCard');
+if(!target)return;
+const panel=document.createElement('section');panel.id='rev35Control';
+panel.innerHTML=`<h3>🛡️ Centro de control de datos · REV35</h3><p class="rev35-info">Auditoría de solo lectura. Ningún registro se borra automáticamente. Primero descarga una copia integral antes de efectuar correcciones.</p>
+<div id="rev35Signal" role="status">Estado: sin comprobar</div>
+<div class="rev35-actions"><button type="button" id="rev35CheckLocal" class="secondary">📊 Auditar este navegador</button><button type="button" id="rev35CheckCloud" class="secondary">☁️ Comparar con Supabase</button><button type="button" id="rev35Backup" class="secondary">⬇ Descargar copia preventiva</button></div>
+<pre id="rev35Audit" aria-live="polite">Pulsa Auditar o Comparar para comprobar los registros.</pre>
+<details><summary>🧹 Revisar registros de cursos incongruentes</summary><p class="rev35-info">Identifica clases cuya fecha no encaja con su curso académico; por ejemplo, clases de 2026 etiquetadas 2030-31. Selecciona manualmente solo las clases de prueba que quieras eliminar. La limpieza queda pendiente de sincronización hasta que se confirme con Supabase.</p><div id="rev35Candidates"></div><div class="rev35-actions"><button type="button" id="rev35MarkDelete" class="secondary">Marcar seleccionadas como eliminadas</button></div><div id="rev35DeleteStatus" role="status"></div></details>
+<details><summary>📅 Recuperar registro independiente de festivos</summary><p class="rev35-info">Reconstruye fechas y descripciones a partir de clases existentes que estén marcadas como festivo; no modifica ni duplica esas clases.</p><div class="rev35-actions"><button type="button" id="rev35Holidays" class="secondary">Previsualizar festivos</button><button type="button" id="rev35HolidaysSave" class="secondary">Guardar registro de festivos</button></div><div id="rev35HolidayStatus" role="status"></div></details>`;
+target.insertAdjacentElement('afterend',panel);
+const output=$('rev35Audit'), status=$('rev35Signal');
+let lastCloud=null,candidates=[],holidayPreview=[];
+const coreFields=['students','lessons','appSettings','deletedStudentKeys','deletedLessonIds','auxiliaryState'];
+const yy=x=>{const m=/^(\d{4})-(\d{2})$/.exec(String(x||''));return m?Number(m[1]):null;};
+function mismatch(l){const y=yy(l.schoolYear),d=String(l.date||'');if(y===null||!/^\d{4}-\d{2}-\d{2}$/.test(d))return false;return d<`${y}-09-01`||d>`${y+1}-08-31`;}
+function unique(a){return [...new Set(a.map(String))]}
+function refreshCandidates(remote){
+ const all=new Map();for(const x of [...lessons,...(remote?.lessons||[])])if(x?.id&&mismatch(x))all.set(String(x.id),x);
+ candidates=[...all.values()].sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+ const deleted=new Set([...deletedLessonIds,...(remote?.deletedLessonIds||[])].map(String));
+ const node=$('rev35Candidates');node.replaceChildren();
+ if(!candidates.length){node.textContent='No hay clases con un curso académico incongruente entre los datos examinados.';return;}
+ for(const x of candidates){const line=document.createElement('label');line.className='rev35-item';const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.value=String(x.id);checkbox.dataset.rev35Delete='1';checkbox.disabled=deleted.has(String(x.id));line.append(checkbox,document.createTextNode(' '+x.date+' · '+(x.student||'Sin alumno')+' · '+(x.schoolYear||'?')+(checkbox.disabled?' · Ya marcada como eliminada':'')));node.append(line);}
+}
+function showLocal(){
+ const p=syncPayload(),au=window.__rev19AuxProbe?.merge(null)||{}; const tomb=new Set(p.deletedLessonIds.map(String));
+ const inconsistent=lessons.filter(mismatch);
+ const unknown=[];const prefixes=['oboe','registro'];
+ for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(!prefixes.some(p=>key.toLowerCase().startsWith(p)))continue;
+  if(/token|password|auth|session|jwt|apikey|access|refresh|supabase/i.test(key))continue;
+  if(key===SK||key===LK||key===SETK||key===YK||key==='registroOboeCursoActivoV1'||key==='registroSyncDeletedStudentsV1'||key==='registroSyncDeletedLessonsV1'||key==='registroClasesSettingsMetaV1')continue;
+  if(key in au)continue;
+  unknown.push(key);
+ }
+ const lines=['AUDITORÍA LOCAL — '+new Date().toLocaleString('es-ES'),
+ `Alumnos: ${students.length} · Clases: ${lessons.length} · Marcas de eliminación de clases: ${tomb.size}`,
+ `Configuración: ${Object.keys(appSettings).length} campos · Datos auxiliares sincronizables: ${Object.keys(au).length} claves`,
+ `Periodos trimestrales: ${Object.keys(appSettings.evaluationPeriods||{}).length} cursos`,
+ `Festivos independientes: ${Object.keys(appSettings.holidayRegistry||{}).length} cursos`,
+ `Clases con fecha/curso incongruentes: ${inconsistent.length}`,
+ `Claves locales no auditadas como datos sincronizados: ${unknown.length}`,
+ ...(unknown.length?['ATENCIÓN: estas claves necesitan clasificación; no se eliminan:',...unknown.slice(0,50)]:[])];
+ output.textContent=lines.join('\n');refreshCandidates(lastCloud);return {p,au,inconsistent,unknown};
+}
+$('rev35CheckLocal').addEventListener('click',()=>{try{showLocal();}catch(e){output.textContent='ERROR: '+e.message;}});
+$('rev35CheckCloud').addEventListener('click',async()=>{
+ if(!currentUserId()||!accessToken){output.textContent='Inicia sesión en Supabase para leer los datos remotos.';return;}
+ output.textContent='Consultando Supabase sin modificar datos…';
+ try{
+  const id=encodeURIComponent(currentUserId());const r=await syncRequest('GET',`/rest/v1/${SYNC_TABLE}?select=data,updated_at&user_id=eq.${id}&limit=2`);
+  if(!r.ok)throw Error('No se pudo leer Supabase: HTTP '+r.status);
+  const rows=await r.json();if(rows.length!==1)throw Error('Se esperaba exactamente un registro en Supabase.');lastCloud=rows[0].data;
+  if(typeof validateCollections==='function')validateCollections(lastCloud);
+  const local=showLocal();const cloud=lastCloud,lc=new Map(lessons.map(x=>[String(x.id),x]));
+  const tomb=new Set((cloud.deletedLessonIds||[]).map(String));
+  const cloudOnly=(cloud.lessons||[]).filter(x=>!lc.has(String(x.id))&&!tomb.has(String(x.id)));
+  const localOnly=lessons.filter(x=>!(cloud.lessons||[]).some(y=>String(y.id)===String(x.id)));
+  const missingTomb=deletedLessonIds.filter(x=>!tomb.has(String(x)));
+  const sameSettings=JSON.stringify(appSettings)===JSON.stringify(cloud.appSettings||{});
+  const lines=['LECTURA REAL DE SUPABASE — '+new Date(rows[0].updated_at).toLocaleString('es-ES'),
+ `Nube: ${cloud.students?.length||0} alumnos · ${cloud.lessons?.length||0} clases · ${tomb.size} eliminaciones marcadas`,
+ `Este dispositivo: ${students.length} alumnos · ${lessons.length} clases`,
+ `Clases en nube no presentes aquí: ${cloudOnly.length}; clases aquí no presentes en nube: ${localOnly.length}`,
+ `Eliminaciones locales pendientes de confirmar en nube: ${missingTomb.length}`,
+ `Configuración idéntica: ${sameSettings?'Sí':'No o pendiente de sincronización'}`,
+ `Datos auxiliares en nube: ${Object.keys(cloud.auxiliaryState||{}).length} claves`,
+ `Historial recuperable: ${(cloud.recoveryHistory||[]).length} versiones anteriores`,
+ `Clases etiquetadas con curso/fecha incongruentes: ${(cloud.lessons||[]).filter(mismatch).length}`,
+ ...(cloudOnly.length?['AVISO: algunas clases presentes en la nube podrían reaparecer al sincronizar. Comprueba el apartado de registros incongruentes.']:[]),
+ ...(local.unknown.length?['AVISO: hay claves de este navegador que todavía necesitan clasificación.']:[])];
+ output.textContent=lines.join('\n');refreshCandidates(cloud);status.textContent='☁️ Comparación completada (solo lectura).';
+ }catch(e){output.textContent='❌ '+e.message;status.textContent='Error de lectura: no se ha modificado ningún dato.';}
+});
+$('rev35MarkDelete').addEventListener('click',()=>{
+ const chosen=[...panel.querySelectorAll('input[data-rev35-delete]:checked')].map(x=>x.value);
+ if(!chosen.length){$('rev35DeleteStatus').textContent='Selecciona primero los registros que quieras eliminar.';return;}
+ if(!confirm('Se marcarán '+chosen.length+' clases concretas como eliminadas. Esta operación no borrará otras clases. ¿Continuar?'))return;
+ if(prompt('Escribe ELIMINAR para confirmar la eliminación de estas clases de prueba:')!=='ELIMINAR')return;
+ const oldLessons=lessons.slice(),oldTomb=deletedLessonIds.slice();const ids=new Set(chosen);
+ try{
+  // Tombstones are persisted before removing the records; no silent removal.
+  for(const id of chosen)rememberDeletedLesson(id);
+  lessons=lessons.filter(x=>!ids.has(String(x.id)));
+  if(!saveL())throw Error('No se pudo persistir el registro de clases.');
+  if(typeof recordSyncChange==='function')for(const id of chosen)recordSyncChange('lessons','deleted');
+  if(typeof markLocalSyncDirty==='function')markLocalSyncDirty();
+  render();renderStudents();refreshCandidates(lastCloud);
+  $('rev35DeleteStatus').textContent='✅ '+chosen.length+' clases marcadas. Ahora pulsa «Sincronizar» y vuelve a «Comparar con Supabase» para verificar la eliminación.';
+ }catch(e){lessons=oldLessons;deletedLessonIds=oldTomb;try{saveDeleted();saveL();}catch(_){}$('rev35DeleteStatus').textContent='❌ Sin cambios confirmados: '+e.message;}
+});
+function holidayCandidates(){
+ const map=new Map();for(const l of lessons){if(l.attendance!=='festivo'||!l.date)continue;
+  const m=/^Festivo:\s*(.*)$/i.exec(String(l.obs||'').trim());const label=m?.[1]||'Festivo (sin descripción independiente)';
+  const y=l.schoolYear||year();const k=y+'|'+l.date;
+  if(!map.has(k))map.set(k,{year:y,date:l.date,label,classes:0});map.get(k).classes++;
+ }
+ return [...map.values()].sort((a,b)=>a.date.localeCompare(b.date));
+}
+$('rev35Holidays').addEventListener('click',()=>{holidayPreview=holidayCandidates();$('rev35HolidayStatus').textContent=holidayPreview.length?holidayPreview.map(x=>`${x.date} · ${x.label} · ${x.classes} clases`).join('\n'):'No hay registros de festivos de los que reconstruir fechas.';$('rev35HolidayStatus').style.whiteSpace='pre-wrap';});
+$('rev35HolidaysSave').addEventListener('click',()=>{
+ holidayPreview=holidayCandidates();if(!holidayPreview.length)return $('rev35HolidayStatus').textContent='No hay festivos detectados.';
+ if(!confirm('Guardar '+holidayPreview.length+' fechas de festivos en la configuración académica (sin cambiar clases)?'))return;
+ const previous=appSettings;const registry=JSON.parse(JSON.stringify(appSettings.holidayRegistry||{}));
+ let newEntries=0;for(const item of holidayPreview){const arr=Array.isArray(registry[item.year])?registry[item.year]:[];
+  if(!arr.some(x=>x.date===item.date)){arr.push({date:item.date,description:item.label,source:'reconstruido de clases existentes'});newEntries++;}
+  registry[item.year]=arr;
+ }
+ try{appSettings={...appSettings,holidayRegistry:registry};localStorage.setItem(SETK,JSON.stringify(appSettings));markSettingsUpdated();
+  if(typeof recordSyncChange==='function')recordSyncChange('settings','updated');if(typeof markLocalSyncDirty==='function')markLocalSyncDirty();
+  $('rev35HolidayStatus').textContent=`✅ ${newEntries} fechas nuevas guardadas. Sincroniza para confirmarlas en Supabase. No se han modificado las clases.`;
+ }catch(e){appSettings=previous;try{localStorage.setItem(SETK,JSON.stringify(previous));}catch(_){}$('rev35HolidayStatus').textContent='❌ '+e.message;}
+});
+$('rev35Backup').addEventListener('click',()=>{
+ try{const data={format:'registro-oboe-rev35-preventiva',at:new Date().toISOString(),...syncPayload(),auxiliaryState:window.__rev19AuxProbe?.merge(null)||{}};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});downloadFile(blob,'Registro_Oboe_REV35_PREVENTIVA_'+new Date().toISOString().slice(0,10)+'.json');
+  output.textContent='Copia preventiva descargada. Comprueba que aparece en Descargas.';
+ }catch(e){output.textContent='❌ '+e.message;}
+});
+const signal=()=>{
+ try{const meta=JSON.parse(localStorage.getItem('registroSyncMetaV1')||'{}');const pending=typeof syncDirty==='function'&&syncDirty();
+  const at=meta.lastSyncAt?new Date(meta.lastSyncAt).toLocaleString('es-ES'):'Nunca';
+  status.textContent=(pending?'🟠 Datos locales pendientes de sincronizar':'🔵 Sin cambios locales marcados')+' · Última sincronización registrada: '+at;
+ }catch(e){status.textContent='Estado de sincronización no disponible';}
+};
+$('syncBtn').addEventListener('click',()=>{status.textContent='🔄 Sincronización en curso; espera la confirmación de Supabase.';},{capture:true});
+setInterval(signal,5000);signal();refreshCandidates(null);
+// Editable draft: edits remain separate from saved lessons. Export and print use the edited text.
+const report=$('rev32Report'),actions=$('rev32ReportActions');
+if(report&&actions&&$('rev32Preview')){
+ const editor=document.createElement('textarea');editor.id='rev35EvalEditor';editor.hidden=true;editor.setAttribute('aria-label','Editar borrador de evaluación trimestral');
+ report.insertAdjacentElement('afterend',editor);
+ const preview=$('rev32Preview');preview.addEventListener('click',()=>queueMicrotask(()=>{
+   if(report.hidden){editor.hidden=true;return;}
+   editor.value=report.textContent;editor.hidden=false;report.hidden=true;
+ }));
+
+ const note=document.createElement('p');note.className='rev35-info';note.textContent='El borrador es editable antes de descargar o imprimir. No modifica las clases ni su evaluación oficial.';actions.before(note);
+}
 })();
 </script>
 </body></html>
