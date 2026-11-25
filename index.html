@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV35 · Corrección 2 · Versión unificada</title><style>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV36 · Seguimiento pedagógico</title><style>
 body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-width:720px;margin:auto;padding:16px}.card{background:white;border:1px solid #ddd;border-radius:16px;padding:16px;margin:12px 0}label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:10px;font:inherit}textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{border:0;border-radius:10px;padding:10px 13px;margin:6px 4px 0 0;font-weight:700;max-width:100%;white-space:normal}.primary{background:#2f5d50;color:#fff}.secondary{background:#dfe9e4;color:#2f5d50}.danger{background:#f3dddd;color:#a44242}.item{border-top:1px solid #ddd;padding:12px 0}.muted{color:#69716d;font-size:12px}.grade{float:right;font-size:20px;font-weight:800;color:#2f5d50}.hidden{display:none}.rec{padding:10px;background:#f7f7f4;border-radius:10px;margin-top:8px}
 .rating-group{margin:12px 0}.rating-title{font-weight:700;font-size:13px;margin-bottom:6px}
 .rating-buttons{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;width:100%}
@@ -575,14 +575,14 @@ body.rev30-banner-collapsed #rev30VersionReopen{display:flex!important}
 <div id="rev30VersionReopen"><button type="button" id="rev30BannerOpen" aria-controls="buildVersionBanner" aria-expanded="false">▸ Ver versión y novedades</button></div>
 <div id="buildVersionBanner" role="region" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
-  <strong id="canonicalBuildBannerVersion">V11.2.6 · REVISIÓN 35 · CONSOLIDADA · PRUEBA</strong>
-  <div class="build-version-detail"><b>NOVEDADES:</b> Centro de control de datos, auditoría de Supabase, revisión de registros antiguos, festivos recuperables, evaluaciones editables e indicador de sincronización. No se eliminan datos automáticamente.</div>
+  <strong id="canonicalBuildBannerVersion">V11.2.6 · Revisión 36 · SEGUIMIENTO PEDAGÓGICO · PRUEBA</strong>
+  <div class="build-version-detail"><b>NOVEDADES:</b> Seguimiento pedagógico, repertorio, objetivos, notas privadas, búsqueda, informes individuales y colectivos, auditoría detallada.</div>
   <div class="build-version-changes"><b>FUNCIONES ACUMULADAS:</b> altas y bajas de alumnos, borrado definitivo protegido, festivos, tareas anteriores, informes de sincronización y sincronización automática opcional.</div>
   <div class="build-version-caution">⚠️ PRUEBA: antes de sincronizar crea una copia integral del navegador con más información. No sincronices aún desde versiones anteriores. Después de recuperar datos en otro navegador, recarga la página.</div>
   <button type="button" class="rev30-banner-close" id="rev30BannerClose" aria-controls="buildVersionBanner" aria-expanded="true">✕ Cerrar este aviso</button>
 </div>
 <div id="rev19AuxStatus" role="status" style="font-size:12px;color:#15416b;margin:6px 0 12px"></div>
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 35 · Corrección 2 · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 36 · SEGUIMIENTO PEDAGÓGICO · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -2523,7 +2523,7 @@ function updateForToday(){
  function rev29WriteReport(localBefore,cloudBefore,verified){
   const outgoing=rev29Difference(cloudBefore,verified,'Enviados a Supabase');
   const incoming=rev29Difference(localBefore,verified,'Recibidos en este dispositivo');
-  const report={at:new Date().toISOString(),version:'V11.2.6 REV35',outgoing,incoming};
+  const report={at:new Date().toISOString(),version:'V11.2.6 REV36',outgoing,incoming};
   try{localStorage.setItem(REV29_REPORT_KEY,JSON.stringify(report));}catch(err){console.warn('El informe detallado excede el almacenamiento disponible:',err);}
   return report;
  }
@@ -3800,7 +3800,7 @@ archivePanel();
 'use strict';
 const $=id=>document.getElementById(id);
 const status=$('integralBackupStatus'),preview=$('integralRestorePreview'),fileInput=$('integralRestoreFile');
-const VERSION='V11.2.6 · Revisión 35';
+const VERSION='V11.2.6 · Revisión 36';
 const DATA_KEYS=['oboeLessonsV2','oboeStudentsV1','oboeSchoolYearV1','registroClasesSettingsV1',
 'registroClasesSettingsMetaV1','registroClasesArchivosV1','registroClasesScheduleModeV1',
 'registroClasesScheduleSimulationV1','registroOboeCursoActivoV1','registroSyncAliasesV11',
@@ -4343,14 +4343,14 @@ setTimeout(refresh,500);window.refreshPendingCalendar=refresh;
 (function(){
   'use strict';
   // UNA sola identificación visible para el aviso y la cabecera.
-  const BUILD=Object.freeze({version:'V11.2.6',revision:'35',correction:'consolidada',status:'PRUEBA'});
+  const BUILD=Object.freeze({version:'V11.2.6',revision:'36',correction:'seguimiento pedagógico',status:'PRUEBA'});
   const caption=BUILD.version+' · Revisión '+BUILD.revision+' · '+BUILD.correction.toUpperCase()+' · '+BUILD.status;
   function updateVersion(){
     const banner=document.getElementById('canonicalBuildBannerVersion');
     const header=document.getElementById('appVersion');
     if(banner)banner.textContent=caption;
     if(header)header.textContent=caption;
-    document.documentElement.dataset.registroBuild='rev35-consolidada';
+    document.documentElement.dataset.registroBuild='rev36-pedagogica';
   }
   window.__registroCurrentBuild=BUILD;
   updateVersion();
@@ -4497,7 +4497,7 @@ const $=id=>document.getElementById(id), esc35=v=>String(v??'').replace(/[&<>"]/
 const target=$('syncBtn')?.closest('.config-section-block')||$('syncBtn')?.parentElement||$('configCard');
 if(!target)return;
 const panel=document.createElement('section');panel.id='rev35Control';
-panel.innerHTML=`<h3>🛡️ Centro de control de datos · REV35</h3><p class="rev35-info">Auditoría de solo lectura. Ningún registro se borra automáticamente. Primero descarga una copia integral antes de efectuar correcciones.</p>
+panel.innerHTML=`<h3>🛡️ Centro de control de datos · REV36</h3><p class="rev35-info">Auditoría de solo lectura. Ningún registro se borra automáticamente. Primero descarga una copia integral antes de efectuar correcciones.</p>
 <div id="rev35Signal" role="status">Estado: sin comprobar</div>
 <div class="rev35-actions"><button type="button" id="rev35CheckLocal" class="secondary">📊 Auditar este navegador</button><button type="button" id="rev35CheckCloud" class="secondary">☁️ Comparar con Supabase</button><button type="button" id="rev35Backup" class="secondary">⬇ Descargar copia preventiva</button></div>
 <pre id="rev35Audit" aria-live="polite">Pulsa Auditar o Comparar para comprobar los registros.</pre>
@@ -4505,6 +4505,7 @@ panel.innerHTML=`<h3>🛡️ Centro de control de datos · REV35</h3><p class="r
 <details><summary>📅 Recuperar registro independiente de festivos</summary><p class="rev35-info">Reconstruye fechas y descripciones a partir de clases existentes que estén marcadas como festivo; no modifica ni duplica esas clases.</p><div class="rev35-actions"><button type="button" id="rev35Holidays" class="secondary">Previsualizar festivos</button><button type="button" id="rev35HolidaysSave" class="secondary">Guardar registro de festivos</button></div><div id="rev35HolidayStatus" role="status"></div></details>`;
 target.insertAdjacentElement('afterend',panel);
 const output=$('rev35Audit'), status=$('rev35Signal');
+const download=document.createElement('button');download.type='button';download.textContent='Descargar informe de auditoría';download.onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([output.textContent],{type:'text/plain'}));a.download='Auditoria_REV36.txt';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};output.after(download);
 let lastCloud=null,candidates=[],holidayPreview=[];
 const coreFields=['students','lessons','appSettings','deletedStudentKeys','deletedLessonIds','auxiliaryState'];
 const yy=x=>{const m=/^(\d{4})-(\d{2})$/.exec(String(x||''));return m?Number(m[1]):null;};
@@ -4552,13 +4553,21 @@ $('rev35CheckCloud').addEventListener('click',async()=>{
   const cloudOnly=(cloud.lessons||[]).filter(x=>!lc.has(String(x.id))&&!tomb.has(String(x.id)));
   const localOnly=lessons.filter(x=>!(cloud.lessons||[]).some(y=>String(y.id)===String(x.id)));
   const missingTomb=deletedLessonIds.filter(x=>!tomb.has(String(x)));
-  const sameSettings=JSON.stringify(appSettings)===JSON.stringify(cloud.appSettings||{});
+  const canonical=v=>Array.isArray(v)?v.map(canonical):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])])):v;
+  const equal=(a,b)=>JSON.stringify(canonical(a))===JSON.stringify(canonical(b));
+  const sameSettings=equal(appSettings,cloud.appSettings||{});
+  const differences=[...new Set([...Object.keys(appSettings),...Object.keys(cloud.appSettings||{})])].filter(k=>!equal(appSettings[k],cloud.appSettings?.[k]));
+  const changed=(a,b)=>a.filter(x=>{const y=b.find(z=>String(z.id)===String(x.id));return y&&!equal(x,y)}).length;
   const lines=['LECTURA REAL DE SUPABASE — '+new Date(rows[0].updated_at).toLocaleString('es-ES'),
  `Nube: ${cloud.students?.length||0} alumnos · ${cloud.lessons?.length||0} clases · ${tomb.size} eliminaciones marcadas`,
  `Este dispositivo: ${students.length} alumnos · ${lessons.length} clases`,
  `Clases en nube no presentes aquí: ${cloudOnly.length}; clases aquí no presentes en nube: ${localOnly.length}`,
  `Eliminaciones locales pendientes de confirmar en nube: ${missingTomb.length}`,
  `Configuración idéntica: ${sameSettings?'Sí':'No o pendiente de sincronización'}`,
+ `Campos de configuración diferentes: ${differences.join(', ')||'ninguno'}`,
+ `Clases con contenido diferente: ${changed(lessons,cloud.lessons||[])}`,
+ `Alumnos con contenido diferente: ${changed(students,cloud.students||[])}`,
+ `Claves locales por clasificar: ${local.unknown.join(', ')||'ninguna'}`,
  `Datos auxiliares en nube: ${Object.keys(cloud.auxiliaryState||{}).length} claves`,
  `Historial recuperable: ${(cloud.recoveryHistory||[]).length} versiones anteriores`,
  `Clases etiquetadas con curso/fecha incongruentes: ${(cloud.lessons||[]).filter(mismatch).length}`,
@@ -4608,7 +4617,7 @@ $('rev35HolidaysSave').addEventListener('click',()=>{
 });
 $('rev35Backup').addEventListener('click',()=>{
  try{const data={format:'registro-oboe-rev35-preventiva',at:new Date().toISOString(),...syncPayload(),auxiliaryState:window.__rev19AuxProbe?.merge(null)||{}};
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});downloadFile(blob,'Registro_Oboe_REV35_PREVENTIVA_'+new Date().toISOString().slice(0,10)+'.json');
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});downloadFile(blob,'Registro_Oboe_REV36_PREVENTIVA_'+new Date().toISOString().slice(0,10)+'.json');
   output.textContent='Copia preventiva descargada. Comprueba que aparece en Descargas.';
  }catch(e){output.textContent='❌ '+e.message;}
 });
@@ -4634,4 +4643,23 @@ if(report&&actions&&$('rev32Preview')){
 }
 })();
 </script>
-</body></html>
+<style>#rev36Ped{padding:12px;color:#173354}#rev36Ped summary{font-weight:700;cursor:pointer}#rev36Ped details{margin:12px 0;border-top:1px solid #ccd9e8;padding-top:8px}#rev36Ped textarea,#rev36Ped select,#rev36Ped input{width:100%;margin:5px 0}#rev36Ped button{margin:4px;white-space:normal}#r36Summary{white-space:pre-wrap;overflow-wrap:anywhere}</style><script>(function(){'use strict';
+const $=id=>document.getElementById(id), E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])), today=()=>isoDateLocal(new Date()), active=()=>year()===(localStorage.getItem('registroOboeCursoActivoV1')||year());
+const panel=document.createElement('details');panel.id='rev36Ped';panel.className='card';panel.innerHTML=`<summary>🎼 Seguimiento pedagógico · REV36</summary><p>Curso seleccionado · datos registrados, sin valoraciones inventadas.</p><div id="r36Today"></div><label>Alumno</label><select id="r36Student"></select><div id="r36Summary"></div><details><summary>Repertorio y objetivos</summary><div id="r36Rep"></div><label>Obra, estudio o ejercicio</label><input id="r36Title"><label>Estado</label><select id="r36State"><option>Pendiente</option><option>En preparación</option><option>Terminado</option></select><button type="button" id="r36Add">Añadir repertorio</button><label>Objetivos de seguimiento</label><textarea id="r36Goals"></textarea><label>Notas privadas del docente (se incluyen en las copias y la nube)</label><textarea id="r36Notes"></textarea><button type="button" id="r36Save">Guardar seguimiento</button></details><details><summary>Estadísticas y evaluación</summary><div id="r36Stats"></div><label>Periodo</label><select id="r36Quarter"><option value="all">Curso completo</option><option value="0">Primer trimestre</option><option value="1">Segundo trimestre</option><option value="2">Tercer trimestre</option></select><button type="button" id="r36Report">Generar informe individual</button><button type="button" id="r36Group">Generar informe colectivo</button><textarea id="r36Draft" rows="10" aria-label="Informe editable"></textarea><button type="button" id="r36Print">Imprimir / guardar PDF</button></details><details><summary>Búsqueda global de clases y repertorio</summary><input id="r36Search" placeholder="Buscar texto"><div id="r36Results"></div></details><p id="r36Status" role="status"></p>`;
+$('lessonCard').before(panel);
+const selected=()=>$('r36Student').value, data=id=>appSettings.pedagogicalTracking?.[year()]?.[id]||{}, history=id=>lessons.filter(l=>String(l.studentId)===String(id)&&lessonYear(l)===year()).sort((a,b)=>String(a.date).localeCompare(String(b.date))||Number(a.created||0)-Number(b.created||0)), last=id=>history(id).filter(l=>l.attendance==='asiste'&&l.date<=today()).at(-1);
+function persist(patch){if(!active()||!selected())throw Error('Selecciona un alumno del curso activo.');const map=appSettings.pedagogicalTracking||{}, y=year(), id=selected(), next={...appSettings,pedagogicalTracking:{...map,[y]:{...map[y],[id]:{...data(id),...patch}}}};localStorage.setItem(SETK,JSON.stringify(next));appSettings=next;markSettingsUpdated();recordSyncChange('settings','updated');markLocalSyncDirty();$('r36Status').textContent='Guardado localmente. Pendiente de confirmación en Supabase.';}
+function stats(a){const attend=a.filter(l=>l.attendance==='asiste'), grades=attend.filter(l=>l.grade!==null&&l.grade!==''&&l.grade!==undefined&&Number.isFinite(Number(l.grade))).map(l=>Number(l.grade));return `${attend.length} asistencias · ${a.filter(l=>l.attendance==='falta').length} faltas · ${a.filter(l=>l.attendance==='festivo').length} festivos · Media: ${grades.length?(grades.reduce((x,y)=>x+y,0)/grades.length).toFixed(2):'—'} · Evolución: ${grades.join(' → ')||'—'}`;}
+function refresh(){const old=selected(), people=students.filter(s=>!s.archived);$('r36Student').innerHTML=people.map(s=>`<option value="${E(s.id)}">${E(s.name)}</option>`).join('');if(people.some(s=>String(s.id)===old))$('r36Student').value=old;const day=DAY_NAMES[new Date().getDay()];$('r36Today').innerHTML='<b>Clases de hoy · '+E(today())+'</b>'+sortedScheduleForDay(day).map(s=>`<div>${E(s.scheduleTime)} · ${E(s.name)} · ${history(s.id).some(l=>l.date===today())?'Registrada':'Sin registro'} <button type="button" data-r36-pick="${E(s.id)}">Preparar</button></div>`).join('');renderStudent();}
+function renderStudent(){const id=selected(), s=students.find(x=>String(x.id)===id), d=data(id), l=last(id);$('r36Summary').innerHTML=s?`<p><b>${E(s.name)} · ${E(s.course)}</b></p><p>Última clase impartida: ${E(l?.date||'—')}<br>Observaciones: ${E(l?.obs||'—')}<br>Tareas vigentes: ${E(l?.nextClass||'Ninguna')}<br>Objetivos de ficha: ${E(s.objectives||'—')}<br>Repertorio de ficha: ${E(s.repertoire||'—')}</p><button type="button" id="r36Profile">Abrir ficha integral</button>`:'';$('r36Profile')?.addEventListener('click',()=>window.openStudentProfile(s.id));$('r36Goals').value=d.goals||'';$('r36Notes').value=d.notes||'';$('r36Rep').innerHTML=(d.repertoire||[]).map((r,i)=>`<div><b>${E(r.title)}</b> · ${E(r.started)} ${r.finished?' · Fin: '+E(r.finished):''}<select data-r36-rep="${i}" ${active()?'':'disabled'}>${['Pendiente','En preparación','Terminado'].map(v=>`<option ${v===r.state?'selected':''}>${v}</option>`).join('')}</select></div>`).join('');$('r36Stats').textContent=stats(history(id));for(const k of ['r36Add','r36Save','r36Goals','r36Notes'])$(k).disabled=!active();}
+function attempt(fn){try{fn()}catch(e){$('r36Status').textContent=e.message}}
+$('r36Student').onchange=renderStudent;panel.addEventListener('toggle',()=>{if(panel.open)refresh()});$('schoolYear').addEventListener('change',()=>setTimeout(refresh,0));
+$('r36Save').onclick=()=>attempt(()=>persist({goals:$('r36Goals').value,notes:$('r36Notes').value}));$('r36Add').onclick=()=>attempt(()=>{const title=$('r36Title').value.trim();if(!title)throw Error('Escribe un título.');const state=$('r36State').value;persist({repertoire:[...(data(selected()).repertoire||[]),{title,state,started:today(),finished:state==='Terminado'?today():null}],goals:$('r36Goals').value,notes:$('r36Notes').value});$('r36Title').value='';renderStudent()});
+panel.addEventListener('change',e=>{if(e.target.dataset.r36Rep===undefined)return;attempt(()=>{const state=e.target.value;persist({repertoire:data(selected()).repertoire.map((r,i)=>i===Number(e.target.dataset.r36Rep)?{...r,state,finished:state==='Terminado'?today():null}:r),goals:$('r36Goals').value,notes:$('r36Notes').value});renderStudent()})});
+panel.addEventListener('click',e=>{const b=e.target.closest('[data-r36-pick]');if(b){$('r36Student').value=b.dataset.r36Pick;renderStudent();}const c=e.target.closest('[data-r36-lesson]');if(c){if(window.__lessonDirty)return alert('Guarda o cancela la clase actual.');if(!active())return alert('Curso histórico: consulta el historial.');showView('lessonCard');window.editLesson(c.dataset.r36Lesson);}});
+function report(group){const q=$('r36Quarter').value,p=appSettings.evaluationPeriods?.[year()]?.[Number(q)];if(q!=='all'&&!p)throw Error('Configura primero las fechas trimestrales.');const list=students.filter(s=>group?!s.archived:String(s.id)===selected());$('r36Draft').value=['INFORME DOCENTE · '+year(),p?`${p.start} — ${p.end}`:'Curso completo',...list.map(s=>{const a=history(s.id).filter(l=>!p||l.date>=p.start&&l.date<=p.end),d=data(s.id),l=a.filter(x=>x.attendance==='asiste').at(-1);return `${s.name} · ${s.course||''}\n${stats(a)}\n${a.filter(x=>x.obs).map(x=>x.date+': '+x.obs).join('\n')}\nTareas al cierre: ${l?.nextClass||'—'}\nObjetivos actuales: ${d.goals||s.objectives||'—'}\nRepertorio actual: ${(d.repertoire||[]).map(r=>r.title+' ('+r.state+')').join('; ')||'—'}`;}),'Borrador descriptivo. Revisar antes de utilizar.'].join('\n\n');}
+$('r36Report').onclick=()=>attempt(()=>report(false));$('r36Group').onclick=()=>attempt(()=>report(true));$('r36Print').onclick=()=>{if(!$('r36Draft').value.trim())return;const w=window.open('','_blank');if(!w)return alert('Ventana bloqueada.');w.document.write('<title>Informe docente</title><style>body{font:14px Arial;margin:35px;color:#173354}pre{white-space:pre-wrap;font:inherit}</style><h1>Registro de clases</h1><pre></pre>');w.document.close();w.document.querySelector('pre').textContent=$('r36Draft').value;w.print()};
+$('r36Search').oninput=()=>{const t=$('r36Search').value.trim().toLocaleLowerCase('es');if(!t){$('r36Results').textContent='';return;}const found=lessons.filter(l=>[l.student,l.obs,l.nextClass,l.autoComment].some(v=>String(v||'').toLocaleLowerCase('es').includes(t)));const rep=Object.entries(appSettings.pedagogicalTracking||{}).flatMap(([y,people])=>Object.entries(people).flatMap(([id,d])=>(d.repertoire||[]).filter(r=>r.title.toLocaleLowerCase('es').includes(t)).map(r=>`${y} · ${students.find(s=>String(s.id)===id)?.name||id} · ${r.title} · ${r.state}`)));$('r36Results').innerHTML=found.slice(0,100).map(l=>`<div>${E(l.date)} · ${E(l.student)} · ${E(l.obs)} · ${E(l.nextClass)} ${lessonYear(l)===year()?`<button type="button" data-r36-lesson="${E(l.id)}">Abrir</button>`:''}</div>`).join('')+rep.map(r=>`<p>${E(r)}</p>`).join('')+`<p>${found.length} clases encontradas (máximo 100 visibles); ${rep.length} obras.</p>`;};
+refresh();
+})();
+</script></body></html>
