@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 REV36 · Seguimiento pedagógico</title><style>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registro de Clases de Oboe · V11.2.6 · Revisión 36 · CORRECCIÓN 6 · AJUSTES · PRUEBA</title><style>
 body{font-family:system-ui;margin:0;background:#f5f3ee;color:#202522}.wrap{max-width:720px;margin:auto;padding:16px}.card{background:white;border:1px solid #ddd;border-radius:16px;padding:16px;margin:12px 0}label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:10px;font:inherit}textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{border:0;border-radius:10px;padding:10px 13px;margin:6px 4px 0 0;font-weight:700;max-width:100%;white-space:normal}.primary{background:#2f5d50;color:#fff}.secondary{background:#dfe9e4;color:#2f5d50}.danger{background:#f3dddd;color:#a44242}.item{border-top:1px solid #ddd;padding:12px 0}.muted{color:#69716d;font-size:12px}.grade{float:right;font-size:20px;font-weight:800;color:#2f5d50}.hidden{display:none}.rec{padding:10px;background:#f7f7f4;border-radius:10px;margin-top:8px}
 .rating-group{margin:12px 0}.rating-title{font-weight:700;font-size:13px;margin-bottom:6px}
 .rating-buttons{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;width:100%}
@@ -501,7 +501,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3973ba!important;outl
 .weekly-overview-stat strong{display:block;font-size:23px;line-height:1.3;color:#143f73;font-variant-numeric:tabular-nums}
 .weekly-overview-stat span{display:block;font-size:11px;font-weight:700;color:#435d78}
 #weeklyOverviewDetails{border-top:1px solid #d8e4f1;padding-top:9px;margin-top:9px}
-#weeklyOverviewDetails summary{cursor:pointer;color:#15477f;font-weight:750;font-size:13px}
+#weeklyOverviewDetails summary{cursor:pointer;color:#164a7c;font-weight:750;font-size:14px;line-height:1.5}
 #weeklyOverviewMissing{font-size:13px;line-height:1.6;padding:8px 3px;color:#253e58}
 .weekly-overview-missing-row{padding:5px 1px;border-bottom:1px solid #e7eef6}
 #weeklyOverviewNote{margin:11px 0 0;font-size:11px}
@@ -542,7 +542,7 @@ body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40
 @media(max-width:600px){#gmailPreferences .gmail-grid{grid-template-columns:1fr}.gmail-profile-actions button{flex:1 1 150px}}
 </style><style id="pending-calendar-styles">
 #pendingTracker{border-top:1px solid #d7e3ef;margin-top:14px;padding-top:12px}
-#pendingTracker summary{cursor:pointer;color:#164a7c;font-weight:750}
+#pendingTracker summary{cursor:pointer;color:#164a7c;font-weight:750;font-size:14px;line-height:1.5}
 .pending-summary{display:inline-block;margin-left:8px;font-weight:600;color:#a13a20}
 .pending-calendar-tools{display:flex;align-items:center;justify-content:center;gap:12px;margin:12px 0}
 .pending-calendar-tools button{min-height:36px;padding:5px 12px}
@@ -571,18 +571,18 @@ body.historical-only .mobile-bottom-nav a:not([href="#historyCard"]){opacity:.40
 body.rev30-banner-collapsed #buildVersionBanner{display:none!important}
 body.rev30-banner-collapsed #rev30VersionReopen{display:flex!important}
 </style>
-</head><body><div class="wrap">
+<style>.rev09verified{white-space:pre-line;margin-top:8px;padding-top:8px;border-top:1px solid #cbd5e1;overflow-wrap:anywhere}</style></head><body><div class="wrap">
 <div id="rev30VersionReopen"><button type="button" id="rev30BannerOpen" aria-controls="buildVersionBanner" aria-expanded="false">▸ Ver versión y novedades</button></div>
 <div id="buildVersionBanner" role="region" aria-label="Versión de prueba y novedades incluidas">
   <span class="build-version-marker">VERSIÓN NUEVA · PRUEBA</span>
-  <strong id="canonicalBuildBannerVersion">V11.2.6 · Revisión 36 · SEGUIMIENTO PEDAGÓGICO · PRUEBA</strong>
-  <div class="build-version-detail"><b>NOVEDADES:</b> Seguimiento pedagógico, repertorio, objetivos, notas privadas, búsqueda, informes individuales y colectivos, auditoría detallada.</div>
+  <strong id="canonicalBuildBannerVersion">V11.2.6 · Revisión 36 · CORRECCIÓN 6 · AJUSTES · PRUEBA</strong>
+  <div class="build-version-detail"><b>NOVEDADES:</b> Botón Ajustes con texto y apartado Configuración general. Se conserva el informe visible de sincronización. Tipografía e iconos unificados en seguimiento semanal y mensual. Seguimiento pedagógico, repertorio, objetivos, notas privadas, búsqueda, informes individuales y colectivos, auditoría detallada.</div>
   <div class="build-version-changes"><b>FUNCIONES ACUMULADAS:</b> altas y bajas de alumnos, borrado definitivo protegido, festivos, tareas anteriores, informes de sincronización y sincronización automática opcional.</div>
   <div class="build-version-caution">⚠️ PRUEBA: antes de sincronizar crea una copia integral del navegador con más información. No sincronices aún desde versiones anteriores. Después de recuperar datos en otro navegador, recarga la página.</div>
   <button type="button" class="rev30-banner-close" id="rev30BannerClose" aria-controls="buildVersionBanner" aria-expanded="true">✕ Cerrar este aviso</button>
 </div>
 <div id="rev19AuxStatus" role="status" style="font-size:12px;color:#15416b;margin:6px 0 12px"></div>
-<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 36 · SEGUIMIENTO PEDAGÓGICO · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir configuración">⚙</button></div></header>
+<header><div class="brand"><span class="eyebrow">CUADERNO DOCENTE</span><h1 id="appTitle">Registro de Clases</h1><p class="muted" id="appSubtitle">Cuaderno digital de clases individuales</p><p id="appVersion" class="muted" style="font-size:11px;margin-top:2px">V11.2.6 · Revisión 36 · CORRECCIÓN 6 · AJUSTES · PRUEBA</p></div><div class="header-actions"><button id="openSync" type="button" aria-label="Abrir sincronización">☁</button><button id="openAdmin" type="button" aria-label="Abrir ajustes">⚙ <span class="admin-label">Ajustes</span></button></div></header>
 
 
 <section class="card collapsed" id="lessonCard" aria-label="Clase">
@@ -674,7 +674,7 @@ body.rev30-banner-collapsed #rev30VersionReopen{display:flex!important}
 <button class="secondary hidden" id="cancelLessonEdit">Cancelar edición</button></section>
 
 <section class="card" id="configCard">
-  <div class="config-head"><h2>⚙️ Configuración</h2><button type="button" class="secondary" id="toggleSettings">⚙️ Abrir configuración</button></div>
+  <div class="config-head"><h2>⚙️ Configuración general</h2><button type="button" class="secondary" id="toggleSettings">⚙️ Abrir configuración general</button></div>
   <p class="muted" id="configHelp">Opciones de configuración y mantenimiento. Normalmente no necesitas abrir este apartado durante las clases.</p>
   <p class="config-summary" id="configSummary"></p>
 
@@ -839,7 +839,7 @@ body.rev30-banner-collapsed #rev30VersionReopen{display:flex!important}
  <div class="weekly-overview-heading"><h2>📋 Resumen semanal</h2><button type="button" class="secondary" id="weeklyOverviewRefresh">↻ Actualizar</button></div>
  <p class="muted" id="weeklyOverviewDates">Semana actual · Lunes a jueves</p>
  <div class="weekly-overview-stats" id="weeklyOverviewStats" aria-live="polite">Calculando…</div>
- <details id="weeklyOverviewDetails"><summary>Ver alumnos pendientes de registrar</summary><div id="weeklyOverviewMissing"></div></details>
+ <details id="weeklyOverviewDetails"><summary>👥 Alumnos pendientes de registrar</summary><div id="weeklyOverviewMissing"></div></details>
  <details id="pendingTracker"><summary>🗓️ Calendario mensual de seguimiento <span id="pendingSummary" class="pending-summary"></span></summary><div class="pending-calendar-tools"><button type="button" class="secondary" id="pendingPrevMonth" aria-label="Mes anterior">‹</button><strong id="pendingMonthLabel"></strong><button type="button" class="secondary" id="pendingNextMonth" aria-label="Mes siguiente">›</button></div><div id="pendingMonthGrid" class="pending-calendar-grid"></div><div class="pending-legend">Pulsa una fecha para ver la agenda por horas. Verde: completo · Rojo: pendiente · Ámbar: hoy · Gris: sin clases o no lectivo. Descartar un aviso no borra la clase.</div><div id="pendingDayDetails" hidden></div></details><p class="muted" id="weeklyOverviewNote">Se compara el horario actual con los registros del curso seleccionado. Los festivos y periodos no lectivos no se cuentan como clases impartidas.</p>
 </section>
 <section class="card weekly-card collapsed" id="weeklyCard">
@@ -908,7 +908,7 @@ function saveSettings(){
   if(typeof markLocalSyncDirty==="function")markLocalSyncDirty();
   applySettings();
   q("settingsStatus").textContent="Configuración guardada.";
-  updateConfigView(false);q("toggleSettings").textContent="⚙️ Abrir configuración";
+  updateConfigView(false);q("toggleSettings").textContent="⚙️ Abrir configuración general";
 }
 function applySettings(){
   const inst=currentInstrument();
@@ -924,11 +924,11 @@ function applySettings(){
   if(summary) summary.innerHTML=[currentInstrument(),appSettings.teacher,appSettings.school].filter(Boolean).join(" · ");
 }
 q("saveSettings").onclick=saveSettings;
-q("toggleSettings").onclick=()=>{const card=q("configCard");card.classList.toggle("collapsed");q("toggleSettings").textContent=card.classList.contains("collapsed")?"⚙️ Abrir configuración":"⚙️ Cerrar configuración";};
+q("toggleSettings").onclick=()=>{const card=q("configCard");card.classList.toggle("collapsed");q("toggleSettings").textContent=card.classList.contains("collapsed")?"⚙️ Abrir configuración general":"⚙️ Cerrar configuración general";};
 q("instrument").onchange=()=>q("otherInstrumentBox").classList.toggle("hidden",q("instrument").value!=="Otro");
 applySettings();
 updateConfigView();
-q("toggleSettings").textContent=q("configCard").classList.contains("collapsed")?"⚙️ Abrir configuración":"⚙️ Cerrar configuración";
+q("toggleSettings").textContent=q("configCard").classList.contains("collapsed")?"⚙️ Abrir configuración general":"⚙️ Cerrar configuración general";
 function yr(){let d=new Date(),y=d.getFullYear();return d.getMonth()+1>=9?`${y}-${String(y+1).slice(-2)}`:`${y-1}-${String(y).slice(-2)}`}
 function initYears(){let y=parseInt(yr()),s="";for(let i=y-4;i<=y+5;i++)s+=`<option>${i}-${String(i+1).slice(-2)}</option>`;q("schoolYear").innerHTML=s;q("schoolYear").value=localStorage.getItem(YK)||yr()}
 function year(){return q("schoolYear").value}initYears();q("schoolYear").onchange=()=>{localStorage.setItem(YK,year());renderStudents();renderSelect();render()};
@@ -1760,7 +1760,7 @@ function applyCloudSettings(cloud){
   if(cloud.schoolYear){localStorage.setItem(YK,String(cloud.schoolYear));localStorage.setItem("registroOboeCursoActivoV1",String(cloud.schoolYear));if(q("schoolYear"))q("schoolYear").value=String(cloud.schoolYear);}
   applySettings();
   updateConfigView();
-  q("toggleSettings").textContent=q("configCard").classList.contains("collapsed")?"⚙️ Abrir configuración":"⚙️ Cerrar configuración";
+  q("toggleSettings").textContent=q("configCard").classList.contains("collapsed")?"⚙️ Abrir configuración general":"⚙️ Cerrar configuración general";
   return true;
 }
 function syncPayload(){const prefs=localSyncSettings();return {version:16,schoolYear:prefs.schoolYear,deviceId,students,lessons,appSettings:prefs.appSettings,settingsUpdatedAt:prefs.settingsUpdatedAt,deletedStudentKeys:[...new Set(deletedStudentKeys)],deletedLessonIds:[...new Set(deletedLessonIds)]};}
@@ -2048,7 +2048,7 @@ function updateForToday(){
  const paths={lessonCard:'M3 10 12 3l9 7v11h-6v-7H9v7H3Z',weeklyCard:'M5 5h14a2 2 0 0 1 2 2v13H3V7a2 2 0 0 1 2-2ZM7 3v4m10-4v4M3 10h18m-13 4h1m6 0h1m-8 3h1m6 0h1',historyCard:'M5 3h14v18H5ZM8 7h8M8 11h8M8 15h5'};
  document.querySelectorAll('.mobile-bottom-nav a').forEach(a=>a.querySelector('span').innerHTML=icon(paths[a.hash.slice(1)]));
  q('openSync').innerHTML=icon('M7 18a5 5 0 0 1-1-10 6 6 0 0 1 11-1 5 5 0 0 1 1 11H7Zm5-8v6m-3-3 3-3 3 3');
- q('openAdmin').innerHTML=icon('M9 3h6l1 3 3 1 2 5-2 5-3 1-1 3H9l-1-3-3-1-2-5 2-5 3-1 1-3Zm3 5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z');
+ q('openAdmin').innerHTML=icon('M9 3h6l1 3 3 1 2 5-2 5-3 1-1 3H9l-1-3-3-1-2-5 2-5 3-1 1-3Zm3 5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z')+'<span class=\"admin-label\">Ajustes</span>';
  q('appTitle').textContent=currentInstrument();document.querySelector('.eyebrow').textContent='REGISTRO DE CLASES';q('appSubtitle').textContent=appSettings.teacher||'Tu cuaderno docente';
  const oldApplySettings=applySettings;applySettings=function(){oldApplySettings();q('appTitle').textContent=currentInstrument();q('appSubtitle').textContent=appSettings.teacher||'Tu cuaderno docente';};
  document.querySelector('.page-intro').hidden=true;
@@ -2524,7 +2524,7 @@ function updateForToday(){
   const outgoing=rev29Difference(cloudBefore,verified,'Enviados a Supabase');
   const incoming=rev29Difference(localBefore,verified,'Recibidos en este dispositivo');
   const report={at:new Date().toISOString(),version:'V11.2.6 REV36',outgoing,incoming};
-  try{localStorage.setItem(REV29_REPORT_KEY,JSON.stringify(report));}catch(err){console.warn('El informe detallado excede el almacenamiento disponible:',err);}
+  try{localStorage.setItem(REV29_REPORT_KEY,JSON.stringify(report));if(outgoing.entries.length||incoming.entries.length)localStorage.setItem('registroSyncLastMeaningfulV36',JSON.stringify(report));}catch(err){console.warn('El informe detallado excede el almacenamiento disponible:',err);}
   return report;
  }
  function rev29Summary(report){
@@ -2533,7 +2533,7 @@ function updateForToday(){
    const fmt=(g,name)=>`${name}: ${g.added||0} altas · ${g.updated||0} modificaciones · ${g.deleted||0} bajas`;
    return [fmt(students,'Alumnos'),fmt(lessons,'Clases'),`Configuración: ${d.settings} campos · Otros datos (festivos, cursos y preferencias): ${d.auxiliary} · Marcas de eliminación: ${d.tombstones}`];
   };
-  return ['📤 CAMBIOS VERIFICADOS EN SUPABASE:',...summarize(report.outgoing),'📥 CAMBIOS RECUPERADOS EN ESTE DISPOSITIVO:',...summarize(report.incoming),'🔎 Detalle de los cambios: desplegable «Cambios de esta sincronización».'];
+  return [`📤 En nube: ${report.outgoing.entries.length} detalles · 📥 Recibidos en este dispositivo: ${report.incoming.entries.length} detalles`,'📤 CAMBIOS VERIFICADOS EN SUPABASE:',...summarize(report.outgoing),'📥 CAMBIOS RECUPERADOS EN ESTE DISPOSITIVO:',...summarize(report.incoming),'🔎 Detalle de los cambios: desplegable «Cambios de esta sincronización».'];
  }
  function localFingerprint(){return encode(syncPayload());}
  function backupBeforeSync(){
@@ -3281,7 +3281,7 @@ archivePanel();
  if(!details)return;
  const pane=document.createElement('section');pane.id='syncReportV08';pane.setAttribute('aria-live','polite');pane.hidden=true;
  details.after(pane);
- function show(msg){if(!msg)return;pane.textContent='ÚLTIMO INFORME DE SINCRONIZACIÓN\n'+msg;pane.hidden=false;}
+ function show(msg){if(!msg)return;pane.textContent='ÚLTIMO INFORME DE SINCRONIZACIÓN\n'+msg;try{const r=JSON.parse(localStorage.getItem('registroSyncLastMeaningfulV36')||'null');if(r){pane.textContent+='\n\nÚLTIMA OPERACIÓN CON CAMBIOS · '+new Date(r.at).toLocaleString('es-ES')+'\n📤 En nube: '+r.outgoing.entries.length+' detalles\n📥 Recibidos en este dispositivo: '+r.incoming.entries.length+' detalles';}}catch(e){}pane.hidden=false;}
  window.__showSyncReportV08=show;
  try{show(localStorage.getItem('registroUltimoInformeSyncV1126'));}catch(e){}
 })();
@@ -3312,7 +3312,8 @@ archivePanel();
  function writeLog(kind,description){try{const data=readLog();const entry={at:new Date().toISOString(),kind,description:String(description||'').slice(0,1000)};data.unshift(entry);localStorage.setItem(LOG_KEY,JSON.stringify(data.slice(0,MAX_LOG)));renderLog()}catch(e){}}
  function renderLog(){const data=readLog();count.textContent='('+data.length+')';list.replaceChildren();if(!data.length){const li=document.createElement('li');li.textContent='Todavía no hay operaciones registradas en esta revisión.';list.append(li);return;}for(const entry of data){const li=document.createElement('li');const at=document.createElement('strong');at.textContent=new Date(entry.at).toLocaleString('es-ES')+' · '+(entry.kind==='ok'?'Correcta':'Error');li.append(at,document.createElement('br'),document.createTextNode(entry.description));list.append(li);}}
  function localPending(){try{return typeof pendingSyncChanges==='function'?pendingSyncChanges():{}}catch(e){return {}}}
- function showPending(){try{const c=localPending(),a=c.students||{},l=c.lessons||{},s=c.settings||{};const dirty=typeof syncDirty==='function'&&syncDirty();const line='Alumnos: '+Number(a.added||0)+' altas, '+Number(a.updated||0)+' cambios, '+Number(a.deleted||0)+' bajas · Clases: '+Number(l.added||0)+' altas, '+Number(l.updated||0)+' cambios, '+Number(l.deleted||0)+' bajas';const value='<strong>'+(dirty?'Cambios locales pendientes':'Sin cambios locales pendientes')+'</strong><div>'+line+'</div>'+(Number(s.updated||0)?'<div>Configuración: '+Number(s.updated||0)+' cambios</div>':'');if(value!==lastRendered){pending.innerHTML=value;lastRendered=value;}return JSON.stringify({dirty,c});}catch(e){return ''}}
+ function rev36VerifiedPanelText(){try{const r=JSON.parse(localStorage.getItem('registroSyncLastMeaningfulV36')||'null');if(!r)return 'Última operación con cambios: aún no registrada.';const fmt=d=>{const g=k=>d?.groups?.find(x=>x.group===k)?.totals||{};const f=k=>{const t=g(k);return `${t.added||0} altas, ${t.updated||0} cambios, ${t.deleted||0} bajas`;};return `Alumnos: ${f('students')} · Clases: ${f('lessons')} · Configuración: ${d?.settings||0} · Otros datos: ${d?.auxiliary||0} · Marcas de eliminación: ${d?.tombstones||0}`;};return 'Última operación con cambios: '+new Date(r.at).toLocaleString('es-ES')+'\nEnviados / verificados en nube: '+fmt(r.outgoing)+'\nRecibidos en este dispositivo: '+fmt(r.incoming);}catch(e){return 'Informe anterior no disponible.';}}
+ function showPending(){try{const c=localPending(),a=c.students||{},l=c.lessons||{},s=c.settings||{};const dirty=typeof syncDirty==='function'&&syncDirty();const line='Alumnos: '+Number(a.added||0)+' altas, '+Number(a.updated||0)+' cambios, '+Number(a.deleted||0)+' bajas · Clases: '+Number(l.added||0)+' altas, '+Number(l.updated||0)+' cambios, '+Number(l.deleted||0)+' bajas';const value='<strong>'+(dirty?'Cambios locales pendientes de enviar':'Sin cambios locales pendientes de enviar (no indica si se han recibido datos)')+'</strong><div>'+line+'</div>'+(Number(s.updated||0)?'<div>Configuración: '+Number(s.updated||0)+' cambios</div>':'');const reportText=rev36VerifiedPanelText();const rendered=value+'<div class="rev09verified"></div>';if(rendered+reportText!==lastRendered){pending.innerHTML=rendered;pending.querySelector('.rev09verified').textContent=reportText;lastRendered=rendered+reportText;}return JSON.stringify({dirty,c});}catch(e){return ''}}
  function sessionReady(){try{return !!accessToken&&!!currentUserId()}catch(e){return false}}
  function canRun(){return enabled&&navigator.onLine!==false&&sessionReady()&&!window.__lessonDirty&&!btn.disabled&&!trying}
  function plan(reason){if(!enabled)return;dueAt=Date.now()+8000;status.textContent='Pendiente: '+reason+'. Se intentará sincronizar automáticamente cuando sea seguro.'}
@@ -4203,17 +4204,18 @@ setTimeout(refresh,500);window.refreshPendingCalendar=refresh;
  const panel=document.createElement('details');panel.id='rev29SyncDetails';
  const title=document.createElement('summary');title.textContent='🔎 Cambios de esta sincronización (desplegar)';
  const download=document.createElement('button');download.type='button';download.className='secondary';download.textContent='⬇ Descargar informe detallado';
- const content=document.createElement('pre');
- panel.append(title,download,content);anchor.after(panel);
+ const content=document.createElement('pre');const previous=document.createElement('pre');
+ panel.append(title,download,content,previous);anchor.after(panel);
  function format(r){
   if(!r)return 'Todavía no existe un informe detallado de sincronización.';
   const section=(name,data)=>[name,...(data.entries.length?data.entries:['Sin cambios de contenido detectados'])].join('\n');
   return [`Informe verificado: ${new Date(r.at).toLocaleString('es-ES')}`,section('📤 CAMBIOS EN SUPABASE',r.outgoing),section('📥 CAMBIOS RECIBIDOS EN ESTE DISPOSITIVO',r.incoming),'Se muestran nombres de registros y campos afectados, no el contenido de notas privadas ni los valores de contacto.','Los cambios que no formen parte del modelo sincronizado no pueden auditarse aquí.'].join('\n\n');
  }
  let current=null;try{current=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){}
- content.textContent=format(current);
- window.__showDetailedSyncV29=(r)=>{current=r;content.textContent=format(r);title.textContent='🔎 Cambios de esta sincronización ('+(r.outgoing.entries.length+r.incoming.entries.length)+' detalles)';};
- download.onclick=()=>{const data=format(current);const blob=new Blob([data],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Informe_Sincronizacion_Registro_Oboe_'+(current?.at||new Date().toISOString()).slice(0,10)+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);};
+ function showPrevious(){try{const r=JSON.parse(localStorage.getItem('registroSyncLastMeaningfulV36')||'null');previous.textContent=r&&r.at!==current?.at?'ÚLTIMA OPERACIÓN CON CAMBIOS (conservada aunque se vuelva a sincronizar)\n'+format(r):'';previous.hidden=!previous.textContent;}catch(e){previous.hidden=true;}}
+ content.textContent=format(current);showPrevious();
+ window.__showDetailedSyncV29=(r)=>{current=r;content.textContent=format(r);showPrevious();title.textContent='🔎 Cambios de esta sincronización ('+(r.outgoing.entries.length+r.incoming.entries.length)+' detalles)';};
+ download.onclick=()=>{const data=format(current)+(previous.hidden?'':'\n\n'+previous.textContent);const blob=new Blob([data],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Informe_Sincronizacion_Registro_Oboe_'+(current?.at||new Date().toISOString()).slice(0,10)+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);};
  if(current)window.__showDetailedSyncV29(current);
 })();
 </script>
@@ -4343,14 +4345,14 @@ setTimeout(refresh,500);window.refreshPendingCalendar=refresh;
 (function(){
   'use strict';
   // UNA sola identificación visible para el aviso y la cabecera.
-  const BUILD=Object.freeze({version:'V11.2.6',revision:'36',correction:'seguimiento pedagógico',status:'PRUEBA'});
+  const BUILD=Object.freeze({version:'V11.2.6',revision:'36',correction:'corrección 6 · ajustes',status:'PRUEBA'});
   const caption=BUILD.version+' · Revisión '+BUILD.revision+' · '+BUILD.correction.toUpperCase()+' · '+BUILD.status;
   function updateVersion(){
     const banner=document.getElementById('canonicalBuildBannerVersion');
     const header=document.getElementById('appVersion');
     if(banner)banner.textContent=caption;
     if(header)header.textContent=caption;
-    document.documentElement.dataset.registroBuild='rev36-pedagogica';
+    document.documentElement.dataset.registroBuild='rev36-correccion-6-ajustes';
   }
   window.__registroCurrentBuild=BUILD;
   updateVersion();
@@ -4662,4 +4664,24 @@ $('r36Report').onclick=()=>attempt(()=>report(false));$('r36Group').onclick=()=>
 $('r36Search').oninput=()=>{const t=$('r36Search').value.trim().toLocaleLowerCase('es');if(!t){$('r36Results').textContent='';return;}const found=lessons.filter(l=>[l.student,l.obs,l.nextClass,l.autoComment].some(v=>String(v||'').toLocaleLowerCase('es').includes(t)));const rep=Object.entries(appSettings.pedagogicalTracking||{}).flatMap(([y,people])=>Object.entries(people).flatMap(([id,d])=>(d.repertoire||[]).filter(r=>r.title.toLocaleLowerCase('es').includes(t)).map(r=>`${y} · ${students.find(s=>String(s.id)===id)?.name||id} · ${r.title} · ${r.state}`)));$('r36Results').innerHTML=found.slice(0,100).map(l=>`<div>${E(l.date)} · ${E(l.student)} · ${E(l.obs)} · ${E(l.nextClass)} ${lessonYear(l)===year()?`<button type="button" data-r36-lesson="${E(l.id)}">Abrir</button>`:''}</div>`).join('')+rep.map(r=>`<p>${E(r)}</p>`).join('')+`<p>${found.length} clases encontradas (máximo 100 visibles); ${rep.length} obras.</p>`;};
 refresh();
 })();
-</script></body></html>
+</script><style id="rev36-visual2">
+body details > summary, body .card details > summary, body #configCard details > summary, body #rev36Ped > summary, body #weeklyOverviewDetails summary, body #pendingTracker summary, body #rev14SyncAudit summary, body #rev35Control summary {font-family:inherit!important;font-size:14px!important;font-weight:750!important;line-height:1.5!important;letter-spacing:0!important;color:#173a67!important;cursor:pointer;overflow-wrap:anywhere;}
+body details > summary {padding-block:8px!important;}
+body .card h2 {font-size:19px!important;font-weight:750!important;line-height:1.35!important;}
+body .card h3, body #rev35Control h3, body .integral-backup h3 {font-size:15px!important;font-weight:750!important;line-height:1.5!important;letter-spacing:0!important;color:#173a67!important;}
+@media(max-width:760px){body .card h2{font-size:17px!important;}}
+</style><script id="rev36-visual2-icons">
+(()=>{const rules=[[/repertorio/i,'🎼'],[/estadística|evaluación|valoración/i,'📊'],[/búsqueda|buscar/i,'🔎'],[/sincroniza|nube/i,'☁️'],[/historial/i,'📚'],[/dispositivo/i,'💻'],[/alumn/i,'👥'],[/calendario|festivo|agenda/i,'📅'],[/curso académico/i,'🎓'],[/copia|respaldo/i,'🛡️'],[/clase/i,'📝']];
+function decorate(root){const items=[];if(root.nodeType===1&&root.matches('summary,h2,h3'))items.push(root);if(root.querySelectorAll)items.push(...root.querySelectorAll('summary,h2,h3'));for(const el of items){if(el.closest('header,.page-intro')||el.textContent.trim()==='')continue;const t=el.textContent.trim();if(/^[\p{Extended_Pictographic}\p{Emoji_Presentation}]/u.test(t))continue;const icon=rules.find(([r])=>r.test(t))?.[1]||'📋';const span=document.createElement('span');span.setAttribute('aria-hidden','true');span.textContent=icon+' ';el.prepend(span);}}
+decorate(document);new MutationObserver(records=>{for(const r of records){if(r.target.nodeType===1&&r.target.matches('summary,h2,h3'))decorate(r.target);for(const n of r.addedNodes)if(n.nodeType===1)decorate(n);}}).observe(document.body,{childList:true,subtree:true});})();
+</script><style id="rev36-visual3">
+body #configCard:not(.collapsed)>details.config-section-block, body #configCard:not(.collapsed)>#academicCloseCard, body #configCard:not(.collapsed)>#yearWizardCard {margin:12px 0!important;padding:0!important;border:1px solid #b4c9df!important;border-radius:12px!important;background:#fff!important;box-shadow:none!important;overflow:hidden;}
+body #configCard>details.config-section-block>summary, body #configCard>#academicCloseCard>summary, body #configCard>#yearWizardCard>summary {box-sizing:border-box!important;margin:0!important;padding:12px 14px!important;background:#f1f6fd!important;color:#173a67!important;font-size:14px!important;font-weight:750!important;line-height:1.5!important;list-style-position:inside!important;min-height:0!important;border:0!important;border-radius:0!important;}
+body #configCard>details.config-section-block[open]>summary {border-bottom:1px solid #b4c9df!important;}
+body #configCard>#yearWizardCard[open]{padding-bottom:12px!important;}
+body details>summary {box-sizing:border-box;}
+</style><style id="rev36-ajustes-label">
+header .header-actions #openAdmin{width:auto!important;min-width:100px!important;max-width:none!important;flex:0 0 auto!important;padding:0 12px!important;gap:7px!important;white-space:nowrap!important;overflow:visible!important;font-size:13px!important;font-weight:700!important;}
+@media(max-width:700px){header{padding-right:176px!important;}header .header-actions #openAdmin{min-width:100px!important;max-width:none!important;width:auto!important;flex:0 0 auto!important;padding:0 10px!important;}}
+@media(max-width:420px){header{padding:65px 16px 14px!important;min-height:0!important;}header .header-actions{top:10px!important;right:12px!important;}}
+</style></body></html>
